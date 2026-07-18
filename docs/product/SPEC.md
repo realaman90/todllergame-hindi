@@ -67,9 +67,10 @@ Working title: **"Chalo Ghar Ghoome"** (Let's Explore the House).
 
 ## MVP scope
 
-1. 3 scenes (House, Farm, Family) — ~40 words total (see
-   [`../design/curriculum.md`](../design/curriculum.md) for the working
-   word list)
+1. 3 scenes (House, Farm, Family) — 55 words total (see
+   [`../design/curriculum.md`](../design/curriculum.md) for the full
+   word list — first draft, pending native-speaker review before
+   recording)
 2. Tap-to-learn interaction + sticker collection wall
 3. Native Hindi voiceover for all words (ADR-003)
 4. Parent gate + basic settings (volume, scene unlock)
@@ -94,3 +95,6 @@ Not yet locked — track as they resolve (promote to an ADR once decided):
   [`ROADMAP.md`](ROADMAP.md)).
 - Whether/when a matching-game prompt layer gets added on top of the pure
   explore loop.
+- How the 1–10 counting content (Parivaar scene) is presented — it
+  doesn't fit the single-tap object loop the rest of MVP uses; see
+  [`../design/curriculum.md`](../design/curriculum.md) "Open items."
