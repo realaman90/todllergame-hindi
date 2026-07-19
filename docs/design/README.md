@@ -12,3 +12,4 @@ timestamp: 2026-07-18
 |---|---|
 | [`curriculum.md`](curriculum.md) | Working content plan — scene/word list, structured for the recording script. **Live doc, fill in as content is authored.** |
 | [`interaction-patterns.md`](interaction-patterns.md) | The concrete UX rules any new scene/interaction must follow — derived from `../product/SPEC.md`'s design philosophy. |
+| [`mockups/`](mockups/) | Self-contained HTML mockups (fonts embedded — open directly in a browser). `v1.1-cast-and-screens.html` = current direction: palette, type, 3-character cast, 7 key screens incl. the find-it puzzle + sticker reward loop. Placeholder art; the style reference for generated/commissioned assets. |
