@@ -17,16 +17,22 @@ As features ship, specs move to `implemented/` with a banner noting what
 shipped and when. Superseded specs keep a banner too — trim, never
 delete.
 
-**Status: empty.** No engineering build has started yet — see
+No engineering build has started yet — see
 [`../decisions/README.md`](../decisions/README.md) for what's locked and
-[`../product/SPEC.md`](../product/SPEC.md) for MVP scope. The first specs
-to write here, in order, are likely:
+[`../product/SPEC.md`](../product/SPEC.md) for MVP scope.
 
-1. `tbd/app-shell-and-scene-engine.md` — navigation shell, scene
-   loading/asset-bundling model, the tap-to-learn interaction primitive.
-2. `tbd/parental-gate.md` — the gate mechanism guarding settings/purchase
-   surfaces (ADR-002).
-3. `tbd/sticker-collection-wall.md` — passive progress tracking/storage.
+### TBD — designed, to build
+
+- [app-shell-and-scene-engine](tbd/app-shell-and-scene-engine.md) — the
+  first slice: JSON content model keyed on curriculum slugs, 7-screen
+  map from the v1.1 mockups, `TappableObject` interaction primitive,
+  asset/audio conventions, M1–M4 milestones (2026-07-19). Covers the
+  parent gate and sticker wall — separate specs for those are no longer
+  planned unless they outgrow this one.
+
+### Implemented — shipped
+
+_None yet._
 
 Don't start implementation before the corresponding `tbd/` spec exists —
 that's the signal the interaction/data model has actually been thought
