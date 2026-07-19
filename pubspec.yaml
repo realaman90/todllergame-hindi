@@ -1,0 +1,42 @@
+name: chalo_ghar_ghoome
+description: "Hindi explore-and-tap game for toddlers."
+publish_to: 'none'
+version: 0.2.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  just_audio: ^0.9.46
+  shared_preferences: ^2.3.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/content/
+    - assets/art/
+    - assets/art/scenes/
+    - assets/art/objects/
+    - assets/art/characters/
+    - assets/audio/hi/
+    - assets/audio/music/
+    - assets/audio/sfx/
+
+  fonts:
+    - family: Baloo2
+      fonts:
+        - asset: assets/fonts/Baloo2-variable.ttf
+    - family: Hind
+      fonts:
+        - asset: assets/fonts/Hind-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Hind-SemiBold.ttf
+          weight: 600

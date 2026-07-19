@@ -1,0 +1,245 @@
+{
+  "id": "house",
+  "title_hi": "घर",
+  "title_translit": "Ghar",
+  "title_en": "House",
+  "theme": "marigold",
+  "background": "scenes/house_bg.png",
+  "ambient_audio": "music/house_ambient.mp3",
+  "objects": [
+    {
+      "slug": "paani",
+      "word_hi": "पानी",
+      "translit": "paani",
+      "gloss_en": "water",
+      "art": "objects/house_paani.png",
+      "pos": [
+        0.12,
+        0.24
+      ],
+      "scale": 1.0,
+      "anim": "bounce"
+    },
+    {
+      "slug": "doodh",
+      "word_hi": "दूध",
+      "translit": "doodh",
+      "gloss_en": "milk",
+      "art": "objects/house_doodh.png",
+      "pos": [
+        0.3,
+        0.22
+      ],
+      "scale": 0.95,
+      "anim": "wiggle"
+    },
+    {
+      "slug": "kursi",
+      "word_hi": "कुर्सी",
+      "translit": "kursi",
+      "gloss_en": "chair",
+      "art": "objects/house_kursi.png",
+      "pos": [
+        0.48,
+        0.24
+      ],
+      "scale": 1.0,
+      "anim": "pop"
+    },
+    {
+      "slug": "mez",
+      "word_hi": "मेज़",
+      "translit": "mez",
+      "gloss_en": "table",
+      "art": "objects/house_mez.png",
+      "pos": [
+        0.66,
+        0.22
+      ],
+      "scale": 0.95,
+      "anim": "float"
+    },
+    {
+      "slug": "bistar",
+      "word_hi": "बिस्तर",
+      "translit": "bistar",
+      "gloss_en": "bed",
+      "art": "objects/house_bistar.png",
+      "pos": [
+        0.84,
+        0.24
+      ],
+      "scale": 1.0,
+      "anim": "bounce"
+    },
+    {
+      "slug": "takiya",
+      "word_hi": "तकिया",
+      "translit": "takiya",
+      "gloss_en": "pillow",
+      "art": "objects/house_takiya.png",
+      "pos": [
+        0.18,
+        0.46
+      ],
+      "scale": 0.95,
+      "anim": "wiggle"
+    },
+    {
+      "slug": "darwaza",
+      "word_hi": "दरवाज़ा",
+      "translit": "darwaza",
+      "gloss_en": "door",
+      "art": "objects/house_darwaza.png",
+      "pos": [
+        0.36,
+        0.44
+      ],
+      "scale": 1.05,
+      "anim": "pop"
+    },
+    {
+      "slug": "khidki",
+      "word_hi": "खिड़की",
+      "translit": "khidki",
+      "gloss_en": "window",
+      "art": "objects/house_khidki.png",
+      "pos": [
+        0.54,
+        0.46
+      ],
+      "scale": 0.95,
+      "anim": "float"
+    },
+    {
+      "slug": "saabun",
+      "word_hi": "साबुन",
+      "translit": "saabun",
+      "gloss_en": "soap",
+      "art": "objects/house_saabun.png",
+      "pos": [
+        0.72,
+        0.44
+      ],
+      "scale": 1.0,
+      "anim": "bounce"
+    },
+    {
+      "slug": "ghadi",
+      "word_hi": "घड़ी",
+      "translit": "ghadi",
+      "gloss_en": "clock",
+      "art": "objects/house_ghadi.png",
+      "pos": [
+        0.9,
+        0.46
+      ],
+      "scale": 0.9,
+      "anim": "wiggle"
+    },
+    {
+      "slug": "roti",
+      "word_hi": "रोटी",
+      "translit": "roti",
+      "gloss_en": "flatbread",
+      "art": "objects/house_roti.png",
+      "pos": [
+        0.12,
+        0.68
+      ],
+      "scale": 1.0,
+      "anim": "pop"
+    },
+    {
+      "slug": "chawal",
+      "word_hi": "चावल",
+      "translit": "chawal",
+      "gloss_en": "rice",
+      "art": "objects/house_chawal.png",
+      "pos": [
+        0.3,
+        0.66
+      ],
+      "scale": 0.95,
+      "anim": "float"
+    },
+    {
+      "slug": "daal",
+      "word_hi": "दाल",
+      "translit": "daal",
+      "gloss_en": "lentils",
+      "art": "objects/house_daal.png",
+      "pos": [
+        0.48,
+        0.68
+      ],
+      "scale": 1.05,
+      "anim": "bounce"
+    },
+    {
+      "slug": "seb",
+      "word_hi": "सेब",
+      "translit": "seb",
+      "gloss_en": "apple",
+      "art": "objects/house_seb.png",
+      "pos": [
+        0.66,
+        0.66
+      ],
+      "scale": 0.95,
+      "anim": "wiggle"
+    },
+    {
+      "slug": "kela",
+      "word_hi": "केला",
+      "translit": "kela",
+      "gloss_en": "banana",
+      "art": "objects/house_kela.png",
+      "pos": [
+        0.84,
+        0.68
+      ],
+      "scale": 1.0,
+      "anim": "pop"
+    },
+    {
+      "slug": "aam",
+      "word_hi": "आम",
+      "translit": "aam",
+      "gloss_en": "mango",
+      "art": "objects/house_aam.png",
+      "pos": [
+        0.5,
+        0.86
+      ],
+      "scale": 1.1,
+      "anim": "float"
+    }
+  ],
+  "puzzles": [
+    {
+      "ask": "paani",
+      "decoys": [
+        "doodh",
+        "roti",
+        "seb"
+      ]
+    },
+    {
+      "ask": "kursi",
+      "decoys": [
+        "mez",
+        "bistar",
+        "takiya"
+      ]
+    },
+    {
+      "ask": "darwaza",
+      "decoys": [
+        "khidki",
+        "ghadi",
+        "saabun"
+      ]
+    }
+  ]
+}

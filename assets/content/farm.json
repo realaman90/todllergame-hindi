@@ -1,0 +1,219 @@
+{
+  "id": "farm",
+  "title_hi": "बगीचा",
+  "title_translit": "Bageecha",
+  "title_en": "Farm",
+  "theme": "mehndi",
+  "background": "scenes/farm_bg.png",
+  "ambient_audio": "music/farm_ambient.mp3",
+  "objects": [
+    {
+      "slug": "gaay",
+      "word_hi": "गाय",
+      "translit": "gaay",
+      "gloss_en": "cow",
+      "art": "objects/farm_gaay.png",
+      "pos": [
+        0.12,
+        0.22
+      ],
+      "scale": 1.1,
+      "anim": "bounce"
+    },
+    {
+      "slug": "bakri",
+      "word_hi": "बकरी",
+      "translit": "bakri",
+      "gloss_en": "goat",
+      "art": "objects/farm_bakri.png",
+      "pos": [
+        0.34,
+        0.2
+      ],
+      "scale": 1.0,
+      "anim": "wiggle"
+    },
+    {
+      "slug": "murgi",
+      "word_hi": "मुर्गी",
+      "translit": "murgi",
+      "gloss_en": "hen",
+      "art": "objects/farm_murgi.png",
+      "pos": [
+        0.56,
+        0.22
+      ],
+      "scale": 0.95,
+      "anim": "pop"
+    },
+    {
+      "slug": "kutta",
+      "word_hi": "कुत्ता",
+      "translit": "kutta",
+      "gloss_en": "dog",
+      "art": "objects/farm_kutta.png",
+      "pos": [
+        0.78,
+        0.2
+      ],
+      "scale": 1.05,
+      "anim": "float"
+    },
+    {
+      "slug": "billi",
+      "word_hi": "बिल्ली",
+      "translit": "billi",
+      "gloss_en": "cat",
+      "art": "objects/farm_billi.png",
+      "pos": [
+        0.2,
+        0.44
+      ],
+      "scale": 0.95,
+      "anim": "bounce"
+    },
+    {
+      "slug": "haathi",
+      "word_hi": "हाथी",
+      "translit": "haathi",
+      "gloss_en": "elephant",
+      "art": "objects/farm_haathi.png",
+      "pos": [
+        0.42,
+        0.42
+      ],
+      "scale": 1.0,
+      "anim": "wiggle"
+    },
+    {
+      "slug": "batakh",
+      "word_hi": "बत्तख",
+      "translit": "batakh",
+      "gloss_en": "duck",
+      "art": "objects/farm_batakh.png",
+      "pos": [
+        0.64,
+        0.44
+      ],
+      "scale": 0.9,
+      "anim": "pop"
+    },
+    {
+      "slug": "khargosh",
+      "word_hi": "खरगोश",
+      "translit": "khargosh",
+      "gloss_en": "rabbit",
+      "art": "objects/farm_khargosh.png",
+      "pos": [
+        0.86,
+        0.42
+      ],
+      "scale": 0.95,
+      "anim": "float"
+    },
+    {
+      "slug": "phool",
+      "word_hi": "फूल",
+      "translit": "phool",
+      "gloss_en": "flower",
+      "art": "objects/farm_phool.png",
+      "pos": [
+        0.12,
+        0.66
+      ],
+      "scale": 0.9,
+      "anim": "bounce"
+    },
+    {
+      "slug": "ped",
+      "word_hi": "पेड़",
+      "translit": "ped",
+      "gloss_en": "tree",
+      "art": "objects/farm_ped.png",
+      "pos": [
+        0.34,
+        0.64
+      ],
+      "scale": 0.95,
+      "anim": "wiggle"
+    },
+    {
+      "slug": "sooraj",
+      "word_hi": "सूरज",
+      "translit": "sooraj",
+      "gloss_en": "sun",
+      "art": "objects/farm_sooraj.png",
+      "pos": [
+        0.56,
+        0.66
+      ],
+      "scale": 1.0,
+      "anim": "pop"
+    },
+    {
+      "slug": "laal",
+      "word_hi": "लाल",
+      "translit": "laal",
+      "gloss_en": "red",
+      "art": "objects/farm_laal.png",
+      "pos": [
+        0.78,
+        0.64
+      ],
+      "scale": 0.95,
+      "anim": "float"
+    },
+    {
+      "slug": "peela",
+      "word_hi": "पीला",
+      "translit": "peela",
+      "gloss_en": "yellow",
+      "art": "objects/farm_peela.png",
+      "pos": [
+        0.24,
+        0.86
+      ],
+      "scale": 1.15,
+      "anim": "bounce"
+    },
+    {
+      "slug": "hara",
+      "word_hi": "हरा",
+      "translit": "hara",
+      "gloss_en": "green",
+      "art": "objects/farm_hara.png",
+      "pos": [
+        0.72,
+        0.84
+      ],
+      "scale": 1.0,
+      "anim": "wiggle"
+    }
+  ],
+  "puzzles": [
+    {
+      "ask": "gaay",
+      "decoys": [
+        "bakri",
+        "murgi",
+        "batakh"
+      ]
+    },
+    {
+      "ask": "sooraj",
+      "decoys": [
+        "ped",
+        "phool",
+        "murgi"
+      ]
+    },
+    {
+      "ask": "khargosh",
+      "decoys": [
+        "kutta",
+        "billi",
+        "haathi"
+      ]
+    }
+  ]
+}
