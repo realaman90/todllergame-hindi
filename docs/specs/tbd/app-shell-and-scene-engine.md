@@ -91,9 +91,11 @@ ducks to ~30% while a word plays.
 - Art: PNG (transparent) for objects/characters, JPG/PNG for
   backgrounds, under `assets/art/` mirroring the content-model paths.
   Source of truth for style is `docs/design/mockups/v1.1-cast-and-screens.html`.
-- Audio: MP3s under `assets/audio/`, filenames exactly per
-  `curriculum.md`. Placeholder TTS lives in the same tree — shipping
-  builds swap files, not code (ADR-003).
+- Audio: MP3s under `assets/audio/<lang>/` (language-scoped per ADR-007;
+  MVP ships `hi/` only), filenames exactly per `curriculum.md` —
+  e.g. `assets/audio/hi/farm_gaay.mp3`. The loader takes the language as
+  a parameter even while only `hi` exists. Placeholder TTS lives in the
+  same tree — shipping builds swap files, not code (ADR-003).
 - Everything bundled; no network fetch anywhere (ADR-004).
 
 ## 5. Persistence
@@ -133,7 +135,11 @@ assets/
 2. **M2 — full loop:** stickers persist, sticker wall, find-it puzzle,
    sticker-earned moment.
 3. **M3 — content complete:** all 3 MVP scenes driven from JSON matching
-   curriculum.md; generated art/audio dropped in.
+   curriculum.md; generated art/audio dropped in. Includes two carried
+   M1-review findings: home scene-select becomes art doorway cards (not
+   text-only — mockup screen 01), and the scene back button gets a
+   toddler-sized custom treatment instead of the default 48dp Material
+   BackButton.
 4. **M4 — shell polish:** parent gate, settings, app icon, splash,
    landscape lock, store-readiness pass (ADR-002 checklist).
 

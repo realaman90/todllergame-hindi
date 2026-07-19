@@ -10,11 +10,17 @@ scoped as a shippable product (App Store / Play Store), not a one-off.
 
 ## Status
 
-Pre-code. Product/design/stack decisions are locked (see below); no app
-code exists yet. If you're about to scaffold the app, check
-`docs/specs/tbd/` first for any build spec already written for the piece
-you're about to touch — if none exists, the design isn't locked yet, so
-raise that before writing code.
+Flutter app scaffolded and playable: milestones **M1–M3** of
+`docs/specs/tbd/app-shell-and-scene-engine.md` are implemented (all 3
+MVP scenes from curriculum.md, generated art/audio staged in `assets/`,
+sticker loop, find-it puzzles). **M4** (parent gate, settings, app icon,
+store-readiness) is not started — the spec stays in `tbd/` until it
+lands. Word voiceover in `assets/audio/hi/` is dev-placeholder TTS —
+must be replaced with native-speaker recordings before ship (ADR-003).
+Asset generation tooling lives in `tools/asset-gen/` (see its README).
+Before building any new piece, check `docs/specs/tbd/` for a build spec
+— if none exists, the design isn't locked yet, so raise that before
+writing code.
 
 ## Start here
 
@@ -46,7 +52,29 @@ raise that before writing code.
   `docs/product/SPEC.md` "Compliance" section and `docs/decisions/` for
   whether it's allowed.
 
+## Model routing
+
+Which model/mode to use for what kind of work in this repo:
+
+- **Planning, architecture, ADRs, specs, reviews:** Claude **Fable 5 at
+  xhigh reasoning effort**. Anything that locks a decision or shapes a
+  spec goes through Fable.
+- **Code implementation + frontend work:** shell out to **Kimi K3 in
+  yolo (auto-approve) mode** via its CLI, driven from the specs written
+  above. Invocation (kimi-code v0.27.0, installed at `~/.kimi-code/bin`):
+  `kimi -p "<implementation brief>"` from the repo root. Prompt mode is
+  implicitly auto-approve — do NOT add `-y`/`--auto` (they error when
+  combined with `-p`; they're for interactive mode). Use
+  `kimi -r <session-id> -p "..."` to continue a prior Kimi session for
+  follow-ups. Fable stays in the loop as orchestrator/reviewer — Kimi
+  output gets reviewed against the spec before commit, since yolo mode
+  skips approval prompts.
+
 ## Build/run
 
-Not yet applicable — no app scaffold exists. Update this section (and add
-a `specs/tbd/app-shell-and-scene-engine.md`) when scaffolding starts.
+Standard Flutter (repo root is the app): `flutter pub get`, then
+`flutter run` (or `flutter build ios --simulator` / `flutter analyze`).
+Requires Flutter (Homebrew cask), Xcode with the iOS simulator runtime,
+and CocoaPods. Landscape-only, iOS 15+ / Android 8+. Simulator deploy
+order matters: terminate → install → launch (installing over a running
+app silently keeps the old build).

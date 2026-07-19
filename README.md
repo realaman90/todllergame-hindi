@@ -1,7 +1,17 @@
-# Todller Game — Hindi
+# chalo_ghar_ghoome
 
-An interactive, explore-and-tap Hindi learning game for toddlers (~3 years
-old), built for iOS and Android.
+A new Flutter project.
 
-Documentation lives in [`docs/`](docs/README.md) — start there. Agents
-working in this repo should read [`CLAUDE.md`](CLAUDE.md) first.
+## Getting Started
+
+This project is a starting point for a Flutter application.
+
+A few resources to get you started if this is your first Flutter project:
+
+- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
+- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
+- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+
+For help getting started with Flutter development, view the
+[online documentation](https://docs.flutter.dev/), which offers tutorials,
+samples, guidance on mobile development, and a full API reference.
