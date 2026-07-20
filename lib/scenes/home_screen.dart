@@ -126,18 +126,6 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _buildBreathingCard(int index, Widget child) {
-    return AnimatedBuilder(
-      animation: _breathingController,
-      builder: (context, child) {
-        final breathPhase = _breathingController.value * 2 * pi + index * 1.3;
-        final breathScale = 1.0 + 0.02 * sin(breathPhase);
-        return Transform.scale(scale: breathScale, child: child);
-      },
-      child: child,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final content = Row(
@@ -148,13 +136,6 @@ class _HomeScreenState extends State<HomeScreen>
           mainAxisSize: MainAxisSize.min,
           children: [
             _MithuBlock(audio: widget.audio),
-            const SizedBox(height: 16),
-            _buildBreathingCard(
-              3,
-              _ActivityDoor(
-                onTap: () => Navigator.of(context).pushNamed('/play'),
-              ),
-            ),
           ],
         ),
         const SizedBox(width: 32),
@@ -164,6 +145,18 @@ class _HomeScreenState extends State<HomeScreen>
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                _buildAnimatedCard(
+                  3,
+                  _DoorwayCard(
+                    sceneId: 'games',
+                    titleHi: 'खेल',
+                    titleTranslit: 'Khel',
+                    color: AppColors.peacock,
+                    deepColor: AppColors.peacockDeep,
+                    onTap: () => Navigator.of(context).pushNamed('/play'),
+                  ),
+                ),
+                const SizedBox(width: 14),
                 _buildAnimatedCard(
                   0,
                   _DoorwayCard(
@@ -349,59 +342,6 @@ class _DoorwayCard extends StatelessWidget {
                     ),
                   ),
                 ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ActivityDoor extends StatelessWidget {
-  final VoidCallback onTap;
-
-  const _ActivityDoor({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        width: 90,
-        height: 90,
-        decoration: BoxDecoration(
-          color: AppColors.paper2,
-          shape: BoxShape.circle,
-          border: Border.all(color: AppColors.peacock, width: 4),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.peacockDeep.withValues(alpha: 0.3),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
-            ),
-          ],
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Image.asset(
-              'assets/art/characters/mithu_hero.png',
-              fit: BoxFit.cover,
-              width: 90,
-              height: 90,
-            ),
-            Container(
-              width: 90,
-              height: 90,
-              color: AppColors.peacock.withValues(alpha: 0.2),
-              alignment: Alignment.center,
-              child: const Icon(
-                Icons.play_arrow_rounded,
-                color: Colors.white,
-                size: 48,
               ),
             ),
           ],
