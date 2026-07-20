@@ -50,7 +50,8 @@ class _CarouselScreenState extends State<CarouselScreen> {
     // activities, so neither a scene nor a format repeats back-to-back.
     final sceneIds = ['house', 'farm', 'family'];
     sceneIds.shuffle(Random());
-    const formats = ['pairs', 'linematch'];
+    // linematch leads: newest game greets the child (and founder) first.
+    const formats = ['linematch', 'pairs'];
     return [
       for (var round = 0; round < formats.length; round++)
         for (var i = 0; i < sceneIds.length; i++)
