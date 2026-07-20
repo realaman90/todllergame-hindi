@@ -68,7 +68,11 @@ Which model/mode to use for what kind of work in this repo:
   `kimi -r <session-id> -p "..."` to continue a prior Kimi session for
   follow-ups. Fable stays in the loop as orchestrator/reviewer — Kimi
   output gets reviewed against the spec before commit, since yolo mode
-  skips approval prompts.
+  skips approval prompts. **Warning:** Kimi must never revert or "clean
+  up" uncommitted working-tree changes in files it didn't itself change —
+  those are the orchestrator's work in progress (it once reverted staged
+  curriculum + tooling edits it mistook for its own accidents). Say so in
+  every brief, and prefer committing docs/tools work before dispatching.
 
 ## Build/run
 

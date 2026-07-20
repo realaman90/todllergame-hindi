@@ -145,6 +145,29 @@ rather than reusing the generic scene-object tap.
 
 Scene total: 25 words (7 family + 8 body parts + 10 numbers).
 
+## Mithu's host lines (added 2026-07-20)
+
+Mithu is the only character who speaks language (ADR-008; Gauri/Laddoo
+make animal sounds only). These lines are part of the recording session
+script — record them in a brighter, more playful register than the word
+takes: that register difference IS the character. Voice casting: founder,
+"parrot-host" energy.
+
+| Devanagari | Transliteration | Used when | Audio file |
+|---|---|---|---|
+| नमस्ते! चलो घर घूमें! | namaste! chalo ghar ghoomein! | app open / home greeting | `mithu_greeting.mp3` |
+| यह है घर! | yeh hai ghar! | entering Ghar | `mithu_welcome_house.mp3` |
+| यह है बगीचा! | yeh hai bageecha! | entering Bageecha | `mithu_welcome_farm.mp3` |
+| यह है परिवार! | yeh hai parivaar! | entering Parivaar | `mithu_welcome_family.mp3` |
+| कहाँ है? | kahaan hai? | find-it prompt, played right after the target word (word + this = "___ कहाँ है?") | `mithu_kahaan_hai.mp3` |
+| शाबाश! | shabash! | praise (random pick) | `mithu_shabash.mp3` |
+| वाह! | wah! | praise (random pick) | `mithu_wah.mp3` |
+| बहुत बढ़िया! | bahut badhiya! | praise (random pick) | `mithu_badhiya.mp3` |
+| नया स्टिकर मिला! | naya sticker mila! | sticker earned | `mithu_sticker.mp3` |
+
+Same two-take rule does NOT apply (no slow takes needed for host lines).
+Placeholder TTS versions exist for dev builds only (ADR-003).
+
 ## Scene: Bazaar — v1.1
 
 _Not started._

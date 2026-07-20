@@ -588,6 +588,50 @@ def get_hindi_voice_id() -> str:
     return DEFAULT_HINDI_VOICE_ID
 
 
+# Mithu's host lines (docs/design/curriculum.md "Mithu's host lines").
+# Placeholder TTS, dev-only per ADR-003 — real takes come from the founder
+# in a playful parrot-host register.
+MITHU_LINES = {
+    "mithu_greeting": "नमस्ते! चलो घर घूमें!",
+    "mithu_welcome_house": "यह है घर!",
+    "mithu_welcome_farm": "यह है बगीचा!",
+    "mithu_welcome_family": "यह है परिवार!",
+    "mithu_kahaan_hai": "कहाँ है?",
+    "mithu_shabash": "शाबाश!",
+    "mithu_wah": "वाह!",
+    "mithu_badhiya": "बहुत बढ़िया!",
+    "mithu_sticker": "नया स्टिकर मिला!",
+}
+
+
+def generate_mithu_lines():
+    """Generate placeholder VO for Mithu's host lines (DEV ONLY, ADR-003)."""
+    print("\n=== MITHU HOST LINES (placeholder, DEV ONLY) ===")
+    voice_id = get_hindi_voice_id()
+    for slug, text in MITHU_LINES.items():
+        path = PLACEHOLDER_DIR / f"{slug}.mp3"
+        if path.exists():
+            print(f"  SKIP (exists): {path.name}")
+            continue
+        print(f"  Generating: {path.name} ({text}) ...")
+        try:
+            audio = client.text_to_speech.convert(
+                voice_id=voice_id,
+                text=text,
+                model_id="eleven_multilingual_v2",
+                voice_settings={
+                    "stability": 0.5,
+                    "similarity_boost": 0.8,
+                    "style": 0.6,
+                },
+            )
+            save_audio(audio, path)
+            print(f"  OK: {path.name}")
+        except Exception as e:
+            print(f"  ERROR ({path.name}): {e}")
+        time.sleep(1)
+
+
 def generate_voiceover():
     """
     Generate placeholder TTS voiceover for all curriculum words.
@@ -662,7 +706,7 @@ def main():
     parser = argparse.ArgumentParser(description="Generate game audio with ElevenLabs")
     parser.add_argument(
         "--only",
-        choices=["songs", "instrumentals", "sfx", "voiceover"],
+        choices=["songs", "instrumentals", "sfx", "voiceover", "mithu"],
         help="Generate only one category",
     )
     parser.add_argument(
@@ -684,6 +728,8 @@ def main():
         generate_sfx()
     if args.only is None or args.only == "voiceover":
         generate_voiceover()
+    if args.only == "mithu":
+        generate_mithu_lines()
 
     print("\nDone! Check out/audio/ for results.")
     if args.only is None or args.only == "voiceover":
