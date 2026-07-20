@@ -14,7 +14,9 @@ class TappableObject extends StatefulWidget {
   final SceneObject object;
   final AudioService audio;
   final String language;
-  final VoidCallback onTap;
+  /// Reports the object's global rect at tap time (used as the
+  /// sticker-flight source) — replaces per-object GlobalKeys.
+  final ValueChanged<Rect> onTap;
 
   const TappableObject({
     super.key,
@@ -79,7 +81,7 @@ class _TappableObjectState extends State<TappableObject>
           TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.85), weight: 30),
           TweenSequenceItem(tween: Tween(begin: 0.85, end: 1.15), weight: 40),
           TweenSequenceItem(tween: Tween(begin: 1.15, end: 1.0), weight: 30),
-        ]).animate(CurvedAnimation(parent: _tapController, curve: Curves.easeOutBack)),
+        ]).animate(CurvedAnimation(parent: _tapController, curve: Curves.easeInOut)),
       'float' => TweenSequence<double>([
           TweenSequenceItem(tween: Tween(begin: 0.0, end: -16.0), weight: 50),
           TweenSequenceItem(tween: Tween(begin: -16.0, end: 0.0), weight: 50),
@@ -103,10 +105,15 @@ class _TappableObjectState extends State<TappableObject>
 
     // Show the word overlay only after the object animation completes so the
     // child sees the art react before it is dimmed by the scrim.
+    // Capture the rect NOW while this context is definitely mounted.
+    final box = context.findRenderObject() as RenderBox?;
+    final rect = (box != null && box.hasSize)
+        ? box.localToGlobal(Offset.zero) & box.size
+        : Rect.zero;
     _overlayTimer?.cancel();
     _overlayTimer = Timer(
       const Duration(milliseconds: 350),
-      widget.onTap,
+      () => widget.onTap(rect),
     );
   }
 
@@ -164,8 +171,14 @@ class _TappableObjectState extends State<TappableObject>
       animation: _idleController,
       builder: (context, child) {
         final value = _idleController.value * 2 * pi + phase;
-        final scale = 1.0 + 0.03 * sin(value);
-        return Transform.scale(scale: scale, child: child);
+        // 6% breath + a light sway so idle life is visible at arm's
+        // length on a tablet, not just under a magnifier.
+        final scale = 1.0 + 0.06 * sin(value);
+        final tilt = 0.02 * sin(value * 0.5 + phase);
+        return Transform.rotate(
+          angle: tilt,
+          child: Transform.scale(scale: scale, child: child),
+        );
       },
       child: tile,
     );

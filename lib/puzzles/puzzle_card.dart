@@ -73,7 +73,8 @@ class _PuzzleCardState extends State<PuzzleCard>
           TweenSequenceItem(tween: Tween(begin: 1.2, end: 1.0), weight: 60),
         ]).animate(CurvedAnimation(
           parent: _controller,
-          curve: Curves.elasticOut,
+          // Bounded: TweenSequence asserts on overshooting curves.
+          curve: Curves.easeInOut,
         )),
     };
   }

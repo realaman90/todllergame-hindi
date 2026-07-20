@@ -65,7 +65,9 @@ class _StickerWallScreenState extends State<StickerWallScreen> {
           final scenes = snapshot.data!;
           final objectMap = <String, SceneObject>{};
           final themeMap = <String, String>{};
+          final sceneById = <String, Scene>{};
           for (final scene in scenes) {
+            sceneById[scene.id] = scene;
             for (final object in scene.objects) {
               objectMap[object.slug] = object;
               themeMap[object.slug] = scene.theme;
@@ -86,6 +88,28 @@ class _StickerWallScreenState extends State<StickerWallScreen> {
             itemCount: stickers.length,
             itemBuilder: (context, index) {
               final slug = stickers[index];
+
+              // Activity sticker: activity:<id>:<scene>
+              if (slug.startsWith('activity:')) {
+                final parts = slug.split(':');
+                if (parts.length == 3) {
+                  final scene = sceneById[parts[2]];
+                  if (scene != null) {
+                    final themeColor = AppColors.forTheme(scene.theme);
+                    final deepColor = AppColors.deepFor(scene.theme);
+                    return Center(
+                      child: ActivityStickerTile(
+                        activityId: parts[1],
+                        color: themeColor,
+                        deepColor: deepColor,
+                        size: 72,
+                      ),
+                    );
+                  }
+                }
+                return const SizedBox.shrink();
+              }
+
               final baseSlug = slug.startsWith('puzzle:')
                   ? slug.substring(7)
                   : slug;

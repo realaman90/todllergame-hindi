@@ -25,24 +25,68 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
   static bool _greetingPlayed = false;
+  bool _introPlaying = false;
+  late final AnimationController _pulseController;
 
   @override
   void initState() {
     super.initState();
     widget.stickerService.addListener(_onStickersChanged);
+    widget.audio.addListener(_onAudioChanged);
     widget.audio.playAmbient('assets/audio/music/theme.mp3');
-    if (!_greetingPlayed) {
+    _pulseController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    _startHomeAudio();
+  }
+
+  Future<void> _startHomeAudio() async {
+    await widget.stickerService.loaded;
+    if (!mounted) return;
+    if (!widget.stickerService.hasSeenIntro) {
+      await widget.stickerService.markIntroSeen();
+      if (!mounted) return;
+      setState(() => _introPlaying = true);
+      await widget.audio.playHostSequence([
+        'mithu_intro_name',
+        'mithu_intro_play',
+        'mithu_intro_choose',
+      ]);
+      if (mounted && _introPlaying) {
+        setState(() => _introPlaying = false);
+      }
+    } else if (!_greetingPlayed) {
       _greetingPlayed = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) widget.audio.playHost('mithu_greeting');
-      });
+      widget.audio.playHost('mithu_greeting');
+    }
+  }
+
+  void _skipIntro() {
+    if (!_introPlaying) return;
+    widget.audio.stop();
+    setState(() => _introPlaying = false);
+  }
+
+  void _onAudioChanged() {
+    final isChoose =
+        widget.audio.currentVoicePath?.endsWith('mithu_intro_choose.mp3') ??
+            false;
+    if (isChoose && !_pulseController.isAnimating) {
+      _pulseController.repeat();
+    } else if (!isChoose && _pulseController.isAnimating) {
+      _pulseController.stop();
+      _pulseController.value = 0;
     }
   }
 
   @override
   void dispose() {
+    _pulseController.dispose();
+    widget.audio.removeListener(_onAudioChanged);
     widget.stickerService.removeListener(_onStickersChanged);
     widget.audio.stopAmbient();
     super.dispose();
@@ -52,61 +96,100 @@ class _HomeScreenState extends State<HomeScreen> {
     if (mounted) setState(() {});
   }
 
+  Widget _buildPulsingCard(int index, Widget child) {
+    return AnimatedBuilder(
+      animation: _pulseController,
+      builder: (context, child) {
+        if (!_pulseController.isAnimating) return child!;
+        final t = (_pulseController.value + index * 0.25) % 1.0;
+        final scale = 1.0 + 0.05 * sin(t * 2 * pi);
+        return Transform.scale(scale: scale, child: child);
+      },
+      child: child,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final content = Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _MithuBlock(audio: widget.audio),
+            const SizedBox(height: 16),
+            _ActivityDoor(
+              onTap: () => Navigator.of(context).pushNamed('/play'),
+            ),
+          ],
+        ),
+        const SizedBox(width: 32),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildPulsingCard(
+                  0,
+                  _DoorwayCard(
+                    sceneId: 'house',
+                    titleHi: 'घर',
+                    titleTranslit: 'Ghar',
+                    color: AppColors.marigold,
+                    deepColor: AppColors.marigoldDeep,
+                    onTap: () => Navigator.of(context).pushNamed('/scene/house'),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                _buildPulsingCard(
+                  1,
+                  _DoorwayCard(
+                    sceneId: 'farm',
+                    titleHi: 'बगीचा',
+                    titleTranslit: 'Bageecha',
+                    color: AppColors.mehndi,
+                    deepColor: AppColors.mehndiDeep,
+                    onTap: () => Navigator.of(context).pushNamed('/scene/farm'),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                _buildPulsingCard(
+                  2,
+                  _DoorwayCard(
+                    sceneId: 'family',
+                    titleHi: 'परिवार',
+                    titleTranslit: 'Parivaar',
+                    color: AppColors.kumkum,
+                    deepColor: AppColors.kumkumDeep,
+                    onTap: () => Navigator.of(context).pushNamed('/scene/family'),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _StickerWallEntry(
+              count: widget.stickerService.count,
+              onTap: () => Navigator.of(context).pushNamed('/stickers'),
+            ),
+          ],
+        ),
+      ],
+    );
+
     return Scaffold(
       backgroundColor: AppColors.paper,
       body: SafeArea(
         child: Center(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              _MithuBlock(audio: widget.audio),
-              const SizedBox(width: 32),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _DoorwayCard(
-                        sceneId: 'house',
-                        titleHi: 'घर',
-                        titleTranslit: 'Ghar',
-                        color: AppColors.marigold,
-                        deepColor: AppColors.marigoldDeep,
-                        onTap: () => Navigator.of(context).pushNamed('/scene/house'),
-                      ),
-                      const SizedBox(width: 14),
-                      _DoorwayCard(
-                        sceneId: 'farm',
-                        titleHi: 'बगीचा',
-                        titleTranslit: 'Bageecha',
-                        color: AppColors.mehndi,
-                        deepColor: AppColors.mehndiDeep,
-                        onTap: () => Navigator.of(context).pushNamed('/scene/farm'),
-                      ),
-                      const SizedBox(width: 14),
-                      _DoorwayCard(
-                        sceneId: 'family',
-                        titleHi: 'परिवार',
-                        titleTranslit: 'Parivaar',
-                        color: AppColors.kumkum,
-                        deepColor: AppColors.kumkumDeep,
-                        onTap: () => Navigator.of(context).pushNamed('/scene/family'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  _StickerWallEntry(
-                    count: widget.stickerService.count,
-                    onTap: () => Navigator.of(context).pushNamed('/stickers'),
-                  ),
-                ],
-              ),
-            ],
-          ),
+          child: _introPlaying
+              ? GestureDetector(
+                  onTap: _skipIntro,
+                  behavior: HitTestBehavior.opaque,
+                  child: AbsorbPointer(child: content),
+                )
+              : content,
         ),
       ),
     );
@@ -268,6 +351,59 @@ class _DoorwayCard extends StatelessWidget {
                     ),
                   ),
                 ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ActivityDoor extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _ActivityDoor({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        width: 90,
+        height: 90,
+        decoration: BoxDecoration(
+          color: AppColors.paper2,
+          shape: BoxShape.circle,
+          border: Border.all(color: AppColors.peacock, width: 4),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.peacockDeep.withValues(alpha: 0.3),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Image.asset(
+              'assets/art/characters/mithu_hero.png',
+              fit: BoxFit.cover,
+              width: 90,
+              height: 90,
+            ),
+            Container(
+              width: 90,
+              height: 90,
+              color: AppColors.peacock.withValues(alpha: 0.2),
+              alignment: Alignment.center,
+              child: const Icon(
+                Icons.play_arrow_rounded,
+                color: Colors.white,
+                size: 48,
               ),
             ),
           ],

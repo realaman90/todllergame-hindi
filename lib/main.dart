@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'activities/activities.dart';
 import 'audio/audio.dart';
 import 'scenes/scenes.dart';
 import 'stickers/stickers.dart';
@@ -66,6 +67,15 @@ class _ChaloGharGhoomeAppState extends State<ChaloGharGhoomeApp> {
               sceneId: sceneId,
               audio: _audio,
               stickerService: _stickers,
+            ),
+          );
+        }
+        if (name == '/play') {
+          return FadeScaleRoute(
+            settings: settings,
+            child: CarouselScreen(
+              stickerService: _stickers,
+              audio: _audio,
             ),
           );
         }

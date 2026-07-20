@@ -202,7 +202,10 @@ class _OverlayArtState extends State<_OverlayArt>
     _animation = TweenSequence<double>([
       TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.12), weight: 50),
       TweenSequenceItem(tween: Tween(begin: 1.12, end: 1.0), weight: 50),
-    ]).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
+    // Bounded curve: TweenSequence asserts on overshooting curves
+    // (easeOutBack/elasticOut exceed 1.0) — the bounce lives in the
+    // sequence itself.
+    ]).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   void _handleTap() {

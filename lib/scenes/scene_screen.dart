@@ -36,7 +36,6 @@ class _SceneScreenState extends State<SceneScreen> {
   static const _maxVisible = 6;
 
   final GlobalKey _pillKey = GlobalKey();
-  final Map<String, GlobalKey> _objectKeys = {};
 
   late final Future<Scene> _sceneFuture;
   Scene? _scene;
@@ -44,12 +43,14 @@ class _SceneScreenState extends State<SceneScreen> {
   List<SceneObject> _visibleObjects = [];
   final Set<String> _visibleSlugs = {};
   final Set<String> _shownSlugs = {};
+  final Set<String> _outgoingSlugs = {};
   final Map<String, int> _slotAssignment = {};
+  final Map<String, int> _instanceGeneration = {};
 
   SceneObject? _activeObject;
   Rect? _activeSourceRect;
   String? _pendingSlug;
-  GlobalKey? _pendingSourceKey;
+  Rect? _pendingSourceRect;
 
   String? _earnedSlug;
   Rect? _earnedSourceRect;
@@ -82,13 +83,6 @@ class _SceneScreenState extends State<SceneScreen> {
     if (mounted) setState(() {});
   }
 
-  void _ensureKeys(Scene scene) {
-    if (_objectKeys.isNotEmpty) return;
-    for (final object in scene.objects) {
-      _objectKeys[object.slug] = GlobalKey();
-    }
-  }
-
   void _initializeIfNeeded(Scene scene) {
     if (_scene != null) return;
     _scene = scene;
@@ -115,6 +109,7 @@ class _SceneScreenState extends State<SceneScreen> {
       _visibleSlugs.add(slug);
       _shownSlugs.add(slug);
       _slotAssignment[slug] = i;
+      _instanceGeneration[slug] = (_instanceGeneration[slug] ?? 0) + 1;
     }
   }
 
@@ -140,33 +135,33 @@ class _SceneScreenState extends State<SceneScreen> {
     }).toList();
   }
 
-  void _showObject(SceneObject object) {
+  void _showObject(SceneObject object, Rect sourceRect) {
     if (!widget.stickerService.has(object.slug)) {
       _pendingSlug = object.slug;
-      _pendingSourceKey = _objectKeys[object.slug];
+      _pendingSourceRect = sourceRect;
     }
     setState(() {
       _activeObject = object;
-      _activeSourceRect = _rectFromKey(_objectKeys[object.slug]);
+      _activeSourceRect = sourceRect;
     });
   }
 
   void _dismissOverlay() {
     final pending = _pendingSlug;
-    final pendingKey = _pendingSourceKey;
+    final pendingRect = _pendingSourceRect;
 
     setState(() {
       _activeObject = null;
       _activeSourceRect = null;
       _pendingSlug = null;
-      _pendingSourceKey = null;
+      _pendingSourceRect = null;
     });
 
     if (pending != null) {
       widget.stickerService.discover(pending);
       setState(() {
         _earnedSlug = pending;
-        _earnedSourceRect = _rectFromKey(pendingKey);
+        _earnedSourceRect = pendingRect;
         _earnedTargetRect = _rectFromKey(_pillKey);
       });
     }
@@ -191,8 +186,14 @@ class _SceneScreenState extends State<SceneScreen> {
     final slot = _slotAssignment[slug];
     if (slot == null) return;
 
+    // Do not refill with anything that is still in the tree (visible or
+    // animating out). Reusing the same GlobalKey while it is still mounted
+    // triggers a framework duplicate-key assertion.
     final candidates = scene.objects
-        .where((o) => !_visibleSlugs.contains(o.slug))
+        .where(
+          (o) =>
+              !_visibleSlugs.contains(o.slug) && !_outgoingSlugs.contains(o.slug),
+        )
         .toList();
     if (candidates.isEmpty) return;
 
@@ -209,11 +210,26 @@ class _SceneScreenState extends State<SceneScreen> {
       _visibleObjects.removeWhere((o) => o.slug == slug);
       _visibleSlugs.remove(slug);
       _slotAssignment.remove(slug);
+      _outgoingSlugs.add(slug);
 
       _visibleObjects.add(replacement);
       _visibleSlugs.add(replacement.slug);
       _shownSlugs.add(replacement.slug);
       _slotAssignment[replacement.slug] = slot;
+      _instanceGeneration[replacement.slug] =
+          (_instanceGeneration[replacement.slug] ?? 0) + 1;
+    });
+  }
+
+  void _onObjectAnimationComplete(String slug) {
+    // Defer the setState to the next frame so it never runs while this
+    // subtree is being deactivated or disposed.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {
+          _outgoingSlugs.remove(slug);
+        });
+      }
     });
   }
 
@@ -270,7 +286,7 @@ class _SceneScreenState extends State<SceneScreen> {
         }
 
         final scene = snapshot.data!;
-        _ensureKeys(scene);
+
         _initializeIfNeeded(scene);
 
         final themeColor = AppColors.forTheme(scene.theme);
@@ -310,6 +326,7 @@ class _SceneScreenState extends State<SceneScreen> {
                         final size = 100.0 * object.scale;
                         final x = slot.dx * constraints.maxWidth;
                         final y = slot.dy * constraints.maxHeight;
+                        final instanceId = _instanceGeneration[object.slug] ?? 0;
                         return Positioned(
                           left: x - size / 2,
                           top: y - size / 2,
@@ -325,15 +342,16 @@ class _SceneScreenState extends State<SceneScreen> {
                                 ),
                               );
                             },
-                            child: Container(
-                              key: ValueKey(object.slug),
+                            child: _AnimatedObject(
+                              key: ValueKey('${object.slug}-$instanceId'),
+                              slug: object.slug,
+                              onDispose: _onObjectAnimationComplete,
                               child: TappableObject(
-                                key: _objectKeys[object.slug],
                                 scene: scene,
                                 object: object,
                                 audio: widget.audio,
                                 language: _language,
-                                onTap: () => _showObject(object),
+                                onTap: (rect) => _showObject(object, rect),
                               ),
                             ),
                           ),
@@ -401,6 +419,38 @@ class _SceneScreenState extends State<SceneScreen> {
       onDismiss: _onEarnedDismiss,
     );
   }
+}
+
+/// Wrapper that reports when its underlying element is disposed.
+///
+/// AnimatedSwitcher keeps the outgoing child in the tree for the exit
+/// animation; this lets the scene know exactly when that child is gone so
+/// the same slug can safely re-enter the refill pool.
+class _AnimatedObject extends StatefulWidget {
+  final String slug;
+  final Widget child;
+  final ValueChanged<String> onDispose;
+
+  const _AnimatedObject({
+    super.key,
+    required this.slug,
+    required this.onDispose,
+    required this.child,
+  });
+
+  @override
+  State<_AnimatedObject> createState() => _AnimatedObjectState();
+}
+
+class _AnimatedObjectState extends State<_AnimatedObject> {
+  @override
+  void dispose() {
+    widget.onDispose(widget.slug);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 class _PuzzleDoor extends StatelessWidget {
