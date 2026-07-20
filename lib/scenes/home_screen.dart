@@ -146,50 +146,30 @@ class _HomeScreenState extends State<HomeScreen>
               mainAxisSize: MainAxisSize.min,
               children: [
                 _buildAnimatedCard(
-                  3,
-                  _DoorwayCard(
-                    sceneId: 'games',
-                    titleHi: 'खेल',
-                    titleTranslit: 'Khel',
-                    color: AppColors.peacock,
-                    deepColor: AppColors.peacockDeep,
-                    onTap: () => Navigator.of(context).pushNamed('/play'),
-                  ),
-                ),
-                const SizedBox(width: 14),
-                _buildAnimatedCard(
                   0,
-                  _DoorwayCard(
-                    sceneId: 'house',
-                    titleHi: 'घर',
-                    titleTranslit: 'Ghar',
+                  DoorwayCard(
+                    sceneId: 'farm',
+                    titleHi: 'सीखो',
+                    titleTranslit: 'Seekho',
                     color: AppColors.marigold,
                     deepColor: AppColors.marigoldDeep,
-                    onTap: () => Navigator.of(context).pushNamed('/scene/house'),
+                    width: 168,
+                    height: 196,
+                    onTap: () => Navigator.of(context).pushNamed('/scenes'),
                   ),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: 26),
                 _buildAnimatedCard(
                   1,
-                  _DoorwayCard(
-                    sceneId: 'farm',
-                    titleHi: 'बगीचा',
-                    titleTranslit: 'Bageecha',
-                    color: AppColors.mehndi,
-                    deepColor: AppColors.mehndiDeep,
-                    onTap: () => Navigator.of(context).pushNamed('/scene/farm'),
-                  ),
-                ),
-                const SizedBox(width: 14),
-                _buildAnimatedCard(
-                  2,
-                  _DoorwayCard(
-                    sceneId: 'family',
-                    titleHi: 'परिवार',
-                    titleTranslit: 'Parivaar',
-                    color: AppColors.kumkum,
-                    deepColor: AppColors.kumkumDeep,
-                    onTap: () => Navigator.of(context).pushNamed('/scene/family'),
+                  DoorwayCard(
+                    sceneId: 'games',
+                    titleHi: 'खेलो',
+                    titleTranslit: 'Khelo',
+                    color: AppColors.peacock,
+                    deepColor: AppColors.peacockDeep,
+                    width: 168,
+                    height: 196,
+                    onTap: () => Navigator.of(context).pushNamed('/play'),
                   ),
                 ),
               ],
@@ -272,84 +252,6 @@ class _MithuBlock extends StatelessWidget {
   }
 }
 
-class _DoorwayCard extends StatelessWidget {
-  final String sceneId;
-  final String titleHi;
-  final String titleTranslit;
-  final Color color;
-  final Color deepColor;
-  final VoidCallback onTap;
-
-  const _DoorwayCard({
-    required this.sceneId,
-    required this.titleHi,
-    required this.titleTranslit,
-    required this.color,
-    required this.deepColor,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        width: 116,
-        height: 132,
-        decoration: BoxDecoration(
-          color: AppColors.paper2,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: deepColor, width: 3),
-          boxShadow: [
-            BoxShadow(
-              color: deepColor.withValues(alpha: 0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          children: [
-            Expanded(
-              child: Image.asset(
-                'assets/art/scenes/${sceneId}_thumb.png',
-                fit: BoxFit.cover,
-                width: double.infinity,
-              ),
-            ),
-            Container(
-              color: color,
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              alignment: Alignment.center,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    titleHi,
-                    style: AppTextStyles.cardLabel.copyWith(
-                      color: Colors.white,
-                      fontSize: 20,
-                    ),
-                  ),
-                  Text(
-                    titleTranslit,
-                    style: AppTextStyles.wordCardTranslit.copyWith(
-                      color: Colors.white.withValues(alpha: 0.9),
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 class _StickerWallEntry extends StatelessWidget {
   final int count;

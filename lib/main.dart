@@ -83,6 +83,12 @@ class _ChaloGharGhoomeAppState extends State<ChaloGharGhoomeApp> {
             ),
           );
         }
+        if (name == '/scenes') {
+          return FadeScaleRoute(
+            settings: settings,
+            child: const ScenePickerScreen(),
+          );
+        }
         if (name == '/play') {
           return FadeScaleRoute(
             settings: settings,
