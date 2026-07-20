@@ -189,6 +189,31 @@ void main() {
     final leftPaths = [tiles[0].imagePath, tiles[2].imagePath, tiles[4].imagePath];
     final rightPaths = [tiles[1].imagePath, tiles[3].imagePath, tiles[5].imagePath];
 
+    // WRONG drag first (founder check): connect left 0 to a wrong right
+    // tile — the game must continue calmly: no lock, no completion, no
+    // fail state; Mithu's warm correction plays on the voice lane.
+    final wrongR = rightPaths.indexWhere((p) => p != leftPaths[0]);
+    await tester.timedDragFrom(
+      leftCenter(0),
+      rightCenter(wrongR) - leftCenter(0),
+      const Duration(milliseconds: 600),
+    );
+    await wait(tester, 2200); // "yeh __ nahi hai" sequence plays
+    expect(find.byType(LineMatchBody), findsOneWidget,
+        reason: 'wrong drag does not end or break the game');
+    expect(find.byType(StickerEarnedOverlay), findsNothing,
+        reason: 'wrong drag earns nothing');
+    expect(
+        tester
+            .widgetList<ArtTile>(find.descendant(
+                of: find.byType(LineMatchBody),
+                matching: find.byType(ArtTile)))
+            .length,
+        6,
+        reason: 'wrong drag removes no tiles');
+    expect(tester.takeException(), isNull,
+        reason: 'no framework exception after wrong drag');
+
     for (var l = 0; l < 3; l++) {
       final r = rightPaths.indexOf(leftPaths[l]);
       expect(r, isNot(-1), reason: 'right column contains left tile $l');
@@ -213,6 +238,29 @@ void main() {
 
     expect(tester.takeException(), isNull,
         reason: 'no framework exception through line match');
+
+    // ---------- ALL NEW GAMES REACHABLE ----------
+    final wanted = <String, Finder>{
+      'pattern': find.byType(PatternBody),
+      'oddone': find.byType(OddOneBody),
+      'bigsmall': find.byType(BigSmallBody),
+    };
+    var walkGuard = 0;
+    while (wanted.isNotEmpty && walkGuard < 14) {
+      wanted.removeWhere((_, f) => tester.any(f));
+      if (wanted.isEmpty) break;
+      final skip = find.byIcon(Icons.arrow_forward_rounded);
+      if (!tester.any(skip)) break;
+      await tester.tap(skip.first);
+      await wait(tester, 1600);
+      walkGuard++;
+    }
+    wanted.removeWhere((_, f) => tester.any(f));
+    expect(wanted.keys, isEmpty,
+        reason: 'all game types reachable in the carousel '
+            '(missing after $walkGuard skips: ${wanted.keys.toList()})');
+    expect(tester.takeException(), isNull,
+        reason: 'no framework exception walking all game types');
 
     // End the test in a QUIET state: let audio finish, then leave the
     // carousel via normal navigation so players are stopped in app

@@ -604,6 +604,15 @@ MITHU_LINES = {
     "mithu_wah": "वाह!",
     "mithu_badhiya": "बहुत बढ़िया!",
     "mithu_sticker": "नया स्टिकर मिला!",
+    # Warm corrective + game-prompt lines (2026-07-20 game expansion)
+    "mithu_yeh": "यह",
+    "mithu_nahi_hai": "नहीं है!",
+    "mithu_phir_se": "फिर से!",
+    "mithu_alag_kaun": "अलग कौन है?",
+    "mithu_konsa_bada": "कौन सा बड़ा है?",
+    "mithu_konsa_chota": "कौन सा छोटा है?",
+    "mithu_bada": "बड़ा!",
+    "mithu_chota": "छोटा!",
 }
 
 

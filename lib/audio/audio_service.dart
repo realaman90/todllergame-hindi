@@ -14,8 +14,10 @@ import 'package:just_audio/just_audio.dart';
 ///   lane is active and restores afterward.
 /// - SFX lane: one-shot sound effects.
 class AudioService extends ChangeNotifier {
-  static const _duckedVolume = 0.30;
-  static const _ambientVolume = 1.0;
+  // Founder feedback: bg music was overpowering the voice. Quieter by
+  // default; full parent-facing sliders arrive with the settings screen.
+  static const _duckedVolume = 0.12;
+  static const _ambientVolume = 0.45;
 
   AudioPlayer? _voicePlayer;
   AudioPlayer? _ambientPlayer;
@@ -28,6 +30,33 @@ class AudioService extends ChangeNotifier {
   String? _currentVoicePath;
   bool _wasPlaying = false;
   bool _clipCompletionHandled = true;
+
+  // Per-player operation queues: just_audio throws 'Loading interrupted'
+  // through internal futures when a new load supersedes one in flight —
+  // uncatchable at call sites and fatal to the test harness. Serializing
+  // each player's platform ops means an in-flight load always finishes
+  // (or fails cleanly) before the next begins.
+  Future<void> _voiceOps = Future.value();
+  Future<void> _sfxOps = Future.value();
+  Future<void> _ambientOps = Future.value();
+
+  Future<void> _onVoiceOps(Future<void> Function() op) {
+    final run = _voiceOps.then((_) => op());
+    _voiceOps = run.then((_) {}, onError: (_) {});
+    return run;
+  }
+
+  Future<void> _onSfxOps(Future<void> Function() op) {
+    final run = _sfxOps.then((_) => op());
+    _sfxOps = run.then((_) {}, onError: (_) {});
+    return run;
+  }
+
+  Future<void> _onAmbientOps(Future<void> Function() op) {
+    final run = _ambientOps.then((_) => op());
+    _ambientOps = run.then((_) {}, onError: (_) {});
+    return run;
+  }
 
   bool get isPlaying => _voicePlayer?.playing ?? false;
   String? get currentVoicePath => _currentVoicePath;
@@ -82,6 +111,20 @@ class AudioService extends ChangeNotifier {
     final wordPath = 'assets/audio/$language/${sceneId}_$slug.mp3';
     final hostPath = 'assets/audio/$language/mithu_kahaan_hai.mp3';
     await _playVoiceSequence([wordPath, hostPath]);
+  }
+
+  /// Warm informative correction: "यह [word] नहीं है!" — spoken kindly,
+  /// never as a buzzer. Teaches negation while redirecting.
+  Future<void> playWrongMatch(
+    String sceneId,
+    String slug, {
+    required String language,
+  }) async {
+    await _playVoiceSequence([
+      'assets/audio/hi/mithu_yeh.mp3',
+      'assets/audio/$language/${sceneId}_$slug.mp3',
+      'assets/audio/hi/mithu_nahi_hai.mp3',
+    ]);
   }
 
   /// Play a random praise line, then the celebration SFX.
@@ -148,7 +191,12 @@ class AudioService extends ChangeNotifier {
         if (_voiceQueue.isNotEmpty) {
           final next = _voiceQueue.removeAt(0);
           _currentVoicePath = next;
-          _playClip(next);
+          // Fire-and-forget from a stream handler: a load superseded by a
+          // rapid new tap throws through just_audio's internal future —
+          // swallow it here or it escapes as an uncaught zone error.
+          _playClip(next).catchError((Object e) {
+            if (kDebugMode) debugPrint('AudioService queued clip aborted: $e');
+          });
         } else {
           _currentVoicePath = null;
           _restoreAmbient();
@@ -179,15 +227,17 @@ class AudioService extends ChangeNotifier {
 
   Future<void> _playClip(String path) async {
     if (kDebugMode) debugPrint('AudioService._playClip: $path');
-    final player = _ensureVoice;
     _currentVoicePath = path;
-    await player.stop();
-    await player.setAsset(path);
-    await player.setVolume(1.0);
-    await _duckAmbient();
-    // Arm completion handling for THIS clip just before it starts.
-    _clipCompletionHandled = false;
-    await player.play();
+    await _onVoiceOps(() async {
+      final player = _ensureVoice;
+      await player.stop();
+      await player.setAsset(path);
+      await player.setVolume(1.0);
+      await _duckAmbient();
+      // Arm completion handling for THIS clip just before it starts.
+      _clipCompletionHandled = false;
+      await player.play();
+    });
     _notifyIfPlayingChanged();
   }
 
@@ -195,11 +245,13 @@ class AudioService extends ChangeNotifier {
   Future<void> playAmbient(String path, {bool loop = true}) async {
     final player = _ensureAmbient;
     try {
-      await player.stop();
-      await player.setAsset(path);
-      await player.setLoopMode(loop ? LoopMode.all : LoopMode.off);
-      await player.setVolume(_ambientVolume);
-      await player.play();
+      await _onAmbientOps(() async {
+        await player.stop();
+        await player.setAsset(path);
+        await player.setLoopMode(loop ? LoopMode.all : LoopMode.off);
+        await player.setVolume(_ambientVolume);
+        await player.play();
+      });
     } on Exception catch (e, stack) {
       if (kDebugMode) {
         debugPrint('AudioService failed to play ambient $path: $e\n$stack');
@@ -237,10 +289,12 @@ class AudioService extends ChangeNotifier {
     final player = _ensureSfx;
     final path = 'assets/audio/sfx/$name.mp3';
     try {
-      await player.stop();
-      await player.setAsset(path);
-      await player.setVolume(1.0);
-      await player.play();
+      await _onSfxOps(() async {
+        await player.stop();
+        await player.setAsset(path);
+        await player.setVolume(1.0);
+        await player.play();
+      });
     } on Exception catch (e, stack) {
       if (kDebugMode) {
         debugPrint('AudioService failed to play sfx $path: $e\n$stack');
@@ -266,15 +320,11 @@ class AudioService extends ChangeNotifier {
   @override
   void dispose() {
     _voiceSubscription?.cancel();
-    // Best-effort teardown: disposing a player with an operation in
-    // flight can throw inside just_audio (seen under the test harness).
-    for (final player in [_voicePlayer, _ambientPlayer, _sfxPlayer]) {
-      try {
-        player?.dispose();
-      } catch (_) {
-        // Dying player during teardown — nothing to save.
-      }
-    }
+    // Deliberately NOT disposing the players: this service lives for the
+    // whole process, and just_audio's dispose kicks off an async platform
+    // teardown that races engine shutdown ("Cannot complete a future with
+    // itself"), crashing test teardown and adding nothing in production —
+    // the OS reclaims everything with the process anyway.
     super.dispose();
   }
 }

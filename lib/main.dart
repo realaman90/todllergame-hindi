@@ -1,3 +1,5 @@
+import 'dart:ui' show PlatformDispatcher;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'activities/activities.dart';
@@ -9,6 +11,17 @@ import 'widgets/widgets.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  // A toddler's rapid taps constantly supersede in-flight audio loads;
+  // just_audio surfaces those aborts through internal futures that no
+  // call-site try/catch can reach. They are business-as-usual, not
+  // errors — swallow exactly that case and nothing else.
+  PlatformDispatcher.instance.onError = (error, stack) {
+    if (error is PlatformException && error.code == 'abort') {
+      debugPrint('audio load superseded (ignored): ${error.message}');
+      return true;
+    }
+    return false;
+  };
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,

@@ -51,7 +51,7 @@ class _CarouselScreenState extends State<CarouselScreen> {
     final sceneIds = ['house', 'farm', 'family'];
     sceneIds.shuffle(Random());
     // linematch leads: newest game greets the child (and founder) first.
-    const formats = ['linematch', 'pairs'];
+    const formats = ['linematch', 'pattern', 'oddone', 'bigsmall', 'pairs'];
     return [
       for (var round = 0; round < formats.length; round++)
         for (var i = 0; i < sceneIds.length; i++)

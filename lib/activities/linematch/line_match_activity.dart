@@ -115,28 +115,39 @@ class _LineMatchBodyState extends State<LineMatchBody>
   double _rowY(Size size, int row) =>
       size.height * (0.22 + 0.28 * row);
 
-  Rect _tileRect(Offset center) =>
-      Rect.fromCenter(center: center, width: _tileSize, height: _tileSize);
-
   int? _hitLeft(Size size, Offset p) {
+    int? best;
+    double bestDist = double.infinity;
+    const maxDist = _tileSize / 2 + _hitSlop;
     for (var row = 0; row < _pairs.length; row++) {
       if (_matched.contains(row)) continue;
-      if (_tileRect(_leftCenter(size, row)).inflate(_hitSlop).contains(p)) {
-        return row;
+      final d = (p - _leftCenter(size, row)).distance;
+      if (d < bestDist && d <= maxDist) {
+        bestDist = d;
+        best = row;
       }
     }
-    return null;
+    return best;
   }
 
+  /// Nearest-center hit test: with generous slop the inflated rects of
+  /// adjacent rows can overlap, and first-rect-wins could snap a release
+  /// NEAR a wrong tile onto its neighbour. The nearest unmatched tile
+  /// within range is the only honest answer.
   int? _hitRight(Size size, Offset p) {
+    int? best;
+    double bestDist = double.infinity;
+    const maxDist = _tileSize / 2 + _hitSlop;
     for (var row = 0; row < _rightOrder.length; row++) {
       final pair = _rightOrder[row];
       if (_matched.contains(pair)) continue;
-      if (_tileRect(_rightCenter(size, row)).inflate(_hitSlop).contains(p)) {
-        return pair;
+      final d = (p - _rightCenter(size, row)).distance;
+      if (d < bestDist && d <= maxDist) {
+        bestDist = d;
+        best = pair;
       }
     }
-    return null;
+    return best;
   }
 
   int _rightRowOf(int pair) => _rightOrder.indexOf(pair);
@@ -186,7 +197,16 @@ class _LineMatchBodyState extends State<LineMatchBody>
         });
       }
     } else {
-      // Miss: the line just melts away. No sound, no shake, no judgment.
+      // Miss: the line melts away, and if the child clearly chose a wrong
+      // tile, Mithu explains warmly — "यह [that word] नहीं है!" (founder
+      // request 2026-07-20: informative correction, never a buzzer).
+      if (target != null) {
+        widget.session.audio.playWrongMatch(
+          widget.session.scene.id,
+          _pairs[target].slug,
+          language: 'hi',
+        );
+      }
       final from = _leftCenter(size, pair);
       final to = at ?? from;
       final controller = AnimationController(
