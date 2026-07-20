@@ -10,17 +10,29 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
 import 'package:chalo_ghar_ghoome/main.dart' as app;
+import 'package:chalo_ghar_ghoome/activities/activities.dart';
 import 'package:chalo_ghar_ghoome/scenes/tappable_object.dart';
 import 'package:chalo_ghar_ghoome/scenes/word_overlay.dart';
 import 'package:chalo_ghar_ghoome/puzzles/puzzle_card.dart';
 import 'package:chalo_ghar_ghoome/puzzles/puzzle_overlay.dart';
 import 'package:chalo_ghar_ghoome/stickers/sticker_earned_overlay.dart';
+import 'package:chalo_ghar_ghoome/widgets/art_tile.dart';
 import 'package:chalo_ghar_ghoome/widgets/mithu_talking.dart';
 
 Future<void> wait(WidgetTester t, int ms, {int stepMs = 100}) async {
   for (var elapsed = 0; elapsed < ms; elapsed += stepMs) {
     await t.pump(Duration(milliseconds: stepMs));
   }
+}
+
+/// Pump until [finder] matches or [timeoutMs] elapses.
+Future<bool> waitFor(WidgetTester t, Finder finder,
+    {int timeoutMs = 8000}) async {
+  for (var elapsed = 0; elapsed < timeoutMs; elapsed += 150) {
+    if (t.any(finder)) return true;
+    await t.pump(const Duration(milliseconds: 150));
+  }
+  return t.any(finder);
 }
 
 void main() {
@@ -139,5 +151,79 @@ void main() {
 
     expect(tester.takeException(), isNull,
         reason: 'no framework exception through the whole loop');
+
+    // ---------- ACTIVITY CAROUSEL: LINE MATCH ----------
+    // Back to Home (custom toddler back button), then into the carousel.
+    await tester.tap(find.byIcon(Icons.arrow_back_rounded).first);
+    await wait(tester, 1200);
+    final activityDoor = find.byIcon(Icons.play_arrow_rounded);
+    expect(activityDoor, findsOneWidget, reason: 'activity door on Home');
+    await tester.tap(activityDoor);
+    await wait(tester, 2000);
+
+    // Skip until the line-match round comes up (playlist alternates).
+    var skips = 0;
+    while (!tester.any(find.byType(LineMatchBody)) && skips < 8) {
+      final skipArrow = find.byIcon(Icons.arrow_forward_rounded);
+      if (!tester.any(skipArrow)) break;
+      await tester.tap(skipArrow.first);
+      await wait(tester, 1500);
+      skips++;
+    }
+    expect(find.byType(LineMatchBody), findsOneWidget,
+        reason: 'line-match round reachable in the carousel (skips=$skips)');
+
+    // Solve all three lines: mirror the widget's layout math.
+    final bodyRect = tester.getRect(find.byType(LineMatchBody));
+    Offset leftCenter(int row) => bodyRect.topLeft +
+        Offset(bodyRect.width * 0.24, bodyRect.height * (0.22 + 0.28 * row));
+    Offset rightCenter(int row) => bodyRect.topLeft +
+        Offset(bodyRect.width * 0.76, bodyRect.height * (0.22 + 0.28 * row));
+
+    // Identify pairs by ArtTile image paths, in build order (L0,R0,L1,R1..).
+    final tiles = tester
+        .widgetList<ArtTile>(find.descendant(
+            of: find.byType(LineMatchBody), matching: find.byType(ArtTile)))
+        .toList();
+    expect(tiles.length, 6, reason: 'three pairs on screen');
+    final leftPaths = [tiles[0].imagePath, tiles[2].imagePath, tiles[4].imagePath];
+    final rightPaths = [tiles[1].imagePath, tiles[3].imagePath, tiles[5].imagePath];
+
+    for (var l = 0; l < 3; l++) {
+      final r = rightPaths.indexOf(leftPaths[l]);
+      expect(r, isNot(-1), reason: 'right column contains left tile $l');
+      await tester.timedDragFrom(
+        leftCenter(l),
+        rightCenter(r) - leftCenter(l),
+        const Duration(milliseconds: 600),
+      );
+      await wait(tester, 900);
+      expect(tester.takeException(), isNull,
+          reason: 'no exception after line drag $l');
+    }
+
+    // All matched -> completion delay -> Mithu praise (clip length varies)
+    // -> earned sticker overlay. Poll rather than guess the audio length.
+    final earned = await waitFor(tester, find.byType(StickerEarnedOverlay),
+        timeoutMs: 12000);
+    expect(earned, isTrue,
+        reason: 'completing line match earns a sticker (polled 12s)');
+    await tester.tapAt(bodyRect.center);
+    await wait(tester, 800);
+
+    expect(tester.takeException(), isNull,
+        reason: 'no framework exception through line match');
+
+    // End the test in a QUIET state: let audio finish, then leave the
+    // carousel via normal navigation so players are stopped in app
+    // context, not by engine teardown (just_audio's platform-init future
+    // races hard shutdown and fails the suite from dart:async).
+    await wait(tester, 3500);
+    final back = find.byIcon(Icons.arrow_back_rounded);
+    if (tester.any(back)) {
+      await tester.tap(back.first);
+      await wait(tester, 1500);
+    }
+    await wait(tester, 2500);
   });
 }

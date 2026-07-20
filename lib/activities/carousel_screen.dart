@@ -46,13 +46,18 @@ class _CarouselScreenState extends State<CarouselScreen> {
   }
 
   List<_Round> _buildPlaylist() {
-    // A1: only pairs is implemented. Interleave scenes by shuffling them
-    // so the same scene never appears back-to-back.
+    // Interleave scenes AND formats: shuffled scenes × alternating
+    // activities, so neither a scene nor a format repeats back-to-back.
     final sceneIds = ['house', 'farm', 'family'];
     sceneIds.shuffle(Random());
+    const formats = ['pairs', 'linematch'];
     return [
-      for (final sceneId in sceneIds)
-        _Round(sceneId: sceneId, activityId: 'pairs'),
+      for (var round = 0; round < formats.length; round++)
+        for (var i = 0; i < sceneIds.length; i++)
+          _Round(
+            sceneId: sceneIds[i],
+            activityId: formats[(i + round) % formats.length],
+          ),
     ];
   }
 

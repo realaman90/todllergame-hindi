@@ -27,6 +27,7 @@ class AudioService extends ChangeNotifier {
   String? _pendingSfx;
   String? _currentVoicePath;
   bool _wasPlaying = false;
+  bool _clipCompletionHandled = true;
 
   bool get isPlaying => _voicePlayer?.playing ?? false;
   String? get currentVoicePath => _currentVoicePath;
@@ -133,10 +134,17 @@ class AudioService extends ChangeNotifier {
 
     final player = _ensureVoice;
     await _voiceSubscription?.cancel();
+    _clipCompletionHandled = true; // nothing playing yet for this op
     _voiceSubscription = player.playerStateStream.listen((state) {
       _notifyIfPlayingChanged();
       if (_voiceGeneration != generation) return;
-      if (!state.playing && state.processingState == ProcessingState.completed) {
+      // just_audio keeps `playing == true` at ProcessingState.completed
+      // (it only flips on stop/pause), so completion must key off the
+      // processing state alone. _clipCompletionHandled dedupes repeated
+      // emissions of the completed state for the same clip.
+      if (state.processingState == ProcessingState.completed &&
+          !_clipCompletionHandled) {
+        _clipCompletionHandled = true;
         if (_voiceQueue.isNotEmpty) {
           final next = _voiceQueue.removeAt(0);
           _currentVoicePath = next;
@@ -177,6 +185,8 @@ class AudioService extends ChangeNotifier {
     await player.setAsset(path);
     await player.setVolume(1.0);
     await _duckAmbient();
+    // Arm completion handling for THIS clip just before it starts.
+    _clipCompletionHandled = false;
     await player.play();
     _notifyIfPlayingChanged();
   }
@@ -256,9 +266,15 @@ class AudioService extends ChangeNotifier {
   @override
   void dispose() {
     _voiceSubscription?.cancel();
-    _voicePlayer?.dispose();
-    _ambientPlayer?.dispose();
-    _sfxPlayer?.dispose();
+    // Best-effort teardown: disposing a player with an operation in
+    // flight can throw inside just_audio (seen under the test harness).
+    for (final player in [_voicePlayer, _ambientPlayer, _sfxPlayer]) {
+      try {
+        player?.dispose();
+      } catch (_) {
+        // Dying player during teardown — nothing to save.
+      }
+    }
     super.dispose();
   }
 }
