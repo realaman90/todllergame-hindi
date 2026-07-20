@@ -615,6 +615,9 @@ MITHU_LINES = {
     "mithu_game_linematch": "रेखा मिलाओ!",
     "mithu_game_pairs": "जोड़ी मिलाओ!",
     "mithu_game_pattern": "पैटर्न पूरा करो!",
+    "mithu_game_kulfi": "कुल्फी बनाओ!",
+    "mithu_kulfi": "कुल्फी!",
+    "mithu_daalo": "डालो!",
     "mithu_chota": "छोटा!",
 }
 

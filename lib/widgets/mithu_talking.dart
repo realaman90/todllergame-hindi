@@ -41,6 +41,9 @@ class _MithuTalkingState extends State<MithuTalking>
   Timer? _flutterTimer;
   bool _beakOpen = false;
   bool _flutterNow = false;
+  // Per-instance celebration style so wins do not all look identical:
+  // 0 = lean dance, 1 = spin-hop, 2 = happy flap.
+  final int _danceStyle = Random().nextInt(3);
 
   bool get _dancing {
     final p = widget.voicePath ?? '';
@@ -106,6 +109,8 @@ class _MithuTalkingState extends State<MithuTalking>
   String get _frame {
     if (_dancing) {
       final beat = (_idleController.value * 8).floor();
+      if (_danceStyle == 2) return beat.isEven ? _spread : _rest;
+      if (_danceStyle == 1) return _spread;
       return beat.isEven ? _leanL : _leanR;
     }
     if (widget.isPlaying) return _beakOpen ? _open : _rest;
@@ -123,12 +128,24 @@ class _MithuTalkingState extends State<MithuTalking>
         double tiltAngle;
         double scale = 1.0;
         if (_dancing) {
-          // Hop on every beat, tilt with the lean.
           final beat = _idleController.value * 8;
           final frac = beat - beat.floor();
-          dy = -14.0 * (frac < 0.5 ? frac * 2 : (1 - frac) * 2);
-          tiltAngle = (beat.floor().isEven ? -1 : 1) * 0.06;
-          scale = 1.03;
+          final hop = -14.0 * (frac < 0.5 ? frac * 2 : (1 - frac) * 2);
+          if (_danceStyle == 1) {
+            // Spin-hop: a full joyful turn per dance clock cycle.
+            dy = hop * 0.7;
+            tiltAngle = _idleController.value * 2 * pi;
+            scale = 1.05;
+          } else if (_danceStyle == 2) {
+            // Happy flap: fast wing frames + bouncy double-bob.
+            dy = 6.0 * sin(t * 6) - 6;
+            tiltAngle = 0.04 * sin(t * 5);
+            scale = 1.06;
+          } else {
+            dy = hop;
+            tiltAngle = (beat.floor().isEven ? -1 : 1) * 0.06;
+            scale = 1.03;
+          }
         } else if (widget.isPlaying) {
           dy = 4.0 * sin(t * 3);
           tiltAngle = 0.02 * sin(t * 2);

@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import '../audio/audio.dart';
 import '../theme/theme.dart';
+import '../widgets/widgets.dart';
 
 class _ConfettiPiece {
   final double x; // 0..1 across the screen
@@ -180,6 +181,19 @@ class _StickerEarnedOverlayState extends State<StickerEarnedOverlay>
                   ),
                 );
               },
+            ),
+            // Mithu appears and celebrates every win, bottom-left.
+            Positioned(
+              left: 30,
+              bottom: 24,
+              child: ListenableBuilder(
+                listenable: widget.audio,
+                builder: (context, _) => MithuTalking(
+                  isPlaying: widget.audio.isPlaying,
+                  voicePath: widget.audio.currentVoicePath,
+                  size: 150,
+                ),
+              ),
             ),
             AnimatedBuilder(
               animation: rectAnimation,
