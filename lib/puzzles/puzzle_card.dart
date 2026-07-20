@@ -7,8 +7,8 @@ import '../widgets/widgets.dart';
 /// A candidate card in the find-it puzzle.
 ///
 /// Wrong taps trigger a gentle idle wobble; correct taps trigger a small
-/// celebration bounce, play the celebration SFX, and report their global
-/// bounds via [onSolved].
+/// celebration bounce and report their global bounds via [onSolved].
+/// The celebration SFX is handled by the puzzle overlay after Mithu's praise.
 class PuzzleCard extends StatefulWidget {
   final Scene scene;
   final SceneObject object;
@@ -86,7 +86,7 @@ class _PuzzleCardState extends State<PuzzleCard>
       _celebrating = true;
       _setAnimation(AnimationType.celebrate);
       _controller.forward(from: 0.0).whenCompleteOrCancel(() {
-        widget.audio.playSfx('celebration');
+        if (!mounted) return;
         final box = context.findRenderObject() as RenderBox?;
         if (box != null) {
           widget.onSolved(box.localToGlobal(Offset.zero) & box.size);

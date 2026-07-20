@@ -73,7 +73,7 @@ class _StickerEarnedOverlayState extends State<StickerEarnedOverlay>
       );
     });
 
-    widget.audio.playSfx('sticker_earned');
+    widget.audio.playStickerEarned();
     _controller.forward();
   }
 

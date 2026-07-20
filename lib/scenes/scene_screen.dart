@@ -11,6 +11,10 @@ import 'tappable_object.dart';
 import 'word_overlay.dart';
 
 /// Displays one scene: a wide diorama of tappable objects.
+///
+/// M3 object-subset rotation: at most 6 objects are shown at once,
+/// laid out on a jittered grid with guaranteed no overlaps. New objects
+/// animate in when a discovered object rotates out.
 class SceneScreen extends StatefulWidget {
   final String sceneId;
   final AudioService audio;
@@ -29,11 +33,19 @@ class SceneScreen extends StatefulWidget {
 
 class _SceneScreenState extends State<SceneScreen> {
   static const _language = 'hi';
+  static const _maxVisible = 6;
 
   final GlobalKey _pillKey = GlobalKey();
   final Map<String, GlobalKey> _objectKeys = {};
 
   late final Future<Scene> _sceneFuture;
+  Scene? _scene;
+  List<Offset> _slots = [];
+  List<SceneObject> _visibleObjects = [];
+  final Set<String> _visibleSlugs = {};
+  final Set<String> _shownSlugs = {};
+  final Map<String, int> _slotAssignment = {};
+
   SceneObject? _activeObject;
   Rect? _activeSourceRect;
   String? _pendingSlug;
@@ -52,6 +64,7 @@ class _SceneScreenState extends State<SceneScreen> {
     _sceneFuture.then((scene) {
       if (mounted) {
         widget.audio.playAmbient('assets/audio/${scene.ambientAudio}');
+        widget.audio.playHost('mithu_welcome_${scene.id}');
       }
     });
     widget.stickerService.addListener(_onStickersChanged);
@@ -74,6 +87,57 @@ class _SceneScreenState extends State<SceneScreen> {
     for (final object in scene.objects) {
       _objectKeys[object.slug] = GlobalKey();
     }
+  }
+
+  void _initializeIfNeeded(Scene scene) {
+    if (_scene != null) return;
+    _scene = scene;
+    _slots = _computeSlots(scene.id);
+
+    final undiscovered = scene.objects
+        .where((o) => !widget.stickerService.has(o.slug))
+        .toList();
+    final discovered = scene.objects
+        .where((o) => widget.stickerService.has(o.slug))
+        .toList();
+
+    // Deterministic but varied ordering.
+    undiscovered.shuffle(Random(scene.id.hashCode));
+    discovered.shuffle(Random(scene.id.hashCode + 1));
+
+    _visibleObjects = [
+      ...undiscovered,
+      ...discovered,
+    ].take(_maxVisible).toList();
+
+    for (var i = 0; i < _visibleObjects.length; i++) {
+      final slug = _visibleObjects[i].slug;
+      _visibleSlugs.add(slug);
+      _shownSlugs.add(slug);
+      _slotAssignment[slug] = i;
+    }
+  }
+
+  List<Offset> _computeSlots(String seed) {
+    final random = Random(seed.hashCode);
+    const base = [
+      Offset(0.18, 0.30),
+      Offset(0.50, 0.30),
+      Offset(0.82, 0.30),
+      Offset(0.18, 0.70),
+      Offset(0.50, 0.70),
+      Offset(0.82, 0.70),
+    ];
+    return base.map((center) {
+      final jitter = Offset(
+        random.nextDouble() * 0.06 - 0.03,
+        random.nextDouble() * 0.06 - 0.03,
+      );
+      return Offset(
+        (center.dx + jitter.dx).clamp(0.12, 0.88),
+        (center.dy + jitter.dy).clamp(0.24, 0.76),
+      );
+    }).toList();
   }
 
   void _showObject(SceneObject object) {
@@ -109,10 +173,47 @@ class _SceneScreenState extends State<SceneScreen> {
   }
 
   void _onEarnedDismiss() {
+    final earned = _earnedSlug;
     setState(() {
       _earnedSlug = null;
       _earnedSourceRect = null;
       _earnedTargetRect = null;
+    });
+
+    if (earned != null && !earned.startsWith('puzzle:')) {
+      _rotateAfterDiscovery(earned);
+    }
+  }
+
+  void _rotateAfterDiscovery(String slug) {
+    final scene = _scene;
+    if (scene == null) return;
+    final slot = _slotAssignment[slug];
+    if (slot == null) return;
+
+    final candidates = scene.objects
+        .where((o) => !_visibleSlugs.contains(o.slug))
+        .toList();
+    if (candidates.isEmpty) return;
+
+    // Prefer undiscovered, then discovered-but-not-yet-shown.
+    candidates.sort((a, b) {
+      final aDisc = widget.stickerService.has(a.slug) ? 1 : 0;
+      final bDisc = widget.stickerService.has(b.slug) ? 1 : 0;
+      if (aDisc != bDisc) return aDisc - bDisc;
+      return a.slug.compareTo(b.slug);
+    });
+
+    final replacement = candidates.first;
+    setState(() {
+      _visibleObjects.removeWhere((o) => o.slug == slug);
+      _visibleSlugs.remove(slug);
+      _slotAssignment.remove(slug);
+
+      _visibleObjects.add(replacement);
+      _visibleSlugs.add(replacement.slug);
+      _shownSlugs.add(replacement.slug);
+      _slotAssignment[replacement.slug] = slot;
     });
   }
 
@@ -170,6 +271,8 @@ class _SceneScreenState extends State<SceneScreen> {
 
         final scene = snapshot.data!;
         _ensureKeys(scene);
+        _initializeIfNeeded(scene);
+
         final themeColor = AppColors.forTheme(scene.theme);
         final deepColor = AppColors.deepFor(scene.theme);
 
@@ -201,21 +304,37 @@ class _SceneScreenState extends State<SceneScreen> {
                     fit: StackFit.expand,
                     children: [
                       _Background(scene: scene),
-                      ...scene.objects.map((object) {
-                        final x = object.pos.dx * constraints.maxWidth;
-                        final y = object.pos.dy * constraints.maxHeight;
+                      ..._visibleObjects.map((object) {
+                        final slotIndex = _slotAssignment[object.slug]!;
+                        final slot = _slots[slotIndex];
                         final size = 100.0 * object.scale;
+                        final x = slot.dx * constraints.maxWidth;
+                        final y = slot.dy * constraints.maxHeight;
                         return Positioned(
                           left: x - size / 2,
                           top: y - size / 2,
-                          child: Container(
-                            key: _objectKeys[object.slug],
-                            child: TappableObject(
-                              scene: scene,
-                              object: object,
-                              audio: widget.audio,
-                              language: _language,
-                              onTap: () => _showObject(object),
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 500),
+                            transitionBuilder: (child, animation) {
+                              return FadeTransition(
+                                opacity: animation,
+                                child: ScaleTransition(
+                                  scale: Tween<double>(begin: 0.6, end: 1.0)
+                                      .animate(animation),
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: Container(
+                              key: ValueKey(object.slug),
+                              child: TappableObject(
+                                key: _objectKeys[object.slug],
+                                scene: scene,
+                                object: object,
+                                audio: widget.audio,
+                                language: _language,
+                                onTap: () => _showObject(object),
+                              ),
                             ),
                           ),
                         );

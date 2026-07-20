@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../audio/audio.dart';
 import '../content/content.dart';
 import '../theme/theme.dart';
+import '../widgets/widgets.dart';
 import 'puzzle_card.dart';
 
 /// Find-it puzzle overlay.
@@ -50,16 +51,16 @@ class _PuzzleOverlayState extends State<PuzzleOverlay> {
   }
 
   void _playPrompt() {
-    widget.audio.playWord(
+    widget.audio.playPromptSequence(
       widget.scene.id,
       widget.puzzle.ask,
       language: widget.language,
-      slow: false,
     );
   }
 
-  void _handleSolved(SceneObject object, Rect sourceRect) {
-    widget.onSolved(object.slug, sourceRect);
+  Future<void> _handleSolved(SceneObject object, Rect sourceRect) async {
+    await widget.audio.playPraise();
+    if (mounted) widget.onSolved(object.slug, sourceRect);
   }
 
   @override
@@ -101,6 +102,7 @@ class _PuzzleOverlayState extends State<PuzzleOverlay> {
                     object: target,
                     themeColor: themeColor,
                     deepColor: deepColor,
+                    audio: widget.audio,
                     onTap: _playPrompt,
                   ),
                   const SizedBox(height: 16),
@@ -133,12 +135,14 @@ class _PromptCard extends StatelessWidget {
   final SceneObject object;
   final Color themeColor;
   final Color deepColor;
+  final AudioService audio;
   final VoidCallback onTap;
 
   const _PromptCard({
     required this.object,
     required this.themeColor,
     required this.deepColor,
+    required this.audio,
     required this.onTap,
   });
 
@@ -166,10 +170,14 @@ class _PromptCard extends StatelessWidget {
                 border: Border.all(color: deepColor, width: 2),
               ),
               alignment: Alignment.center,
-              child: const Icon(
-                Icons.chat_bubble_outline,
-                color: Colors.white,
-                size: 22,
+              child: ListenableBuilder(
+                listenable: audio,
+                builder: (context, child) {
+                  return MithuTalking(
+                    isPlaying: audio.isPlaying,
+                    size: 40,
+                  );
+                },
               ),
             ),
             const SizedBox(width: 12),

@@ -30,7 +30,7 @@ class TappableObject extends StatefulWidget {
 }
 
 class _TappableObjectState extends State<TappableObject>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late final AnimationController _tapController;
   late final AnimationController _idleController;
   Animation<double>? _tapAnimation;

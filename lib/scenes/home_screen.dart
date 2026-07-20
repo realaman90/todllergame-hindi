@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../audio/audio.dart';
 import '../stickers/stickers.dart';
 import '../theme/theme.dart';
+import '../widgets/widgets.dart';
 
 /// Scene-select home screen.
 ///
@@ -25,11 +26,19 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  static bool _greetingPlayed = false;
+
   @override
   void initState() {
     super.initState();
     widget.stickerService.addListener(_onStickersChanged);
     widget.audio.playAmbient('assets/audio/music/theme.mp3');
+    if (!_greetingPlayed) {
+      _greetingPlayed = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) widget.audio.playHost('mithu_greeting');
+      });
+    }
   }
 
   @override
@@ -53,7 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const _MithuBlock(),
+              _MithuBlock(audio: widget.audio),
               const SizedBox(width: 32),
               Column(
                 mainAxisSize: MainAxisSize.min,
@@ -105,7 +114,9 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class _MithuBlock extends StatefulWidget {
-  const _MithuBlock();
+  final AudioService audio;
+
+  const _MithuBlock({required this.audio});
 
   @override
   State<_MithuBlock> createState() => _MithuBlockState();
@@ -160,9 +171,14 @@ class _MithuBlockState extends State<_MithuBlock>
               ],
             ),
             clipBehavior: Clip.antiAlias,
-            child: Image.asset(
-              'assets/art/characters/mithu_hero.png',
-              fit: BoxFit.cover,
+            child: ListenableBuilder(
+              listenable: widget.audio,
+              builder: (context, child) {
+                return MithuTalking(
+                  isPlaying: widget.audio.isPlaying,
+                  size: 160,
+                );
+              },
             ),
           ),
           const SizedBox(height: 12),
