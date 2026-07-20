@@ -270,7 +270,7 @@ class _MithuBlock extends StatelessWidget {
         ),
         const SizedBox(height: 2),
         Text(
-          'चलो घर घूमें!',
+          'बोलो! खेलो!',
           style: AppTextStyles.wordCardTranslit
               .copyWith(color: AppColors.ink.withValues(alpha: 0.7)),
         ),

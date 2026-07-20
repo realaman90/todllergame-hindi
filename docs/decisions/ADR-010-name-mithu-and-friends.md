@@ -4,9 +4,13 @@
 
 The product name is **Mithu & Friends**, replacing the working title
 "Chalo Ghar Ghoome". Applied to: app display name (iOS/Android), in-app
-home title, and the store-listing pattern. "चलो घर घूमें!" survives as
-the Hindi tagline under the brand title (it is also Mithu's greeting
-line). Chosen by the founder from mascot-led candidates.
+home title, and the store-listing pattern. Chosen by the founder from mascot-led candidates.
+
+**Amended same day:** founder ruled "चलो घर घूमें!" is a LEVEL phrase,
+not an app tagline — it becomes the Ghar scene's spoken invitation, and
+every scene gets the same pattern (चलो बगीचा घूमें! / चलो परिवार से
+मिलें!). The home greeting becomes "नमस्ते! चलो खेलें!". No app-wide
+Hindi tagline for now.
 
 Store-listing pattern for the multi-language roadmap (ADR-007):
 **"Mithu & Friends: Hindi for Toddlers"** (then …Swedish, …English, per

@@ -158,10 +158,10 @@ takes: that register difference IS the character. Voice casting: founder,
 | नमस्ते! मेरा नाम मिठू है! | namaste! mera naam Mithu hai! | first-launch intro, line 1 | `mithu_intro_name.mp3` |
 | चलो, साथ में खेलें! | chalo, saath mein khelein! | first-launch intro, line 2 | `mithu_intro_play.mp3` |
 | एक दरवाज़ा चुनो! | ek darwaza chuno! | first-launch intro, line 3 (doorway cards pulse gently while it plays) | `mithu_intro_choose.mp3` |
-| नमस्ते! चलो घर घूमें! | namaste! chalo ghar ghoomein! | later app opens / home greeting | `mithu_greeting.mp3` |
-| यह है घर! | yeh hai ghar! | entering Ghar | `mithu_welcome_house.mp3` |
-| यह है बगीचा! | yeh hai bageecha! | entering Bageecha | `mithu_welcome_farm.mp3` |
-| यह है परिवार! | yeh hai parivaar! | entering Parivaar | `mithu_welcome_family.mp3` |
+| नमस्ते! चलो खेलें! | namaste! chalo khelein! | later app opens / home greeting | `mithu_greeting.mp3` |
+| चलो घर घूमें! | chalo ghar ghoomein! | entering Ghar (the old app title, now the level invitation) | `mithu_welcome_house.mp3` |
+| चलो बगीचा घूमें! | chalo bageecha ghoomein! | entering Bageecha | `mithu_welcome_farm.mp3` |
+| चलो परिवार से मिलें! | chalo parivaar se milein! | entering Parivaar | `mithu_welcome_family.mp3` |
 | कहाँ है? | kahaan hai? | find-it prompt, played right after the target word (word + this = "___ कहाँ है?") | `mithu_kahaan_hai.mp3` |
 | शाबाश! | shabash! | praise (random pick) | `mithu_shabash.mp3` |
 | वाह! | wah! | praise (random pick) | `mithu_wah.mp3` |
