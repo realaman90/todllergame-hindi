@@ -47,15 +47,17 @@ void main() {
     // ---------- HOME ----------
     expect(find.byType(MithuTalking), findsOneWidget,
         reason: 'Mithu (talking widget) must be on Home');
-    expect(find.text('बगीचा'), findsOneWidget,
-        reason: 'Bageecha doorway card must be on Home');
+    expect(find.text('सीखो'), findsOneWidget,
+        reason: 'Seekho (learn) card must be on Home');
+    expect(find.text('खेलो'), findsOneWidget,
+        reason: 'Khelo (play) card must be on Home');
 
     // If the first-launch intro is running, a tap anywhere skips it.
     // Tap Mithu himself — a safe non-navigating target regardless of
     // how the Home layout evolves.
     await tester.tap(find.byType(MithuTalking), warnIfMissed: false);
     await wait(tester, 500);
-    expect(find.text('बगीचा'), findsOneWidget,
+    expect(find.text('सीखो'), findsOneWidget,
         reason: 'still on Home after intro skip');
 
     // Talk animation check: capture Mithu image frames over time while
@@ -66,7 +68,11 @@ void main() {
         of: find.byType(MithuTalking), matching: find.byType(Image));
     expect(mithuFinder, findsWidgets, reason: 'Mithu renders an image');
 
-    // ---------- ENTER SCENE ----------
+    // ---------- ENTER SCENE (Home -> Seekho picker -> Bageecha) ----------
+    await tester.tap(find.text('सीखो'));
+    await wait(tester, 1500);
+    expect(find.text('बगीचा'), findsOneWidget,
+        reason: 'scene picker shows Bageecha');
     await tester.tap(find.text('बगीचा'));
     await wait(tester, 2500); // route transition + welcome line starts
 
@@ -153,12 +159,13 @@ void main() {
         reason: 'no framework exception through the whole loop');
 
     // ---------- ACTIVITY CAROUSEL: LINE MATCH ----------
-    // Back to Home (custom toddler back button), then into the carousel.
+    // Back out twice (scene -> picker -> Home), then into Khelo.
     await tester.tap(find.byIcon(Icons.arrow_back_rounded).first);
     await wait(tester, 1200);
-    final activityDoor = find.byIcon(Icons.play_arrow_rounded);
-    expect(activityDoor, findsOneWidget, reason: 'activity door on Home');
-    await tester.tap(activityDoor);
+    await tester.tap(find.byIcon(Icons.arrow_back_rounded).first);
+    await wait(tester, 1200);
+    expect(find.text('खेलो'), findsOneWidget, reason: 'back on Home');
+    await tester.tap(find.text('खेलो'));
     await wait(tester, 2000);
 
     // Skip until the line-match round comes up (playlist alternates).

@@ -123,10 +123,13 @@ class _CarouselScreenState extends State<CarouselScreen> {
   @override
   Widget build(BuildContext context) {
     final round = _playlist[_index];
+    final activity = activityFor(round.activityId);
 
     return Scaffold(
       backgroundColor: AppColors.paper,
       appBar: AppBar(
+        title: Text(activity.titleHi, style: AppTextStyles.sceneTitle),
+        centerTitle: true,
         leading: ToddlerBackButton(
           onPressed: () => Navigator.of(context).maybePop(),
         ),
@@ -154,7 +157,6 @@ class _CarouselScreenState extends State<CarouselScreen> {
           }
 
           final state = snapshot.data!;
-          final activity = activityFor(round.activityId);
           final session = ActivitySession(
             scene: state.scene,
             vocab: state.vocab,

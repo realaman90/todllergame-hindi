@@ -4,3 +4,4 @@ export 'back_button.dart';
 export 'fade_scale_route.dart';
 export 'mithu_talking.dart';
 export 'doorway_card.dart';
+export 'pop_in.dart';

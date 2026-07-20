@@ -249,9 +249,11 @@ class AudioService extends ChangeNotifier {
         await player.stop();
         await player.setAsset(path);
         await player.setLoopMode(loop ? LoopMode.all : LoopMode.off);
-        await player.setVolume(_ambientVolume);
+        // Fade in from silence instead of slamming on.
+        await player.setVolume(0.0);
         await player.play();
       });
+      await _rampAmbient(_ambientVolume, ms: 1200);
     } on Exception catch (e, stack) {
       if (kDebugMode) {
         debugPrint('AudioService failed to play ambient $path: $e\n$stack');
@@ -259,24 +261,31 @@ class AudioService extends ChangeNotifier {
     }
   }
 
-  Future<void> stopAmbient() async => await _ambientPlayer?.stop();
+  Future<void> stopAmbient() async {
+    await _rampAmbient(0.0, ms: 200);
+    await _ambientPlayer?.stop();
+  }
 
-  Future<void> _duckAmbient() async {
+  /// Smoothly ramp the ambient volume — instant volume jumps read as
+  /// "basic"; a short ramp makes ducking feel produced.
+  Future<void> _rampAmbient(double to, {int ms = 220}) async {
+    final player = _ambientPlayer;
+    if (player == null) return;
     try {
-      await _ambientPlayer?.setVolume(_duckedVolume);
+      final from = player.volume;
+      const steps = 6;
+      for (var i = 1; i <= steps; i++) {
+        await player.setVolume(from + (to - from) * i / steps);
+        await Future.delayed(Duration(milliseconds: ms ~/ steps));
+      }
     } catch (_) {
-      // Player mid-teardown (app exit / test harness) — ducking a dying
-      // player is a no-op, not an error.
+      // Player mid-teardown — best-effort only.
     }
   }
 
-  Future<void> _restoreAmbient() async {
-    try {
-      await _ambientPlayer?.setVolume(_ambientVolume);
-    } catch (_) {
-      // Player mid-teardown — restoring volume is best-effort only.
-    }
-  }
+  Future<void> _duckAmbient() => _rampAmbient(_duckedVolume);
+
+  Future<void> _restoreAmbient() => _rampAmbient(_ambientVolume, ms: 420);
 
   void _playPendingSfx() {
     final sfx = _pendingSfx;

@@ -15,6 +15,9 @@ class OddOneActivity extends Activity {
   String get id => 'oddone';
 
   @override
+  String get titleHi => 'अलग कौन?';
+
+  @override
   Widget build(BuildContext context, ActivitySession session) {
     return OddOneBody(session: session, key: ValueKey(session.scene.id));
   }
@@ -104,7 +107,8 @@ class _OddOneBodyState extends State<OddOneBody> with TickerProviderStateMixin {
         runSpacing: 28,
         alignment: WrapAlignment.center,
         children: [
-          for (var i = 0; i < 4; i++) _tile(i, themeColor, deepColor),
+          for (var i = 0; i < 4; i++)
+            PopIn(delayMs: 110 * i, child: _tile(i, themeColor, deepColor)),
         ],
       ),
     );

@@ -12,6 +12,9 @@ abstract class Activity {
 
   String get id;
 
+  /// Devanagari display title shown in the carousel's app bar.
+  String get titleHi;
+
   /// Builds the activity UI for a scene's vocabulary subset.
   Widget build(BuildContext context, ActivitySession session);
 }

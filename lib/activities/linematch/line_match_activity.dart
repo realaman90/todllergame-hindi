@@ -20,6 +20,9 @@ class LineMatchActivity extends Activity {
   String get id => 'linematch';
 
   @override
+  String get titleHi => 'रेखा मिलाओ';
+
+  @override
   Widget build(BuildContext context, ActivitySession session) {
     return LineMatchBody(session: session, key: ValueKey(session.scene.id));
   }
@@ -84,6 +87,8 @@ class _LineMatchBodyState extends State<LineMatchBody>
       duration: const Duration(milliseconds: 450),
       vsync: this,
     );
+
+    widget.session.audio.playHost('mithu_game_linematch');
   }
 
   bool _identityOrder(List<int> order) {
@@ -351,7 +356,9 @@ class _LineMatchBodyState extends State<LineMatchBody>
     return Positioned(
       left: center.dx - _tileSize / 2,
       top: center.dy - _tileSize / 2,
-      child: IgnorePointer(child: tile),
+      child: IgnorePointer(
+        child: PopIn(delayMs: 100 + (phase * 120).round(), child: tile),
+      ),
     );
   }
 }

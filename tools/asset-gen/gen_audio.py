@@ -612,6 +612,9 @@ MITHU_LINES = {
     "mithu_konsa_bada": "कौन सा बड़ा है?",
     "mithu_konsa_chota": "कौन सा छोटा है?",
     "mithu_bada": "बड़ा!",
+    "mithu_game_linematch": "रेखा मिलाओ!",
+    "mithu_game_pairs": "जोड़ी मिलाओ!",
+    "mithu_game_pattern": "पैटर्न पूरा करो!",
     "mithu_chota": "छोटा!",
 }
 

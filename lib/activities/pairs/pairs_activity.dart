@@ -18,6 +18,9 @@ class PairsActivity extends Activity {
   String get id => 'pairs';
 
   @override
+  String get titleHi => 'जोड़ी मिलाओ';
+
+  @override
   Widget build(BuildContext context, ActivitySession session) {
     return _PairsGame(session: session);
   }

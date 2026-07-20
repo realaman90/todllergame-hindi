@@ -20,6 +20,9 @@ class PatternActivity extends Activity {
   String get id => 'pattern';
 
   @override
+  String get titleHi => 'पैटर्न पूरा करो';
+
+  @override
   Widget build(BuildContext context, ActivitySession session) {
     return PatternBody(session: session, key: ValueKey(session.scene.id));
   }
@@ -74,9 +77,11 @@ class _PatternBodyState extends State<PatternBody>
   }
 
   Future<void> _speakSequence() async {
-    // "A… B… A… B…" — the audio IS the instruction; no text needed.
+    // Title first, then "A… B… A… B…" — the audio IS the instruction.
     final audio = widget.session.audio;
     final sceneId = widget.session.scene.id;
+    await audio.playHost('mithu_game_pattern');
+    await Future.delayed(const Duration(milliseconds: 200));
     for (final o in [_a, _b, _a, _b]) {
       if (!mounted) return;
       await audio.playWord(sceneId, o.slug, language: 'hi');
@@ -130,7 +135,10 @@ class _PatternBodyState extends State<PatternBody>
               for (var i = 0; i < sequence.length; i++)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: _seqSlot(sequence[i], i, themeColor, deepColor),
+                  child: PopIn(
+                    delayMs: 120 * i,
+                    child: _seqSlot(sequence[i], i, themeColor, deepColor),
+                  ),
                 ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -145,7 +153,10 @@ class _PatternBodyState extends State<PatternBody>
               for (var i = 0; i < _choices.length; i++)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 26),
-                  child: _choice(i, themeColor, deepColor),
+                  child: PopIn(
+                    delayMs: 600 + 150 * i,
+                    child: _choice(i, themeColor, deepColor),
+                  ),
                 ),
             ],
           ),

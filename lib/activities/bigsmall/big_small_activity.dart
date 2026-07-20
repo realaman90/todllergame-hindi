@@ -16,6 +16,9 @@ class BigSmallActivity extends Activity {
   String get id => 'bigsmall';
 
   @override
+  String get titleHi => 'बड़ा-छोटा';
+
+  @override
   Widget build(BuildContext context, ActivitySession session) {
     return BigSmallBody(session: session, key: ValueKey(session.scene.id));
   }
@@ -99,8 +102,9 @@ class _BigSmallBodyState extends State<BigSmallBody>
     final themeColor = AppColors.forTheme(scene.theme);
     final deepColor = AppColors.deepFor(scene.theme);
 
-    final bigTile = _tile(true, themeColor, deepColor);
-    final smallTile = _tile(false, themeColor, deepColor);
+    final bigTile = PopIn(delayMs: 80, child: _tile(true, themeColor, deepColor));
+    final smallTile =
+        PopIn(delayMs: 260, child: _tile(false, themeColor, deepColor));
 
     return Center(
       child: Row(
