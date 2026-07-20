@@ -617,6 +617,8 @@ MITHU_LINES = {
     "mithu_game_pattern": "पैटर्न पूरा करो!",
     "mithu_game_kulfi": "कुल्फी बनाओ!",
     "mithu_kulfi": "कुल्फी!",
+    "mithu_game_icecream": "आइसक्रीम बनाओ!",
+    "mithu_icecream": "आइसक्रीम!",
     "mithu_daalo": "डालो!",
     "mithu_chota": "छोटा!",
 }

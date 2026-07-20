@@ -1,15 +1,17 @@
 import 'activity.dart';
+import 'balloons/balloons.dart';
 import 'bigsmall/bigsmall.dart';
-import 'kulfi/kulfi.dart';
+import 'icecream/icecream.dart';
 import 'linematch/linematch.dart';
 import 'oddone/oddone.dart';
 import 'pairs/pairs.dart';
 import 'pattern/pattern.dart';
 
 export 'activity.dart';
+export 'balloons/balloons.dart';
 export 'bigsmall/bigsmall.dart';
 export 'carousel_screen.dart';
-export 'kulfi/kulfi.dart';
+export 'icecream/icecream.dart';
 export 'linematch/linematch.dart';
 export 'oddone/oddone.dart';
 export 'pairs/pairs.dart';
@@ -20,7 +22,8 @@ Activity activityFor(String id) {
   return switch (id) {
     'pairs' => const PairsActivity(),
     'linematch' => const LineMatchActivity(),
-    'kulfi' => const KulfiActivity(),
+    'icecream' => const IceCreamActivity(),
+    'balloons' => const BalloonsActivity(),
     'pattern' => const PatternActivity(),
     'oddone' => const OddOneActivity(),
     'bigsmall' => const BigSmallActivity(),

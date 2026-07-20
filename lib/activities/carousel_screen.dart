@@ -51,8 +51,8 @@ class _CarouselScreenState extends State<CarouselScreen> {
     final sceneIds = ['house', 'farm', 'family'];
     sceneIds.shuffle(Random());
     // linematch leads: newest game greets the child (and founder) first.
-    const formats = ['kulfi', 'linematch', 'pattern', 'oddone', 'bigsmall', 'pairs'];
-    return [
+    const formats = ['icecream', 'linematch', 'pattern', 'oddone', 'bigsmall', 'pairs'];
+    final rounds = [
       for (var round = 0; round < formats.length; round++)
         for (var i = 0; i < sceneIds.length; i++)
           _Round(
@@ -60,6 +60,16 @@ class _CarouselScreenState extends State<CarouselScreen> {
             activityId: formats[(i + round) % formats.length],
           ),
     ];
+    // Weave a balloon-popping breather after every 2nd game — a short
+    // satisfying palate-cleanser with no goal beyond joyful popping.
+    final woven = <_Round>[];
+    for (var i = 0; i < rounds.length; i++) {
+      woven.add(rounds[i]);
+      if (i.isOdd) {
+        woven.add(_Round(sceneId: rounds[i].sceneId, activityId: 'balloons'));
+      }
+    }
+    return woven;
   }
 
   Future<_RoundState> _loadRound(_Round round) async {
@@ -171,7 +181,23 @@ class _CarouselScreenState extends State<CarouselScreen> {
           return Stack(
             children: [
               Positioned.fill(child: GameBackdrop(color: themeColor)),
-              activity.build(context, session),
+              // Rounds slide in from the right and fade — no hard swaps.
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 480),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                transitionBuilder: (child, animation) => SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0.12, 0),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: FadeTransition(opacity: animation, child: child),
+                ),
+                child: KeyedSubtree(
+                  key: ValueKey(_index),
+                  child: activity.build(context, session),
+                ),
+              ),
               if (_earnedSlug != null)
                 _buildEarnedOverlay(state.scene, round.activityId),
             ],

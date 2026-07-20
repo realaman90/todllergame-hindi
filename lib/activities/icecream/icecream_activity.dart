@@ -6,24 +6,24 @@ import '../../theme/theme.dart';
 import '../../widgets/widgets.dart';
 import '../activity.dart';
 
-/// कुल्फी बनाओ — make kulfi! The first "making" game.
+/// आइसक्रीम बनाओ — make ice cream! The first "making" game.
 ///
-/// Two forgiving drag steps into a clay matka: first दूध (milk), then a
+/// Two forgiving drag steps into a mixing bowl: first दूध (milk), then a
 /// fruit flavor of the child's choice (आम / केला / सेब — every choice is
-/// right). The pot shakes, and out pops a kulfi tinted by the flavor.
+/// right). The bowl shakes, and out pops an ice cream cone tinted by the flavor.
 /// Vocabulary is fixed to the house-scene food words.
-class KulfiActivity extends Activity {
-  const KulfiActivity();
+class IceCreamActivity extends Activity {
+  const IceCreamActivity();
 
   @override
-  String get id => 'kulfi';
+  String get id => 'icecream';
 
   @override
-  String get titleHi => 'कुल्फी बनाओ';
+  String get titleHi => 'आइसक्रीम बनाओ';
 
   @override
   Widget build(BuildContext context, ActivitySession session) {
-    return KulfiBody(session: session, key: const ValueKey('kulfi'));
+    return IceCreamBody(session: session, key: const ValueKey('icecream'));
   }
 }
 
@@ -35,16 +35,16 @@ class _Ingredient {
   const _Ingredient(this.slug, this.wordHi, this.tint);
 }
 
-class KulfiBody extends StatefulWidget {
+class IceCreamBody extends StatefulWidget {
   final ActivitySession session;
 
-  const KulfiBody({super.key, required this.session});
+  const IceCreamBody({super.key, required this.session});
 
   @override
-  State<KulfiBody> createState() => _KulfiBodyState();
+  State<IceCreamBody> createState() => _IceCreamBodyState();
 }
 
-class _KulfiBodyState extends State<KulfiBody> with TickerProviderStateMixin {
+class _IceCreamBodyState extends State<IceCreamBody> with TickerProviderStateMixin {
   static const _milk = _Ingredient('doodh', 'दूध', Colors.white);
   static const _fruits = [
     _Ingredient('aam', 'आम', Color(0xFFF2A93B)),
@@ -71,7 +71,7 @@ class _KulfiBodyState extends State<KulfiBody> with TickerProviderStateMixin {
     _pour = AnimationController(
         duration: const Duration(milliseconds: 500), vsync: this);
 
-    widget.session.audio.playHost('mithu_game_kulfi');
+    widget.session.audio.playHost('mithu_game_icecream');
   }
 
   @override
@@ -97,7 +97,7 @@ class _KulfiBodyState extends State<KulfiBody> with TickerProviderStateMixin {
       _shake.forward(from: 0.0).whenCompleteOrCancel(() async {
         if (!mounted) return;
         setState(() => _done = true);
-        await widget.session.audio.playHost('mithu_kulfi');
+        await widget.session.audio.playHost('mithu_icecream');
         await Future.delayed(const Duration(milliseconds: 700));
         if (mounted) widget.session.onComplete();
       });
@@ -144,7 +144,7 @@ class _KulfiBodyState extends State<KulfiBody> with TickerProviderStateMixin {
                         alignment: Alignment.center,
                         children: [
                           const ArtTile(
-                            imagePath: 'assets/art/objects/kulfi_pot.png',
+                            imagePath: 'assets/art/objects/icecream_bowl.png',
                             color: themeColor,
                             deepColor: deepColor,
                             size: 185,
@@ -175,12 +175,12 @@ class _KulfiBodyState extends State<KulfiBody> with TickerProviderStateMixin {
               if (_done)
                 Positioned(
                   top: 0,
-                  child: PopIn(
+                  child: _ScoopPlop(
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
                         const ArtTile(
-                          imagePath: 'assets/art/objects/kulfi_done.png',
+                          imagePath: 'assets/art/objects/icecream_done.png',
                           color: themeColor,
                           deepColor: deepColor,
                           size: 150,
@@ -270,6 +270,66 @@ class _KulfiBodyState extends State<KulfiBody> with TickerProviderStateMixin {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Squash-and-stretch entrance for the finished cone: drops in, squashes
+/// on landing, springs back — the classic satisfying "plop".
+class _ScoopPlop extends StatefulWidget {
+  final Widget child;
+
+  const _ScoopPlop({required this.child});
+
+  @override
+  State<_ScoopPlop> createState() => _ScoopPlopState();
+}
+
+class _ScoopPlopState extends State<_ScoopPlop>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c;
+
+  @override
+  void initState() {
+    super.initState();
+    _c = AnimationController(
+        duration: const Duration(milliseconds: 650), vsync: this)
+      ..forward();
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _c,
+      builder: (context, child) {
+        final t = _c.value;
+        final drop = t < 0.45 ? -90.0 * (1 - t / 0.45) : 0.0;
+        double sx = 1.0, sy = 1.0;
+        if (t >= 0.45 && t < 0.7) {
+          final k = (t - 0.45) / 0.25;
+          sx = 1.0 + 0.25 * sin(k * pi);
+          sy = 1.0 - 0.22 * sin(k * pi);
+        } else if (t >= 0.7) {
+          final k = (t - 0.7) / 0.3;
+          sx = 1.0 + 0.06 * sin((1 - k) * pi);
+          sy = 1.0 - 0.05 * sin((1 - k) * pi);
+        }
+        final fade = (t / 0.2).clamp(0.0, 1.0);
+        return Opacity(
+          opacity: fade,
+          child: Transform.translate(
+            offset: Offset(0, drop),
+            child: Transform.scale(scaleX: sx, scaleY: sy, child: child),
+          ),
+        );
+      },
+      child: widget.child,
     );
   }
 }

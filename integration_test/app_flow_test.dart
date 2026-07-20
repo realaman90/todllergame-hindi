@@ -170,7 +170,7 @@ void main() {
 
     // Skip until the line-match round comes up (playlist alternates).
     var skips = 0;
-    while (!tester.any(find.byType(LineMatchBody)) && skips < 8) {
+    while (!tester.any(find.byType(LineMatchBody)) && skips < 14) {
       final skipArrow = find.byIcon(Icons.arrow_forward_rounded);
       if (!tester.any(skipArrow)) break;
       await tester.tap(skipArrow.first);
@@ -253,7 +253,7 @@ void main() {
       'bigsmall': find.byType(BigSmallBody),
     };
     var walkGuard = 0;
-    while (wanted.isNotEmpty && walkGuard < 14) {
+    while (wanted.isNotEmpty && walkGuard < 22) {
       wanted.removeWhere((_, f) => tester.any(f));
       if (wanted.isEmpty) break;
       final skip = find.byIcon(Icons.arrow_forward_rounded);
