@@ -3,6 +3,22 @@ import 'package:flutter/material.dart';
 import '../audio/audio.dart';
 import '../theme/theme.dart';
 
+class _ConfettiPiece {
+  final double x; // 0..1 across the screen
+  final double fallSpeed; // relative
+  final double size;
+  final double spin;
+  final Color color;
+
+  const _ConfettiPiece({
+    required this.x,
+    required this.fallSpeed,
+    required this.size,
+    required this.spin,
+    required this.color,
+  });
+}
+
 class _Sparkle {
   final Offset direction;
   final double distance;
@@ -46,6 +62,7 @@ class _StickerEarnedOverlayState extends State<StickerEarnedOverlay>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final List<_Sparkle> _sparkles;
+  late final List<_ConfettiPiece> _confetti;
 
   @override
   void initState() {
@@ -69,6 +86,15 @@ class _StickerEarnedOverlayState extends State<StickerEarnedOverlay>
         direction: Offset(cos(angle), sin(angle)),
         distance: 60 + random.nextDouble() * 90,
         radius: 4 + random.nextDouble() * 5,
+        color: colors[index % colors.length],
+      );
+    });
+    _confetti = List.generate(26, (index) {
+      return _ConfettiPiece(
+        x: random.nextDouble(),
+        fallSpeed: 0.65 + random.nextDouble() * 0.6,
+        size: 7 + random.nextDouble() * 7,
+        spin: (random.nextDouble() - 0.5) * 9,
         color: colors[index % colors.length],
       );
     });
@@ -131,6 +157,18 @@ class _StickerEarnedOverlayState extends State<StickerEarnedOverlay>
         child: Stack(
           children: [
             AnimatedBuilder(
+              animation: _controller,
+              builder: (context, child) {
+                return CustomPaint(
+                  size: size,
+                  painter: _ConfettiPainter(
+                    progress: _controller.value,
+                    pieces: _confetti,
+                  ),
+                );
+              },
+            ),
+            AnimatedBuilder(
               animation: sparkleProgress,
               builder: (context, child) {
                 return CustomPaint(
@@ -158,6 +196,43 @@ class _StickerEarnedOverlayState extends State<StickerEarnedOverlay>
       ),
     );
   }
+}
+
+class _ConfettiPainter extends CustomPainter {
+  final double progress;
+  final List<_ConfettiPiece> pieces;
+
+  _ConfettiPainter({required this.progress, required this.pieces});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (progress <= 0) return;
+    for (final piece in pieces) {
+      final y = (-0.08 + progress * 1.25 * piece.fallSpeed) * size.height;
+      if (y > size.height + 20) continue;
+      final x = piece.x * size.width +
+          18 * sin(progress * 6 * pi * piece.fallSpeed + piece.x * 10);
+      canvas.save();
+      canvas.translate(x, y);
+      canvas.rotate(piece.spin * progress * pi);
+      final paint = Paint()
+        ..color = piece.color.withValues(
+            alpha: (1.4 - progress).clamp(0.0, 1.0) * 0.9);
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromCenter(
+              center: Offset.zero, width: piece.size, height: piece.size * 0.6),
+          const Radius.circular(2),
+        ),
+        paint,
+      );
+      canvas.restore();
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _ConfettiPainter old) =>
+      old.progress != progress;
 }
 
 class _SparklePainter extends CustomPainter {

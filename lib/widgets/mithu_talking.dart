@@ -1,19 +1,26 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-/// A talking Mithu avatar.
+/// Mithu as a paper puppet with three states, driven by real frame art
+/// (all generated on-model from the ADR-008 canon):
 ///
-/// Mithu always has a slow, gentle idle bob + occasional small wing-tilt.
-/// While [isPlaying] is true, the beak alternates between open and closed
-/// frames at ~120 ms on top of the idle motion.
+/// - **idle**: beak-closed rest frame, gentle breathing bob, and every
+///   few seconds a quick wing flutter (rest → wings-spread → rest).
+/// - **talking** (`isPlaying`): the beak genuinely opens and closes
+///   (rest ↔ open-beak frames) with a lively bob.
+/// - **dancing** (`voicePath` is a praise/sticker line): leans side to
+///   side with a hop — Mithu celebrates WITH the child.
 class MithuTalking extends StatefulWidget {
   final bool isPlaying;
+  final String? voicePath;
   final double size;
 
   const MithuTalking({
     super.key,
     required this.isPlaying,
+    this.voicePath,
     this.size = 120,
   });
 
@@ -23,41 +30,87 @@ class MithuTalking extends StatefulWidget {
 
 class _MithuTalkingState extends State<MithuTalking>
     with TickerProviderStateMixin {
-  late final AnimationController _idleController;
-  late final AnimationController _talkController;
+  static const _rest = 'assets/art/characters/mithu_rest.png';
+  static const _open = 'assets/art/characters/mithu_hero_talk.png';
+  static const _spread = 'assets/art/characters/mithu_hero.png';
+  static const _leanL = 'assets/art/characters/mithu_lean_left.png';
+  static const _leanR = 'assets/art/characters/mithu_lean_right.png';
+
+  late final AnimationController _idleController; // breathing + dance clock
+  Timer? _frameTimer;
+  Timer? _flutterTimer;
+  bool _beakOpen = false;
+  bool _flutterNow = false;
+
+  bool get _dancing {
+    final p = widget.voicePath ?? '';
+    return p.contains('shabash') ||
+        p.contains('wah') ||
+        p.contains('badhiya') ||
+        p.contains('sticker');
+  }
 
   @override
   void initState() {
     super.initState();
     _idleController = AnimationController(
-      duration: const Duration(milliseconds: 3400),
+      duration: const Duration(milliseconds: 2800),
       vsync: this,
     )..repeat();
-
-    _talkController = AnimationController(
-      duration: const Duration(milliseconds: 240),
-      vsync: this,
-    );
-
-    if (widget.isPlaying) _talkController.repeat();
+    _syncFrameTimer();
+    _scheduleFlutter();
   }
 
   @override
-  void didUpdateWidget(covariant MithuTalking oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.isPlaying && !oldWidget.isPlaying) {
-      _talkController.repeat();
-    } else if (!widget.isPlaying && oldWidget.isPlaying) {
-      _talkController.stop();
-      _talkController.value = 0.0;
+  void didUpdateWidget(covariant MithuTalking old) {
+    super.didUpdateWidget(old);
+    if (old.isPlaying != widget.isPlaying) _syncFrameTimer();
+  }
+
+  void _syncFrameTimer() {
+    _frameTimer?.cancel();
+    if (widget.isPlaying) {
+      _frameTimer = Timer.periodic(const Duration(milliseconds: 140), (_) {
+        if (mounted) setState(() => _beakOpen = !_beakOpen);
+      });
+    } else {
+      _beakOpen = false;
+      if (mounted) setState(() {});
     }
+  }
+
+  /// Every 3.5–7s of quiet idling, a quick wing flutter keeps him alive.
+  void _scheduleFlutter() {
+    _flutterTimer = Timer(
+      Duration(milliseconds: 3500 + Random().nextInt(3500)),
+      () async {
+        if (!mounted) return;
+        if (!widget.isPlaying && !_dancing) {
+          setState(() => _flutterNow = true);
+          await Future.delayed(const Duration(milliseconds: 450));
+          if (mounted) setState(() => _flutterNow = false);
+        }
+        if (mounted) _scheduleFlutter();
+      },
+    );
   }
 
   @override
   void dispose() {
     _idleController.dispose();
-    _talkController.dispose();
+    _frameTimer?.cancel();
+    _flutterTimer?.cancel();
     super.dispose();
+  }
+
+  String get _frame {
+    if (_dancing) {
+      final beat = (_idleController.value * 8).floor();
+      return beat.isEven ? _leanL : _leanR;
+    }
+    if (widget.isPlaying) return _beakOpen ? _open : _rest;
+    if (_flutterNow) return _spread;
+    return _rest;
   }
 
   @override
@@ -65,28 +118,39 @@ class _MithuTalkingState extends State<MithuTalking>
     return AnimatedBuilder(
       animation: _idleController,
       builder: (context, child) {
-        final bob = 5.0 * sin(_idleController.value * 2 * pi);
-        final tilt = 0.05 * sin(_idleController.value * 2 * pi + 1.2);
+        final t = _idleController.value * 2 * pi;
+        double dy;
+        double tiltAngle;
+        double scale = 1.0;
+        if (_dancing) {
+          // Hop on every beat, tilt with the lean.
+          final beat = _idleController.value * 8;
+          final frac = beat - beat.floor();
+          dy = -14.0 * (frac < 0.5 ? frac * 2 : (1 - frac) * 2);
+          tiltAngle = (beat.floor().isEven ? -1 : 1) * 0.06;
+          scale = 1.03;
+        } else if (widget.isPlaying) {
+          dy = 4.0 * sin(t * 3);
+          tiltAngle = 0.02 * sin(t * 2);
+        } else {
+          dy = 5.0 * sin(t);
+          tiltAngle = 0.015 * sin(t * 0.7);
+        }
         return Transform.translate(
-          offset: Offset(0, bob),
-          child: Transform.rotate(angle: tilt, child: child),
+          offset: Offset(0, dy),
+          child: Transform.rotate(
+            angle: tiltAngle,
+            child: Transform.scale(scale: scale, child: child),
+          ),
         );
       },
-      child: AnimatedBuilder(
-        animation: _talkController,
-        builder: (context, child) {
-          final isTalkFrame = widget.isPlaying && _talkController.value < 0.5;
-          return ClipOval(
-            child: Image.asset(
-              isTalkFrame
-                  ? 'assets/art/characters/mithu_hero_talk.png'
-                  : 'assets/art/characters/mithu_hero.png',
-              width: widget.size,
-              height: widget.size,
-              fit: BoxFit.cover,
-            ),
-          );
-        },
+      child: SizedBox(
+        width: widget.size,
+        height: widget.size,
+        // Same-composition on-model frames: a plain swap reads as motion.
+        child: ClipOval(
+          child: Image.asset(_frame, fit: BoxFit.cover, gaplessPlayback: true),
+        ),
       ),
     );
   }

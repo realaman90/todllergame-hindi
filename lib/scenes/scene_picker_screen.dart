@@ -18,7 +18,9 @@ class ScenePickerScreen extends StatelessWidget {
         automaticallyImplyLeading: false,
         leadingWidth: 72,
       ),
-      body: Center(
+      body: Stack(children: [
+        const Positioned.fill(child: GameBackdrop(color: AppColors.peacock)),
+        Center(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -57,6 +59,7 @@ class ScenePickerScreen extends StatelessWidget {
           ],
         ),
       ),
+      ]),
     );
   }
 }

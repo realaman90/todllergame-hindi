@@ -231,6 +231,7 @@ class _MithuBlock extends StatelessWidget {
             builder: (context, child) {
               return MithuTalking(
                 isPlaying: audio.isPlaying,
+                voicePath: audio.currentVoicePath,
                 size: 160,
               );
             },

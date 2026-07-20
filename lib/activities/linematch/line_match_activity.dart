@@ -264,6 +264,8 @@ class _LineMatchBodyState extends State<LineMatchBody>
                         (
                           _leftCenter(size, pair),
                           _rightCenter(size, _rightRowOf(pair)),
+                          // Newest line draws itself in with the glow.
+                          pair == _lastMatched ? _glowController.value : 1.0,
                         ),
                     ],
                     fading: [
@@ -341,12 +343,18 @@ class _LineMatchBodyState extends State<LineMatchBody>
           // Small bounded pop when just matched.
           final g = _glowController.value;
           scale = 1.0 + 0.18 * sin(g * pi);
+        } else {
+          // Pressed-on sticker: settled slightly smaller with a tilt.
+          scale = 0.94;
         }
-        return Transform.scale(
-          scale: scale,
-          child: Opacity(
-            opacity: matched && !glowing ? 0.85 : 1.0,
-            child: child,
+        return Transform.rotate(
+          angle: matched && !glowing ? 0.04 * (phase % 2 == 0 ? 1 : -1) : 0.0,
+          child: Transform.scale(
+            scale: scale,
+            child: Opacity(
+              opacity: matched && !glowing ? 0.92 : 1.0,
+              child: child,
+            ),
           ),
         );
       },
@@ -364,7 +372,7 @@ class _LineMatchBodyState extends State<LineMatchBody>
 }
 
 class _LockedLinesPainter extends CustomPainter {
-  final List<(Offset, Offset)> lines;
+  final List<(Offset, Offset, double)> lines;
   final List<(Offset, Offset, double)> fading;
   final Color color;
 
@@ -380,8 +388,14 @@ class _LockedLinesPainter extends CustomPainter {
       ..color = color
       ..strokeWidth = 9
       ..strokeCap = StrokeCap.round;
-    for (final (from, to) in lines) {
-      canvas.drawLine(from, to, paint);
+    for (final (from, to, progress) in lines) {
+      final p = progress.clamp(0.0, 1.0);
+      canvas.drawLine(from, Offset.lerp(from, to, p)!, paint);
+      if (p >= 1.0) {
+        // Little end-caps make locked lines feel like stitched yarn.
+        canvas.drawCircle(from, 7, paint);
+        canvas.drawCircle(to, 7, paint);
+      }
     }
     for (final (from, to, opacity) in fading) {
       canvas.drawLine(

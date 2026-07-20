@@ -128,6 +128,8 @@ class _CarouselScreenState extends State<CarouselScreen> {
     return Scaffold(
       backgroundColor: AppColors.paper,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: Text(activity.titleHi, style: AppTextStyles.sceneTitle),
         centerTitle: true,
         leading: ToddlerBackButton(
@@ -165,8 +167,10 @@ class _CarouselScreenState extends State<CarouselScreen> {
             onSkip: _onSkip,
           );
 
+          final themeColor = AppColors.forTheme(state.scene.theme);
           return Stack(
             children: [
+              Positioned.fill(child: GameBackdrop(color: themeColor)),
               activity.build(context, session),
               if (_earnedSlug != null)
                 _buildEarnedOverlay(state.scene, round.activityId),
