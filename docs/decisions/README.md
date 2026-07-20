@@ -25,6 +25,7 @@ as decisions are made; don't rewrite history (supersede instead). Format:
 | [007](ADR-007-multi-language-roadmap-language-scoped-assets.md) | Multi-language roadmap (hi→en/sv→fr/te/es); language-scoped asset paths; MVP stays Hindi-only | 2026-07-19 | Accepted |
 | [008](ADR-008-mithu-brand-mascot.md) | Mithu the parrot is the brand mascot; canonical design + on-model image-editing pipeline | 2026-07-19 | Accepted |
 | [009](ADR-009-lyria-3-music-backend.md) | Lyria 3 (Gemini API) as music backend for songs/instrumentals; ElevenLabs keeps SFX + placeholder VO | 2026-07-19 | Accepted |
+| [010](ADR-010-name-mithu-and-friends.md) | Product named "Mithu & Friends" (Hindi tagline: चलो घर घूमें!); per-language store-listing pattern | 2026-07-20 | Accepted |
 
 ### Adding a decision
 

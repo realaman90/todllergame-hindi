@@ -56,7 +56,7 @@ class _ChaloGharGhoomeAppState extends State<ChaloGharGhoomeApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Chalo Ghar Ghoome',
+      title: 'Mithu & Friends',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       initialRoute: '/',
