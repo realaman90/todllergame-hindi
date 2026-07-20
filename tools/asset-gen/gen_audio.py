@@ -592,6 +592,9 @@ def get_hindi_voice_id() -> str:
 # Placeholder TTS, dev-only per ADR-003 — real takes come from the founder
 # in a playful parrot-host register.
 MITHU_LINES = {
+    "mithu_intro_name": "नमस्ते! मेरा नाम मिठू है!",
+    "mithu_intro_play": "चलो, साथ में खेलें!",
+    "mithu_intro_choose": "एक दरवाज़ा चुनो!",
     "mithu_greeting": "नमस्ते! चलो घर घूमें!",
     "mithu_welcome_house": "यह है घर!",
     "mithu_welcome_farm": "यह है बगीचा!",
