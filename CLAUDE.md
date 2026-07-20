@@ -59,7 +59,13 @@ Which model/mode to use for what kind of work in this repo:
 - **Planning, architecture, ADRs, specs, reviews:** Claude **Fable 5 at
   xhigh reasoning effort**. Anything that locks a decision or shapes a
   spec goes through Fable.
-- **Code implementation + frontend work:** shell out to **Kimi K3 in
+- **Game-feel code (mini-games, animations, interactions, anything the
+  child directly touches):** implemented **directly by Fable** (founder
+  decision 2026-07-20 after Kimi rounds produced invisible-animation and
+  startup regressions), verified through the E2E test +
+  screen-recording + vision-model-verdict loop.
+- **Structural/mechanical implementation (new screens, persistence,
+  content plumbing, scaffolding):** shell out to **Kimi K3 in
   yolo (auto-approve) mode** via its CLI, driven from the specs written
   above. Invocation (kimi-code v0.27.0, installed at `~/.kimi-code/bin`):
   `kimi -p "<implementation brief>"` from the repo root. Prompt mode is

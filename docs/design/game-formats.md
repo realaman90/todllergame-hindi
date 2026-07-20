@@ -59,6 +59,9 @@ playlist over those modules.
 | 13 | आकार (Shapes) | NEW vocab: गोल, तिकोना, चौकोर… | tap/drag | **requires curriculum addition + recording** |
 | 14 | बड़ा-छोटा (Big & small) | NEW vocab: बड़ा, छोटा | tap | "कौन सा बड़ा है?" comparisons — **requires curriculum addition + recording** |
 
+| 15 | रेखा मिलाओ (Line matching) | any pairs: word-art↔art, animal↔sound, color↔object | **finger-drag line** | founder priority 2026-07-20: drag a line from an item on the left to its match on the right; the line draws under the finger, snaps + glows on a correct match, gently fades on a miss (no fail state); both items speak on connect. 3 pairs max on screen. |
+| 16 | पैटर्न पूरा करो (Pattern completion) | any | tap | simple AB/ABC sequences of art tiles (गाय-फूल-गाय-फूल-?) with 2 big answer choices; foundational pre-math skill |
+
 **Declined: crosswords** — requires reading/spelling, which
 interaction-patterns.md forbids for this age band ("everything by ear,
 no reading required"). Parked for a possible future 5+ mode.

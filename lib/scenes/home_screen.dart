@@ -26,10 +26,11 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   static bool _greetingPlayed = false;
   bool _introPlaying = false;
   late final AnimationController _pulseController;
+  late final AnimationController _breathingController;
 
   @override
   void initState() {
@@ -41,6 +42,10 @@ class _HomeScreenState extends State<HomeScreen>
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
+    _breathingController = AnimationController(
+      duration: const Duration(milliseconds: 3400),
+      vsync: this,
+    )..repeat();
     _startHomeAudio();
   }
 
@@ -86,6 +91,7 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   void dispose() {
     _pulseController.dispose();
+    _breathingController.dispose();
     widget.audio.removeListener(_onAudioChanged);
     widget.stickerService.removeListener(_onStickersChanged);
     widget.audio.stopAmbient();
@@ -96,14 +102,37 @@ class _HomeScreenState extends State<HomeScreen>
     if (mounted) setState(() {});
   }
 
-  Widget _buildPulsingCard(int index, Widget child) {
+  Widget _buildAnimatedCard(int index, Widget child) {
     return AnimatedBuilder(
-      animation: _pulseController,
+      animation: _breathingController,
       builder: (context, child) {
-        if (!_pulseController.isAnimating) return child!;
-        final t = (_pulseController.value + index * 0.25) % 1.0;
-        final scale = 1.0 + 0.05 * sin(t * 2 * pi);
-        return Transform.scale(scale: scale, child: child);
+        final breathPhase = _breathingController.value * 2 * pi + index * 1.3;
+        final breathScale = 1.0 + 0.02 * sin(breathPhase);
+        return Transform.scale(
+          scale: breathScale,
+          child: child,
+        );
+      },
+      child: AnimatedBuilder(
+        animation: _pulseController,
+        builder: (context, child) {
+          if (!_pulseController.isAnimating) return child!;
+          final t = (_pulseController.value + index * 0.25) % 1.0;
+          final pulseScale = 1.0 + 0.05 * sin(t * 2 * pi);
+          return Transform.scale(scale: pulseScale, child: child);
+        },
+        child: child,
+      ),
+    );
+  }
+
+  Widget _buildBreathingCard(int index, Widget child) {
+    return AnimatedBuilder(
+      animation: _breathingController,
+      builder: (context, child) {
+        final breathPhase = _breathingController.value * 2 * pi + index * 1.3;
+        final breathScale = 1.0 + 0.02 * sin(breathPhase);
+        return Transform.scale(scale: breathScale, child: child);
       },
       child: child,
     );
@@ -120,8 +149,11 @@ class _HomeScreenState extends State<HomeScreen>
           children: [
             _MithuBlock(audio: widget.audio),
             const SizedBox(height: 16),
-            _ActivityDoor(
-              onTap: () => Navigator.of(context).pushNamed('/play'),
+            _buildBreathingCard(
+              3,
+              _ActivityDoor(
+                onTap: () => Navigator.of(context).pushNamed('/play'),
+              ),
             ),
           ],
         ),
@@ -132,7 +164,7 @@ class _HomeScreenState extends State<HomeScreen>
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _buildPulsingCard(
+                _buildAnimatedCard(
                   0,
                   _DoorwayCard(
                     sceneId: 'house',
@@ -144,7 +176,7 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                 ),
                 const SizedBox(width: 14),
-                _buildPulsingCard(
+                _buildAnimatedCard(
                   1,
                   _DoorwayCard(
                     sceneId: 'farm',
@@ -156,7 +188,7 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                 ),
                 const SizedBox(width: 14),
-                _buildPulsingCard(
+                _buildAnimatedCard(
                   2,
                   _DoorwayCard(
                     sceneId: 'family',
@@ -196,87 +228,53 @@ class _HomeScreenState extends State<HomeScreen>
   }
 }
 
-class _MithuBlock extends StatefulWidget {
+class _MithuBlock extends StatelessWidget {
   final AudioService audio;
 
   const _MithuBlock({required this.audio});
 
   @override
-  State<_MithuBlock> createState() => _MithuBlockState();
-}
-
-class _MithuBlockState extends State<_MithuBlock>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 4000),
-      vsync: this,
-    )..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        final bob = 4.0 * sin(_controller.value * 2 * 3.14159);
-        final tilt = 0.04 * sin(_controller.value * 2 * 3.14159 + 1.0);
-        return Transform.translate(
-          offset: Offset(0, bob),
-          child: Transform.rotate(angle: tilt, child: child),
-        );
-      },
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 160,
-            height: 160,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.ink.withValues(alpha: 0.12),
-                  blurRadius: 16,
-                  offset: const Offset(0, 6),
-                ),
-              ],
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: ListenableBuilder(
-              listenable: widget.audio,
-              builder: (context, child) {
-                return MithuTalking(
-                  isPlaying: widget.audio.isPlaying,
-                  size: 160,
-                );
-              },
-            ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 160,
+          height: 160,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.ink.withValues(alpha: 0.12),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
-          Text(
-            'चलो घर घूमें',
-            style: AppTextStyles.homeTitle.copyWith(color: AppColors.peacock),
+          clipBehavior: Clip.antiAlias,
+          child: ListenableBuilder(
+            listenable: audio,
+            builder: (context, child) {
+              return MithuTalking(
+                isPlaying: audio.isPlaying,
+                size: 160,
+              );
+            },
           ),
-          const SizedBox(height: 2),
-          Text(
-            'Chalo Ghar Ghoome',
-            style: AppTextStyles.wordCardTranslit
-                .copyWith(color: AppColors.ink.withValues(alpha: 0.7)),
-          ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'चलो घर घूमें',
+          style: AppTextStyles.homeTitle.copyWith(color: AppColors.peacock),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          'Chalo Ghar Ghoome',
+          style: AppTextStyles.wordCardTranslit
+              .copyWith(color: AppColors.ink.withValues(alpha: 0.7)),
+        ),
+      ],
     );
   }
 }

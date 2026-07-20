@@ -60,12 +60,15 @@ class AudioService extends ChangeNotifier {
 
   /// Play a Mithu host line by base name (e.g. `mithu_greeting`).
   Future<void> playHost(String name) async {
-    await _playVoice('assets/audio/hi/$name.mp3');
+    final path = 'assets/audio/hi/$name.mp3';
+    if (kDebugMode) debugPrint('AudioService.playHost: $path');
+    await _playVoice(path);
   }
 
   /// Play a sequence of Mithu host lines back-to-back on the voice lane.
   Future<void> playHostSequence(List<String> names) async {
     final paths = names.map((name) => 'assets/audio/hi/$name.mp3').toList();
+    if (kDebugMode) debugPrint('AudioService.playHostSequence: $paths');
     await _playVoiceSequence(paths);
   }
 
@@ -101,6 +104,12 @@ class AudioService extends ChangeNotifier {
   }
 
   Future<void> _startVoiceOperation(List<String> paths, {String? thenSfx}) async {
+    if (kDebugMode) {
+      debugPrint(
+        'AudioService._startVoiceOperation: ${paths.length} clip(s), first=${paths.firstOrNull}',
+      );
+    }
+
     // Finish any awaiter on the previous voice operation.
     if (_voiceCompleter != null && !_voiceCompleter!.isCompleted) {
       _voiceCompleter!.complete();
@@ -161,6 +170,7 @@ class AudioService extends ChangeNotifier {
   }
 
   Future<void> _playClip(String path) async {
+    if (kDebugMode) debugPrint('AudioService._playClip: $path');
     final player = _ensureVoice;
     _currentVoicePath = path;
     await player.stop();
