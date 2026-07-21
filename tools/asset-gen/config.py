@@ -322,4 +322,38 @@ SFX = {
         "description": "A soft celebration burst — gentle confetti/sparkle, not overwhelming",
         "duration_seconds": 3,
     },
+    # Game-feel palette (2026-07-21, game-feel.md F12/F13/F16): organic
+    # timbres — marimba/kalimba/wood/bell, warm low-mids, no bass hits.
+    "note_tap": {
+        "description": "One single short kalimba pluck, a clean warm single note, dry, no reverb tail, no melody — just one note",
+        "duration_seconds": 1,
+    },
+    "tap_wood": {
+        "description": "A single soft woodblock tap, warm and organic, like tapping a small wooden toy",
+        "duration_seconds": 1,
+    },
+    "tap_soft": {
+        "description": "A tiny soft felt-mallet tap on a marimba bar, muted and gentle",
+        "duration_seconds": 1,
+    },
+    "boop_curious": {
+        "description": "A curious friendly little boop, rounded sine-like blip bending slightly upward, consonant and warm — a 'hmm try again' feeling, absolutely not a buzzer",
+        "duration_seconds": 1,
+    },
+    "ding_sticker": {
+        "description": "One tiny bright glockenspiel ding, a single cheerful note with a short sparkle",
+        "duration_seconds": 1,
+    },
+    "stinger_win_1": {
+        "description": "A tiny victory stinger: three quick ascending marimba notes ending on a warm bell, playful and warm, toy-like",
+        "duration_seconds": 2,
+    },
+    "stinger_win_2": {
+        "description": "A tiny victory stinger: quick kalimba flourish rising up with a soft shaker, gentle and joyful",
+        "duration_seconds": 2,
+    },
+    "stinger_win_3": {
+        "description": "A tiny victory stinger: little ukulele strum up-stroke plus one glockenspiel sparkle note, cozy and happy",
+        "duration_seconds": 2,
+    },
 }

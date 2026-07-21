@@ -92,6 +92,7 @@ class _OddOneBodyState extends State<OddOneBody> with TickerProviderStateMixin {
         if (mounted) setState(() => _wobbling = null);
       });
       // Warm and informative: name what they touched, then invite retry.
+      widget.session.audio.playSfx('boop_curious');
       widget.session.audio
           .playWord(widget.session.scene.id, _common.slug, language: 'hi');
     }

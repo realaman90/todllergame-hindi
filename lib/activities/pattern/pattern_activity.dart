@@ -116,6 +116,7 @@ class _PatternBodyState extends State<PatternBody>
       _wobble.forward(from: 0.0).whenCompleteOrCancel(() {
         if (mounted) setState(() => _wobbling = null);
       });
+      widget.session.audio.playSfx('boop_curious');
       widget.session.audio.playHost('mithu_phir_se');
     }
   }

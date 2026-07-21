@@ -107,7 +107,14 @@ class _CarouselScreenState extends State<CarouselScreen> {
     final round = _playlist[_index];
     final slug = 'activity:${round.activityId}:${round.sceneId}';
     widget.stickerService.discover(slug);
-    await widget.audio.playPraise();
+    // Restate the round's focal word inside the celebration (F14).
+    final state = await _roundFuture;
+    final word = state.vocab.firstOrNull;
+    await widget.audio.playPraise(
+      sceneId: word == null ? null : round.sceneId,
+      slug: word?.slug,
+      language: word == null ? null : 'hi',
+    );
     if (mounted) setState(() => _earnedSlug = slug);
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../content/content.dart';
+import '../juice/juice.dart';
 import '../theme/theme.dart';
 import '../widgets/widgets.dart';
 import 'sticker_service.dart';
@@ -98,11 +99,18 @@ class _StickerWallScreenState extends State<StickerWallScreen> {
                     final themeColor = AppColors.forTheme(scene.theme);
                     final deepColor = AppColors.deepFor(scene.theme);
                     return Center(
-                      child: ActivityStickerTile(
+                      child: PopIn(
+                        delayMs: 40 * (index % 12),
+                        child: IdleBreath(
+                          phase: index * 1.1,
+                          amplitude: 0.03,
+                          child: ActivityStickerTile(
                         activityId: parts[1],
                         color: themeColor,
                         deepColor: deepColor,
-                        size: 72,
+                            size: 72,
+                          ),
+                        ),
                       ),
                     );
                   }
@@ -122,12 +130,19 @@ class _StickerWallScreenState extends State<StickerWallScreen> {
               final themeColor = AppColors.forTheme(theme);
               final deepColor = AppColors.deepFor(theme);
               return Center(
-                child: StickerTile(
-                  imagePath: 'assets/art/${object.art}',
-                  wordHi: object.wordHi,
-                  color: themeColor,
-                  deepColor: deepColor,
-                  size: 72,
+                child: PopIn(
+                  delayMs: 40 * (index % 12),
+                  child: IdleBreath(
+                    phase: index * 1.1,
+                    amplitude: 0.03,
+                    child: StickerTile(
+                      imagePath: 'assets/art/${object.art}',
+                      wordHi: object.wordHi,
+                      color: themeColor,
+                      deepColor: deepColor,
+                      size: 72,
+                    ),
+                  ),
                 ),
               );
             },

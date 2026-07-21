@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../content/content.dart';
 import '../../theme/theme.dart';
 import '../../widgets/widgets.dart';
+import '../../juice/juice.dart';
 import '../activity.dart';
 
 /// रेखा मिलाओ — draw a line from a picture to its match.
@@ -60,6 +61,8 @@ class _LineMatchBodyState extends State<LineMatchBody>
   int? _dragPair; // pair index being dragged from the left column
   final ValueNotifier<Offset?> _fingerPoint = ValueNotifier(null);
   final List<_FadingLine> _fadingLines = [];
+  int _burstTrigger = 0;
+  Offset _burstAt = Offset.zero;
 
   late final AnimationController _idleController;
   late final AnimationController _glowController;
@@ -191,6 +194,11 @@ class _LineMatchBodyState extends State<LineMatchBody>
         _dragPair = null;
       });
       _glowController.forward(from: 0.0);
+      widget.session.audio.playSfx('ding_sticker');
+      setState(() {
+        _burstTrigger++;
+        _burstAt = _rightCenter(size, pair);
+      });
       widget.session.audio.playWord(
         widget.session.scene.id,
         _pairs[pair].slug,
@@ -206,6 +214,7 @@ class _LineMatchBodyState extends State<LineMatchBody>
       // tile, Mithu explains warmly — "यह [that word] नहीं है!" (founder
       // request 2026-07-20: informative correction, never a buzzer).
       if (target != null) {
+        widget.session.audio.playSfx('boop_curious');
         widget.session.audio.playWrongMatch(
           widget.session.scene.id,
           _pairs[target].slug,
@@ -252,6 +261,8 @@ class _LineMatchBodyState extends State<LineMatchBody>
           behavior: HitTestBehavior.opaque,
           child: Stack(
             children: [
+              // Micro-celebration burst on each correct connect (F18).
+              ParticleBurst(trigger: _burstTrigger, at: _burstAt),
               // Locked + fading lines live UNDER the tiles.
               AnimatedBuilder(
                 animation: Listenable.merge(

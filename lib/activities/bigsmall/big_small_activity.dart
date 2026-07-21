@@ -94,6 +94,7 @@ class _BigSmallBodyState extends State<BigSmallBody>
         if (mounted) setState(() => _wobblingWrong = false);
       });
       // Name what they DID touch — informative, not punitive.
+      widget.session.audio.playSfx('boop_curious');
       widget.session.audio.playHost(tappedBig ? 'mithu_bada' : 'mithu_chota');
     }
   }

@@ -59,7 +59,11 @@ class _PuzzleOverlayState extends State<PuzzleOverlay> {
   }
 
   Future<void> _handleSolved(SceneObject object, Rect sourceRect) async {
-    await widget.audio.playPraise();
+    await widget.audio.playPraise(
+      sceneId: widget.scene.id,
+      slug: object.slug,
+      language: widget.language,
+    );
     if (mounted) widget.onSolved(object.slug, sourceRect);
   }
 

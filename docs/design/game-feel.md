@@ -4,7 +4,7 @@ title: Game feel — research foundation & feel rules
 description: Research synthesis (canon + toddler studies + best-in-class studios + Flutter techniques) distilled into numbered feel rules with parameters, an audit of the current build, and the recommended build order. Feeds a build spec in specs/tbd/.
 tags: [design, game-feel, juice, audio, animation, research]
 timestamp: 2026-07-21
-status: research complete — build spec not yet cut
+status: P0 + core P1/P2 implemented directly (founder go-ahead 2026-07-21); P3 + remaining P1 hygiene open
 ---
 
 # Game Feel — Research Foundation
@@ -270,6 +270,22 @@ ducking ramps; carousel round transitions.
   (corner witness: gasp/cheer); idle-nudge system (6–8s); 3-level warm
   redirection; scene pulse on wins; polish-backlog transition items
   (doorway-rect scene entry, word-overlay flight, sticker arc).
+
+## Implementation status (2026-07-21)
+
+Shipped same-day on founder go-ahead: **P0 complete** (ADR-011 SoLoud
+migration, `lib/juice/TapBounce` touch-down registration app-wide,
+haptics, dead zones killed). **P1 partial:** `IdleBreath` +
+`ParticleBurst` shared widgets; pairs/puzzle-solve/sticker-wall got
+idle life + entrances. **P2 core:** ElevenLabs feel palette generated
+(note_tap kalimba ladder sample, boop_curious, ding_sticker, 3 win
+stingers, tap_wood/tap_soft spare timbres); pentatonic ladder live on
+all taps; boop on every wrong path; ding + burst on line-match connects
+and pairs matches; praise restates the word (carousel + find-it);
+sticker pill bounces on landing. **Open:** wobble/squash dedup into
+lib/juice (pattern/oddone/bigsmall still inline), sticker flight from
+real source rects in carousel games, per-family tap timbres wiring,
+and all of P3.
 
 Verification stays the founder-decided loop: E2E + screen recording +
 vision-model verdict per change (feel regressions are invisible in

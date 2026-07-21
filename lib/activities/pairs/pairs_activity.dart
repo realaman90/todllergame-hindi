@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../content/content.dart';
 import '../../theme/theme.dart';
 import '../../widgets/widgets.dart';
+import '../../juice/juice.dart';
 import '../activity.dart';
 
 /// जोड़ी मिलाओ (Pairs): 6 face-up cards forming 3 matching pairs.
@@ -60,7 +61,7 @@ class _PairsGameState extends State<_PairsGame>
     final card = _cards[index];
     if (card.matched) return;
 
-    widget.session.audio.playSfx('tap_pop');
+    widget.session.audio.playTapNote();
     widget.session.audio.playWord(
       widget.session.scene.id,
       card.object.slug,
@@ -81,6 +82,7 @@ class _PairsGameState extends State<_PairsGame>
         _cards[index].matched = true;
         _selectedIndex = null;
       });
+      widget.session.audio.playSfx('ding_sticker');
       widget.session.audio.playWord(
         widget.session.scene.id,
         card.object.slug,
@@ -127,12 +129,19 @@ class _PairsGameState extends State<_PairsGame>
               children: List.generate(_cards.length, (index) {
                 final card = _cards[index];
                 final isSelected = _selectedIndex == index && !card.matched;
-                return _PairCard(
-                  card: card,
-                  isSelected: isSelected,
-                  themeColor: themeColor,
-                  deepColor: deepColor,
-                  onTap: () => _handleTap(index),
+                return PopIn(
+                  delayMs: 80 * index,
+                  child: IdleBreath(
+                    phase: index * 1.3,
+                    amplitude: 0.04,
+                    child: _PairCard(
+                      card: card,
+                      isSelected: isSelected,
+                      themeColor: themeColor,
+                      deepColor: deepColor,
+                      onTap: () => _handleTap(index),
+                    ),
+                  ),
                 );
               }),
             ),

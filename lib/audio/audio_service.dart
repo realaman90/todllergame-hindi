@@ -19,7 +19,14 @@ class AudioService extends ChangeNotifier {
   static const _duckedVolume = 0.12;
   static const _ambientVolume = 0.45;
 
-  static const _preloadedSfx = ['tap_pop', 'celebration', 'sticker_earned'];
+  static const _preloadedSfx = [
+    'tap_pop',
+    'note_tap',
+    'boop_curious',
+    'ding_sticker',
+    'celebration',
+    'sticker_earned',
+  ];
 
   // F12: successive taps climb a pentatonic ladder (major pentatonic
   // degrees in semitones) — there is no wrong note, so rapid tapping
@@ -144,13 +151,31 @@ class AudioService extends ChangeNotifier {
     ]);
   }
 
-  /// Play a random praise line, then the celebration SFX.
-  Future<void> playPraise() async {
+  /// Play a random praise line, then a random win stinger.
+  ///
+  /// Pass [sceneId]/[slug]/[language] to restate the word the child just
+  /// learned right inside the celebration ("शाबाश! ... आम!") — juice
+  /// amplifies the curriculum, not generic success (feel rule F14).
+  Future<void> playPraise({
+    String? sceneId,
+    String? slug,
+    String? language,
+  }) async {
     const praises = ['shabash', 'wah', 'badhiya'];
+    const stingers = [
+      'celebration',
+      'stinger_win_1',
+      'stinger_win_2',
+      'stinger_win_3',
+    ];
     final pick = praises[Random().nextInt(praises.length)];
     await _startVoiceOperation(
-      ['assets/audio/hi/mithu_$pick.mp3'],
-      thenSfx: 'celebration',
+      [
+        'assets/audio/hi/mithu_$pick.mp3',
+        if (sceneId != null && slug != null && language != null)
+          'assets/audio/$language/${sceneId}_$slug.mp3',
+      ],
+      thenSfx: stingers[Random().nextInt(stingers.length)],
     );
   }
 
@@ -312,7 +337,7 @@ class AudioService extends ChangeNotifier {
   Future<void> playTapNote() {
     final semitones = _pentatonic[_ladderStep % _pentatonic.length];
     _ladderStep++;
-    return playSfx('tap_pop', rate: pow(2.0, semitones / 12.0).toDouble());
+    return playSfx('note_tap', rate: pow(2.0, semitones / 12.0).toDouble());
   }
 
   void resetTapLadder() => _ladderStep = 0;
