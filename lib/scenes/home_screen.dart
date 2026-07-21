@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import '../audio/audio.dart';
+import '../settings/settings.dart';
 import '../stickers/stickers.dart';
 import '../theme/theme.dart';
 import '../widgets/widgets.dart';
@@ -187,14 +188,23 @@ class _HomeScreenState extends State<HomeScreen>
     return Scaffold(
       backgroundColor: AppColors.paper,
       body: SafeArea(
-        child: Center(
-          child: _introPlaying
-              ? GestureDetector(
-                  onTap: _skipIntro,
-                  behavior: HitTestBehavior.opaque,
-                  child: AbsorbPointer(child: content),
-                )
-              : content,
+        child: Stack(
+          children: [
+            Center(
+              child: _introPlaying
+                  ? GestureDetector(
+                      onTap: _skipIntro,
+                      behavior: HitTestBehavior.opaque,
+                      child: AbsorbPointer(child: content),
+                    )
+                  : content,
+            ),
+            Positioned(
+              top: 4,
+              right: 4,
+              child: _SettingsButton(),
+            ),
+          ],
         ),
       ),
     );
@@ -253,6 +263,27 @@ class _MithuBlock extends StatelessWidget {
   }
 }
 
+
+class _SettingsButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: Icon(
+        Icons.settings,
+        color: AppColors.ink.withValues(alpha: 0.22),
+        size: 20,
+      ),
+      splashRadius: 18,
+      tooltip: 'Grown-up settings',
+      onPressed: () async {
+        final passed = await showParentGate(context);
+        if (passed && context.mounted) {
+          await Navigator.of(context).pushNamed('/settings');
+        }
+      },
+    );
+  }
+}
 
 class _StickerWallEntry extends StatelessWidget {
   final int count;

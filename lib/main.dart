@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'activities/activities.dart';
 import 'audio/audio.dart';
 import 'scenes/scenes.dart';
+import 'settings/settings.dart';
 import 'stickers/stickers.dart';
 import 'theme/theme.dart';
 import 'widgets/widgets.dart';
@@ -26,6 +27,7 @@ class ChaloGharGhoomeApp extends StatefulWidget {
 class _ChaloGharGhoomeAppState extends State<ChaloGharGhoomeApp> {
   final AudioService _audio = AudioService();
   final StickerService _stickers = StickerService();
+  final SettingsService _settings = SettingsService();
 
   @override
   void initState() {
@@ -33,12 +35,18 @@ class _ChaloGharGhoomeAppState extends State<ChaloGharGhoomeApp> {
     // Boot the audio engine + preload SFX before the child's first tap.
     _audio.init();
     _stickers.load();
+    _settings.load().then((_) {
+      if (mounted) {
+        _audio.musicVolume = _settings.musicVolume;
+      }
+    });
   }
 
   @override
   void dispose() {
     _audio.dispose();
     _stickers.dispose();
+    _settings.dispose();
     super.dispose();
   }
 
@@ -91,6 +99,15 @@ class _ChaloGharGhoomeAppState extends State<ChaloGharGhoomeApp> {
           return FadeScaleRoute(
             settings: settings,
             child: StickerWallScreen(stickerService: _stickers),
+          );
+        }
+        if (name == '/settings') {
+          return MaterialPageRoute(
+            settings: settings,
+            builder: (_) => SettingsScreen(
+              audio: _audio,
+              settingsService: _settings,
+            ),
           );
         }
         return null;
