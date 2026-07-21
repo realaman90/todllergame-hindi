@@ -60,13 +60,18 @@ class _CarouselScreenState extends State<CarouselScreen> {
             activityId: formats[(i + round) % formats.length],
           ),
     ];
-    // Weave a balloon-popping breather after every 2nd game — a short
-    // satisfying palate-cleanser with no goal beyond joyful popping.
+    // Breathers after every 3rd game, ALTERNATING types (founder
+    // cadence): counting balloons, then soap bubbles, then balloons…
     final woven = <_Round>[];
+    var breatherIndex = 0;
     for (var i = 0; i < rounds.length; i++) {
       woven.add(rounds[i]);
-      if (i.isOdd) {
-        woven.add(_Round(sceneId: rounds[i].sceneId, activityId: 'balloons'));
+      if ((i + 1) % 3 == 0) {
+        woven.add(_Round(
+          sceneId: rounds[i].sceneId,
+          activityId: breatherIndex.isEven ? 'balloons' : 'bubbles',
+        ));
+        breatherIndex++;
       }
     }
     return woven;

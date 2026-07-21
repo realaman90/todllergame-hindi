@@ -5,11 +5,12 @@ import 'package:flutter/material.dart';
 import '../../theme/theme.dart';
 import '../activity.dart';
 
-/// गुब्बारे — a satisfying balloon-popping breather between games.
+/// गुब्बारे — counting balloons (founder upgrade 2026-07-21).
 ///
-/// No goal, no instruction, no fail: balloons drift up, tapping one pops
-/// it with a burst and a pop sound. After enough pops the carousel moves
-/// on by itself. Pure joy as a palate cleanser.
+/// Five balloons drift up, each carrying a numeral 1-5. Mithu asks for a
+/// number ("तीन!"); popping the right one counts it aloud. Popping any
+/// other balloon still pops satisfyingly (joy is never punished) — Mithu
+/// just asks again. Three correct answers and the carousel moves on.
 class BalloonsActivity extends Activity {
   const BalloonsActivity();
 
@@ -27,13 +28,14 @@ class BalloonsActivity extends Activity {
 
 class _Balloon {
   final int id;
+  final int number; // 1..5 numeral shown on the body
   double x; // 0..1
   double phase;
   double speed;
   final Color color;
   bool popped = false;
 
-  _Balloon(this.id, this.x, this.phase, this.speed, this.color);
+  _Balloon(this.id, this.number, this.x, this.phase, this.speed, this.color);
 }
 
 class BalloonsBody extends StatefulWidget {
@@ -47,7 +49,8 @@ class BalloonsBody extends StatefulWidget {
 
 class _BalloonsBodyState extends State<BalloonsBody>
     with SingleTickerProviderStateMixin {
-  static const _popsToFinish = 6;
+  static const _asksToFinish = 3;
+  static const _numberWords = ['ek', 'do', 'teen', 'chaar', 'paanch'];
   static const _colors = [
     AppColors.marigold,
     AppColors.peacock,
@@ -60,8 +63,9 @@ class _BalloonsBodyState extends State<BalloonsBody>
   final _rng = Random();
   final List<_Balloon> _balloons = [];
   final List<(Offset, Color, AnimationController)> _bursts = [];
-  int _pops = 0;
   int _nextId = 0;
+  int _ask = 0; // number Mithu currently wants (1..5)
+  int _asksDone = 0;
   bool _finishing = false;
 
   @override
@@ -72,19 +76,31 @@ class _BalloonsBodyState extends State<BalloonsBody>
       vsync: this,
     )..addListener(_tick)
       ..repeat();
-    for (var i = 0; i < 5; i++) {
-      _spawn(initial: true);
+    for (var n = 1; n <= 5; n++) {
+      _spawn(n, initial: true);
     }
+    _nextAsk();
   }
 
-  void _spawn({bool initial = false}) {
+  void _spawn(int number, {bool initial = false}) {
     _balloons.add(_Balloon(
       _nextId++,
+      number,
       0.12 + _rng.nextDouble() * 0.76,
-      initial ? _rng.nextDouble() : 0.0,
-      0.55 + _rng.nextDouble() * 0.6,
-      _colors[_nextId % _colors.length],
+      initial ? _rng.nextDouble() * 0.6 : 0.0,
+      0.35 + _rng.nextDouble() * 0.35,
+      _colors[number % _colors.length],
     ));
+  }
+
+  void _nextAsk() {
+    var next = 1 + _rng.nextInt(5);
+    while (next == _ask) {
+      next = 1 + _rng.nextInt(5);
+    }
+    _ask = next;
+    widget.session.audio
+        .playWord('family', _numberWords[_ask - 1], language: 'hi');
   }
 
   void _tick() {
@@ -93,23 +109,23 @@ class _BalloonsBodyState extends State<BalloonsBody>
       for (final b in _balloons) {
         b.phase += b.speed / (60 * 12); // rise per frame at 12s clock
       }
-      _balloons.removeWhere((b) {
-        if (b.phase > 1.15 && !b.popped) {
-          // Floated away: it just comes back as a new balloon.
-          return true;
-        }
-        return b.popped;
-      });
-      while (_balloons.length < 5 && !_finishing) {
-        _spawn();
+      final escaped = _balloons
+          .where((b) => b.phase > 1.15 && !b.popped)
+          .map((b) => b.number)
+          .toList();
+      _balloons.removeWhere((b) => b.phase > 1.15 || b.popped);
+      // Every numeral is always in the air: escaped/popped ones respawn.
+      final present = _balloons.map((b) => b.number).toSet();
+      for (var n = 1; n <= 5; n++) {
+        if (!present.contains(n) && !_finishing) _spawn(n);
       }
+      escaped.clear();
     });
   }
 
   void _pop(_Balloon b, Size size) {
     if (b.popped || _finishing) return;
     b.popped = true;
-    _pops++;
     widget.session.audio.playSfx('tap_pop');
 
     final at = Offset(
@@ -126,11 +142,29 @@ class _BalloonsBodyState extends State<BalloonsBody>
       }
     });
 
-    if (_pops >= _popsToFinish && !_finishing) {
-      _finishing = true;
-      Future.delayed(const Duration(milliseconds: 700), () {
-        // A breather earns no sticker fuss — just gently move on.
-        if (mounted) widget.session.onSkip();
+    if (b.number == _ask) {
+      _asksDone++;
+      // Count it aloud — the number IS the reward.
+      widget.session.audio
+          .playWord('family', _numberWords[b.number - 1], language: 'hi');
+      if (_asksDone >= _asksToFinish) {
+        _finishing = true;
+        Future.delayed(const Duration(milliseconds: 900), () async {
+          await widget.session.audio.playPraise();
+          if (mounted) widget.session.onSkip();
+        });
+      } else {
+        Future.delayed(const Duration(milliseconds: 1100), () {
+          if (mounted && !_finishing) _nextAsk();
+        });
+      }
+    } else {
+      // Wrong balloon still pops joyfully; Mithu simply asks again.
+      Future.delayed(const Duration(milliseconds: 900), () {
+        if (mounted && !_finishing) {
+          widget.session.audio
+              .playWord('family', _numberWords[_ask - 1], language: 'hi');
+        }
       });
     }
   }
@@ -161,6 +195,7 @@ class _BalloonsBodyState extends State<BalloonsBody>
                 painter: _BalloonPainter(
                   color: b.color,
                   sway: sin(b.phase * 14 + b.id),
+                  number: b.number,
                 ),
               ),
             ),
@@ -187,8 +222,13 @@ class _BalloonsBodyState extends State<BalloonsBody>
 class _BalloonPainter extends CustomPainter {
   final Color color;
   final double sway;
+  final int number;
 
-  _BalloonPainter({required this.color, required this.sway});
+  _BalloonPainter({
+    required this.color,
+    required this.sway,
+    required this.number,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -213,11 +253,24 @@ class _BalloonPainter extends CustomPainter {
       Rect.fromCenter(center: Offset(cx - 16, 26), width: 20, height: 30),
       Paint()..color = Colors.white.withValues(alpha: 0.35),
     );
+    // The numeral, big and friendly.
+    final tp = TextPainter(
+      text: TextSpan(
+        text: '$number',
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 34,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    tp.paint(canvas, Offset(cx - tp.width / 2, 44 - tp.height / 2));
   }
 
   @override
   bool shouldRepaint(covariant _BalloonPainter old) =>
-      old.sway != sway || old.color != color;
+      old.sway != sway || old.color != color || old.number != number;
 }
 
 class _BurstPainter extends CustomPainter {
