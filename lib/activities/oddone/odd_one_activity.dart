@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../content/content.dart';
 import '../../theme/theme.dart';
 import '../../widgets/widgets.dart';
+import '../../juice/juice.dart';
 import '../activity.dart';
 
 /// अलग कौन? — three of one thing and one different; tap the odd one out.
@@ -75,6 +76,7 @@ class _OddOneBodyState extends State<OddOneBody> with TickerProviderStateMixin {
   }
 
   void _onTap(int i) {
+    widget.session.audio.playTapNote();
     if (_solved) return;
     if (i == _oddIndex) {
       setState(() => _solved = true);
@@ -140,9 +142,8 @@ class _OddOneBodyState extends State<OddOneBody> with TickerProviderStateMixin {
       },
       child: tile,
     );
-    return GestureDetector(
-      onTap: () => _onTap(i),
-      behavior: HitTestBehavior.opaque,
+    return TapBounce(
+      onDown: () => _onTap(i),
       child: tile,
     );
   }

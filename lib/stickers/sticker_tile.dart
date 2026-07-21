@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../juice/juice.dart';
 import '../widgets/widgets.dart';
 
 /// A sticker tile: art clipped to a rounded-rect paper sticker.
@@ -31,10 +32,8 @@ class StickerTile extends StatelessWidget {
       showLabel: false,
     );
 
-    if (onTap == null) return tile;
-    return GestureDetector(
+    return TapBounce(
       onTap: onTap,
-      behavior: HitTestBehavior.opaque,
       child: tile,
     );
   }

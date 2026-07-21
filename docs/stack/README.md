@@ -30,7 +30,7 @@ Additions or changes to anything below require a new ADR in
 
 | Technology | Purpose | Why |
 |---|---|---|
-| `just_audio` or `audioplayers` (Flutter plugin, to be finalized when scaffolding starts) | Playback of short word/voice clips | Mature, well-supported Flutter audio plugins for many short bundled clips |
+| `flutter_soloud` (only audio engine — SFX, voice, ambient) | Preloaded in-memory SFX (<100ms tap feedback), per-play pitch, polyphony, FFI play path | ADR-011 (2026-07-21); replaced `just_audio`, which couldn't meet feel rules F2/F12 |
 
 ## Storage
 

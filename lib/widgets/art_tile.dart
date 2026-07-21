@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../juice/juice.dart';
 import '../theme/theme.dart';
 
 /// A die-cut paper sticker: art inside a white sticker rim, layered soft
@@ -80,11 +81,8 @@ class ArtTile extends StatelessWidget {
     art = Transform.rotate(angle: tilt, child: art);
 
     if (onTap != null) {
-      art = GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: art,
-      );
+      // Reaction on touch-DOWN (feel rule F1) with the house bounce.
+      art = TapBounce(onDown: onTap, child: art);
     }
 
     if (!showLabel || wordHi == null) return art;

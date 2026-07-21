@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../content/content.dart';
 import '../../theme/theme.dart';
 import '../../widgets/widgets.dart';
+import '../../juice/juice.dart';
 import '../activity.dart';
 
 /// बड़ा-छोटा — the same object twice, one big and one small; Mithu asks
@@ -78,6 +79,7 @@ class _BigSmallBodyState extends State<BigSmallBody>
   }
 
   void _onTap({required bool tappedBig}) {
+    widget.session.audio.playTapNote();
     if (_solved) return;
     if (tappedBig == _askBig) {
       setState(() => _solved = true);
@@ -144,9 +146,8 @@ class _BigSmallBodyState extends State<BigSmallBody>
       },
       child: tile,
     );
-    return GestureDetector(
-      onTap: () => _onTap(tappedBig: isBig),
-      behavior: HitTestBehavior.opaque,
+    return TapBounce(
+      onDown: () => _onTap(tappedBig: isBig),
       child: tile,
     );
   }

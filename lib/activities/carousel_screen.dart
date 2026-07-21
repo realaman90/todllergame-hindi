@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import '../audio/audio.dart';
+import '../juice/juice.dart';
 import '../content/content.dart';
 import '../stickers/stickers.dart';
 import '../theme/theme.dart';
@@ -119,6 +120,8 @@ class _CarouselScreenState extends State<CarouselScreen> {
 
   void _advance() {
     _completing = false;
+    // Each round's taps restart the pentatonic ladder from the root.
+    widget.audio.resetTapLadder();
     if (_index < _playlist.length - 1) {
       setState(() {
         _index++;
@@ -256,12 +259,10 @@ class _SkipArrow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        final state = context.findAncestorStateOfType<_CarouselScreenState>();
-        state?._onSkip();
-      },
-      behavior: HitTestBehavior.opaque,
+    final state = context.findAncestorStateOfType<_CarouselScreenState>();
+    return TapBounce(
+      tapSound: state?.widget.audio,
+      onTap: () => state?._onSkip(),
       child: Container(
         width: 56,
         height: 56,

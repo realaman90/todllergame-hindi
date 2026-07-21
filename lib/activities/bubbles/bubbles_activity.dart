@@ -98,7 +98,7 @@ class _BubblesBodyState extends State<BubblesBody>
     if (b.popped || _finishing) return;
     b.popped = true;
     _pops++;
-    widget.session.audio.playSfx('tap_pop');
+    widget.session.audio.playTapNote();
 
     final at = Offset(
       b.x * size.width,
@@ -141,7 +141,7 @@ class _BubblesBodyState extends State<BubblesBody>
             left: b.x * size.width - b.size / 2,
             top: size.height * (1.08 - b.phase * 1.15) - b.size / 2,
             child: GestureDetector(
-              onTap: () => _pop(b, size),
+              onTapDown: (_) => _pop(b, size),
               behavior: HitTestBehavior.opaque,
               child: CustomPaint(
                 size: Size(b.size, b.size),

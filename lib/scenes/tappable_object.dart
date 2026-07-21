@@ -184,7 +184,7 @@ class _TappableObjectState extends State<TappableObject>
     );
 
     return GestureDetector(
-      onTap: _handleTap,
+      onTapDown: (_) => _handleTap(),
       behavior: HitTestBehavior.opaque,
       child: tile,
     );

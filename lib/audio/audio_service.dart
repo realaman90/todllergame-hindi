@@ -2,73 +2,89 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
-import 'package:just_audio/just_audio.dart';
+import 'package:flutter_soloud/flutter_soloud.dart';
 
-/// Three-lane audio service.
+/// Three-lane audio service on the SoLoud engine (ADR-011).
 ///
-/// - Voice lane: single player for word clips, puzzle prompts, and Mithu
-///   host lines. Starting a new voice operation stops the previous one.
-///   Multiple voice clips can be queued as one sequence (e.g. a puzzle
-///   prompt word followed by "kahaan hai?").
-/// - Ambient lane: looping music/ambient. Ducks to 30% while the voice
-///   lane is active and restores afterward.
-/// - SFX lane: one-shot sound effects.
+/// - Voice lane: word clips, puzzle prompts, and Mithu host lines. A new
+///   voice operation supersedes the previous one. Multiple clips can be
+///   queued as one sequence (e.g. a word followed by "kahaan hai?").
+/// - Ambient lane: looping music. Ducks while the voice lane is active.
+/// - SFX lane: one-shot effects, preloaded into memory at init so the
+///   first feedback lands inside the 100ms window (feel rule F2), with
+///   optional per-play rate for pitch variation (F12).
 class AudioService extends ChangeNotifier {
   // Founder feedback: bg music was overpowering the voice. Quieter by
   // default; full parent-facing sliders arrive with the settings screen.
   static const _duckedVolume = 0.12;
   static const _ambientVolume = 0.45;
 
-  AudioPlayer? _voicePlayer;
-  AudioPlayer? _ambientPlayer;
-  AudioPlayer? _sfxPlayer;
-  StreamSubscription<PlayerState>? _voiceSubscription;
+  static const _preloadedSfx = ['tap_pop', 'celebration', 'sticker_earned'];
+
+  // F12: successive taps climb a pentatonic ladder (major pentatonic
+  // degrees in semitones) — there is no wrong note, so rapid tapping
+  // turns into melody instead of a stuck sample.
+  static const _pentatonic = [0, 2, 4, 7, 9, 12];
+
+  final SoLoud _engine = SoLoud.instance;
+  Future<void>? _initFuture;
+  bool _engineReady = false;
+
+  final Map<String, AudioSource> _cache = {};
+
   int _voiceGeneration = 0;
-  final List<String> _voiceQueue = [];
-  Completer<void>? _voiceCompleter;
-  String? _pendingSfx;
+  SoundHandle? _voiceHandle;
   String? _currentVoicePath;
-  bool _wasPlaying = false;
-  bool _clipCompletionHandled = true;
+  bool _voiceActive = false;
+  String? _pendingSfx;
 
-  // Per-player operation queues: just_audio throws 'Loading interrupted'
-  // through internal futures when a new load supersedes one in flight —
-  // uncatchable at call sites and fatal to the test harness. Serializing
-  // each player's platform ops means an in-flight load always finishes
-  // (or fails cleanly) before the next begins.
-  Future<void> _voiceOps = Future.value();
-  Future<void> _sfxOps = Future.value();
-  Future<void> _ambientOps = Future.value();
+  SoundHandle? _ambientHandle;
+  double _ambientCurrent = 0.0;
+  int _rampGeneration = 0;
 
-  Future<void> _onVoiceOps(Future<void> Function() op) {
-    final run = _voiceOps.then((_) => op());
-    _voiceOps = run.then((_) {}, onError: (_) {});
-    return run;
-  }
+  int _ladderStep = 0;
 
-  Future<void> _onSfxOps(Future<void> Function() op) {
-    final run = _sfxOps.then((_) => op());
-    _sfxOps = run.then((_) {}, onError: (_) {});
-    return run;
-  }
-
-  Future<void> _onAmbientOps(Future<void> Function() op) {
-    final run = _ambientOps.then((_) => op());
-    _ambientOps = run.then((_) {}, onError: (_) {});
-    return run;
-  }
-
-  bool get isPlaying => _voicePlayer?.playing ?? false;
+  bool get isPlaying => _voiceActive;
   String? get currentVoicePath => _currentVoicePath;
 
-  AudioPlayer get _ensureVoice => _voicePlayer ??= AudioPlayer();
-  AudioPlayer get _ensureAmbient => _ambientPlayer ??= AudioPlayer();
-  AudioPlayer get _ensureSfx => _sfxPlayer ??= AudioPlayer();
+  /// Boot the engine and preload the latency-critical SFX. Safe to call
+  /// more than once; every public method awaits this internally.
+  Future<void> init() => _initFuture ??= _doInit();
 
-  void _notifyIfPlayingChanged() {
-    final now = isPlaying;
-    if (now != _wasPlaying) {
-      _wasPlaying = now;
+  Future<void> _doInit() async {
+    try {
+      await _engine.init();
+      _engineReady = true;
+      for (final name in _preloadedSfx) {
+        await _load('assets/audio/sfx/$name.mp3');
+      }
+    } catch (e, stack) {
+      // No audio is a degraded session, not a broken one — the app must
+      // keep working silently (e.g. CI machines without an audio device).
+      if (kDebugMode) debugPrint('AudioService init failed: $e\n$stack');
+    }
+  }
+
+  Future<AudioSource?> _load(
+    String path, {
+    LoadMode mode = LoadMode.memory,
+  }) async {
+    if (!_engineReady) return null;
+    final cached = _cache[path];
+    if (cached != null) return cached;
+    try {
+      final source = await _engine.loadAsset(path, mode: mode);
+      _cache[path] = source;
+      return source;
+    } catch (e) {
+      if (kDebugMode) debugPrint('AudioService failed to load $path: $e');
+      return null;
+    }
+  }
+
+  void _setVoiceActive(bool active) {
+    if (_voiceActive != active) {
+      _voiceActive = active;
       notifyListeners();
     }
   }
@@ -85,21 +101,21 @@ class AudioService extends ChangeNotifier {
   }) async {
     final suffix = slow ? '_slow' : '';
     final path = 'assets/audio/$language/${sceneId}_$slug$suffix.mp3';
-    await _playVoice(path);
+    await _startVoiceOperation([path]);
   }
 
   /// Play a Mithu host line by base name (e.g. `mithu_greeting`).
   Future<void> playHost(String name) async {
     final path = 'assets/audio/hi/$name.mp3';
     if (kDebugMode) debugPrint('AudioService.playHost: $path');
-    await _playVoice(path);
+    await _startVoiceOperation([path]);
   }
 
   /// Play a sequence of Mithu host lines back-to-back on the voice lane.
   Future<void> playHostSequence(List<String> names) async {
     final paths = names.map((name) => 'assets/audio/hi/$name.mp3').toList();
     if (kDebugMode) debugPrint('AudioService.playHostSequence: $paths');
-    await _playVoiceSequence(paths);
+    await _startVoiceOperation(paths);
   }
 
   /// Play a find-it prompt: the target word followed by "___ kahaan hai?".
@@ -108,9 +124,10 @@ class AudioService extends ChangeNotifier {
     String slug, {
     required String language,
   }) async {
-    final wordPath = 'assets/audio/$language/${sceneId}_$slug.mp3';
-    final hostPath = 'assets/audio/$language/mithu_kahaan_hai.mp3';
-    await _playVoiceSequence([wordPath, hostPath]);
+    await _startVoiceOperation([
+      'assets/audio/$language/${sceneId}_$slug.mp3',
+      'assets/audio/$language/mithu_kahaan_hai.mp3',
+    ]);
   }
 
   /// Warm informative correction: "यह [word] नहीं है!" — spoken kindly,
@@ -120,7 +137,7 @@ class AudioService extends ChangeNotifier {
     String slug, {
     required String language,
   }) async {
-    await _playVoiceSequence([
+    await _startVoiceOperation([
       'assets/audio/hi/mithu_yeh.mp3',
       'assets/audio/$language/${sceneId}_$slug.mp3',
       'assets/audio/hi/mithu_nahi_hai.mp3',
@@ -131,130 +148,99 @@ class AudioService extends ChangeNotifier {
   Future<void> playPraise() async {
     const praises = ['shabash', 'wah', 'badhiya'];
     final pick = praises[Random().nextInt(praises.length)];
-    await _playVoice('assets/audio/hi/mithu_$pick.mp3', thenSfx: 'celebration');
+    await _startVoiceOperation(
+      ['assets/audio/hi/mithu_$pick.mp3'],
+      thenSfx: 'celebration',
+    );
   }
 
   /// Play the sticker-earned host line, then the sticker_earned SFX.
   Future<void> playStickerEarned() async {
-    await _playVoice('assets/audio/hi/mithu_sticker.mp3', thenSfx: 'sticker_earned');
+    await _startVoiceOperation(
+      ['assets/audio/hi/mithu_sticker.mp3'],
+      thenSfx: 'sticker_earned',
+    );
   }
 
-  Future<void> _playVoice(String path, {String? thenSfx}) async {
-    await _startVoiceOperation([path], thenSfx: thenSfx);
-  }
-
-  Future<void> _playVoiceSequence(List<String> paths, {String? thenSfx}) async {
-    await _startVoiceOperation(paths, thenSfx: thenSfx);
-  }
-
-  Future<void> _startVoiceOperation(List<String> paths, {String? thenSfx}) async {
+  /// The voice lane is a plain awaited loop: play a clip, sleep its
+  /// length, move on. A newer operation bumps the generation; a stale
+  /// loop wakes, sees it lost, and exits without touching state. This
+  /// replaces just_audio's state-stream juggling wholesale.
+  Future<void> _startVoiceOperation(
+    List<String> paths, {
+    String? thenSfx,
+  }) async {
     if (kDebugMode) {
       debugPrint(
         'AudioService._startVoiceOperation: ${paths.length} clip(s), first=${paths.firstOrNull}',
       );
     }
+    await init();
+    if (!_engineReady) return;
 
-    // Finish any awaiter on the previous voice operation.
-    if (_voiceCompleter != null && !_voiceCompleter!.isCompleted) {
-      _voiceCompleter!.complete();
+    final generation = ++_voiceGeneration;
+    _pendingSfx = thenSfx;
+
+    final previous = _voiceHandle;
+    _voiceHandle = null;
+    if (previous != null) {
+      await _engine.stop(previous);
     }
-    _voiceCompleter = null;
-    _pendingSfx = null;
+    if (generation != _voiceGeneration) return;
 
     if (paths.isEmpty) {
       _currentVoicePath = null;
-      _notifyIfPlayingChanged();
+      _setVoiceActive(false);
       return;
     }
 
-    final completer = Completer<void>();
-    _voiceCompleter = completer;
-    _pendingSfx = thenSfx;
-    _currentVoicePath = paths.first;
-    final generation = ++_voiceGeneration;
-    _voiceQueue.clear();
-    _voiceQueue.addAll(paths.sublist(1));
-
-    final player = _ensureVoice;
-    await _voiceSubscription?.cancel();
-    _clipCompletionHandled = true; // nothing playing yet for this op
-    _voiceSubscription = player.playerStateStream.listen((state) {
-      _notifyIfPlayingChanged();
-      if (_voiceGeneration != generation) return;
-      // just_audio keeps `playing == true` at ProcessingState.completed
-      // (it only flips on stop/pause), so completion must key off the
-      // processing state alone. _clipCompletionHandled dedupes repeated
-      // emissions of the completed state for the same clip.
-      if (state.processingState == ProcessingState.completed &&
-          !_clipCompletionHandled) {
-        _clipCompletionHandled = true;
-        if (_voiceQueue.isNotEmpty) {
-          final next = _voiceQueue.removeAt(0);
-          _currentVoicePath = next;
-          // Fire-and-forget from a stream handler: a load superseded by a
-          // rapid new tap throws through just_audio's internal future —
-          // swallow it here or it escapes as an uncaught zone error.
-          _playClip(next).catchError((Object e) {
-            if (kDebugMode) debugPrint('AudioService queued clip aborted: $e');
-          });
-        } else {
-          _currentVoicePath = null;
-          _restoreAmbient();
-          _playPendingSfx();
-          if (_voiceCompleter != null && !_voiceCompleter!.isCompleted) {
-            _voiceCompleter!.complete();
-            _voiceCompleter = null;
-          }
-        }
-      }
-    });
-
-    try {
-      await _playClip(paths.first);
-      await completer.future;
-    } on Exception catch (e, stack) {
-      if (kDebugMode) {
-        debugPrint('AudioService failed to play voice sequence: $e\n$stack');
-      }
-      _currentVoicePath = null;
-      _restoreAmbient();
-      if (_voiceCompleter != null && !_voiceCompleter!.isCompleted) {
-        _voiceCompleter!.complete();
-        _voiceCompleter = null;
+    unawaited(_duckAmbient());
+    for (final path in paths) {
+      if (generation != _voiceGeneration) return;
+      final source = await _load(path);
+      if (generation != _voiceGeneration) return;
+      if (source == null) continue;
+      if (kDebugMode) debugPrint('AudioService._playClip: $path');
+      _currentVoicePath = path;
+      _setVoiceActive(true);
+      try {
+        _voiceHandle = _engine.play(source);
+        final length = _engine.getLength(source);
+        await Future.delayed(length + const Duration(milliseconds: 120));
+      } catch (e) {
+        if (kDebugMode) debugPrint('AudioService voice clip failed: $e');
       }
     }
-  }
+    if (generation != _voiceGeneration) return;
 
-  Future<void> _playClip(String path) async {
-    if (kDebugMode) debugPrint('AudioService._playClip: $path');
-    _currentVoicePath = path;
-    await _onVoiceOps(() async {
-      final player = _ensureVoice;
-      await player.stop();
-      await player.setAsset(path);
-      await player.setVolume(1.0);
-      await _duckAmbient();
-      // Arm completion handling for THIS clip just before it starts.
-      _clipCompletionHandled = false;
-      await player.play();
-    });
-    _notifyIfPlayingChanged();
+    _voiceHandle = null;
+    _currentVoicePath = null;
+    _setVoiceActive(false);
+    unawaited(_restoreAmbient());
+    final sfx = _pendingSfx;
+    _pendingSfx = null;
+    if (sfx != null) unawaited(playSfx(sfx));
   }
 
   /// Play a looping ambient track (theme on Home, scene ambient in scene).
   Future<void> playAmbient(String path, {bool loop = true}) async {
-    final player = _ensureAmbient;
+    await init();
+    if (!_engineReady) return;
     try {
-      await _onAmbientOps(() async {
-        await player.stop();
-        await player.setAsset(path);
-        await player.setLoopMode(loop ? LoopMode.all : LoopMode.off);
-        // Fade in from silence instead of slamming on.
-        await player.setVolume(0.0);
-        await player.play();
-      });
-      await _rampAmbient(_ambientVolume, ms: 1200);
-    } on Exception catch (e, stack) {
+      final previous = _ambientHandle;
+      _ambientHandle = null;
+      if (previous != null) await _engine.stop(previous);
+      // Ambient tracks are long — stream from disk instead of RAM.
+      final source = await _load(path, mode: LoadMode.disk);
+      if (source == null) return;
+      _ambientCurrent = 0.0;
+      _ambientHandle = _engine.play(source, volume: 0.0, looping: loop);
+      // Fade in from silence instead of slamming on.
+      await _rampAmbient(
+        _voiceActive ? _duckedVolume : _ambientVolume,
+        ms: 1200,
+      );
+    } catch (e, stack) {
       if (kDebugMode) {
         debugPrint('AudioService failed to play ambient $path: $e\n$stack');
       }
@@ -263,23 +249,34 @@ class AudioService extends ChangeNotifier {
 
   Future<void> stopAmbient() async {
     await _rampAmbient(0.0, ms: 200);
-    await _ambientPlayer?.stop();
+    final handle = _ambientHandle;
+    _ambientHandle = null;
+    if (handle != null) {
+      try {
+        await _engine.stop(handle);
+      } catch (_) {
+        // Handle already invalid — nothing to stop.
+      }
+    }
   }
 
   /// Smoothly ramp the ambient volume — instant volume jumps read as
   /// "basic"; a short ramp makes ducking feel produced.
   Future<void> _rampAmbient(double to, {int ms = 220}) async {
-    final player = _ambientPlayer;
-    if (player == null) return;
-    try {
-      final from = player.volume;
-      const steps = 6;
-      for (var i = 1; i <= steps; i++) {
-        await player.setVolume(from + (to - from) * i / steps);
-        await Future.delayed(Duration(milliseconds: ms ~/ steps));
+    final handle = _ambientHandle;
+    if (handle == null) return;
+    final generation = ++_rampGeneration;
+    final from = _ambientCurrent;
+    const steps = 6;
+    for (var i = 1; i <= steps; i++) {
+      if (generation != _rampGeneration || _ambientHandle != handle) return;
+      _ambientCurrent = from + (to - from) * i / steps;
+      try {
+        _engine.setVolume(handle, _ambientCurrent);
+      } catch (_) {
+        return; // handle died mid-ramp — best-effort only
       }
-    } catch (_) {
-      // Player mid-teardown — best-effort only.
+      await Future.delayed(Duration(milliseconds: ms ~/ steps));
     }
   }
 
@@ -287,53 +284,61 @@ class AudioService extends ChangeNotifier {
 
   Future<void> _restoreAmbient() => _rampAmbient(_ambientVolume, ms: 420);
 
-  void _playPendingSfx() {
-    final sfx = _pendingSfx;
-    _pendingSfx = null;
-    if (sfx != null) playSfx(sfx);
-  }
-
   /// Play a one-shot sound effect by filename (no extension).
-  Future<void> playSfx(String name) async {
-    final player = _ensureSfx;
-    final path = 'assets/audio/sfx/$name.mp3';
+  ///
+  /// [rate] is a relative playback speed (1.0 = as recorded); use it for
+  /// pitch variation so repeats never sound identical (F12).
+  Future<void> playSfx(String name, {double? rate}) async {
+    await init();
+    if (!_engineReady) return;
     try {
-      await _onSfxOps(() async {
-        await player.stop();
-        await player.setAsset(path);
-        await player.setVolume(1.0);
-        await player.play();
-      });
-    } on Exception catch (e, stack) {
+      final source = await _load('assets/audio/sfx/$name.mp3');
+      if (source == null) return;
+      final handle = _engine.play(source, paused: rate != null);
+      if (rate != null) {
+        _engine.setRelativePlaySpeed(handle, rate);
+        _engine.setPause(handle, false);
+      }
+    } catch (e, stack) {
       if (kDebugMode) {
-        debugPrint('AudioService failed to play sfx $path: $e\n$stack');
+        debugPrint('AudioService failed to play sfx $name: $e\n$stack');
       }
     }
   }
 
+  /// F12 tap sound: each call climbs one step of a pentatonic ladder.
+  /// Call [resetTapLadder] when a round/screen starts so the melody
+  /// restarts from the root.
+  Future<void> playTapNote() {
+    final semitones = _pentatonic[_ladderStep % _pentatonic.length];
+    _ladderStep++;
+    return playSfx('tap_pop', rate: pow(2.0, semitones / 12.0).toDouble());
+  }
+
+  void resetTapLadder() => _ladderStep = 0;
+
   /// Stop the voice lane and restore ambient volume.
   Future<void> stop() async {
-    _voiceGeneration = 0;
-    _voiceQueue.clear();
-    if (_voiceCompleter != null && !_voiceCompleter!.isCompleted) {
-      _voiceCompleter!.complete();
-    }
-    _voiceCompleter = null;
+    _voiceGeneration++;
     _pendingSfx = null;
     _currentVoicePath = null;
+    final handle = _voiceHandle;
+    _voiceHandle = null;
+    if (handle != null && _engineReady) {
+      try {
+        await _engine.stop(handle);
+      } catch (_) {
+        // Already finished.
+      }
+    }
+    _setVoiceActive(false);
     await _restoreAmbient();
-    await _voicePlayer?.stop();
-    _notifyIfPlayingChanged();
   }
 
   @override
   void dispose() {
-    _voiceSubscription?.cancel();
-    // Deliberately NOT disposing the players: this service lives for the
-    // whole process, and just_audio's dispose kicks off an async platform
-    // teardown that races engine shutdown ("Cannot complete a future with
-    // itself"), crashing test teardown and adding nothing in production —
-    // the OS reclaims everything with the process anyway.
+    // Deliberately NOT deinit-ing the engine: this service lives for the
+    // whole process, and the OS reclaims everything with the process.
     super.dispose();
   }
 }

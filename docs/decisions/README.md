@@ -26,6 +26,7 @@ as decisions are made; don't rewrite history (supersede instead). Format:
 | [008](ADR-008-mithu-brand-mascot.md) | Mithu the parrot is the brand mascot; canonical design + on-model image-editing pipeline | 2026-07-19 | Accepted |
 | [009](ADR-009-lyria-3-music-backend.md) | Lyria 3 (Gemini API) as music backend for songs/instrumentals; ElevenLabs keeps SFX + placeholder VO | 2026-07-19 | Accepted |
 | [010](ADR-010-name-mithu-and-friends.md) | Product named "Mithu & Friends" (Hindi tagline: चलो घर घूमें!); per-language store-listing pattern | 2026-07-20 | Accepted |
+| [011](ADR-011-flutter-soloud-audio-engine.md) | flutter_soloud replaces just_audio as the only audio engine (feel rules F2/F12) | 2026-07-21 | Accepted |
 
 ### Adding a decision
 

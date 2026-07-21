@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../juice/juice.dart';
 import '../theme/theme.dart';
 
 /// A tappable doorway card: art thumbnail + colored label band.
@@ -27,9 +28,8 @@ class DoorwayCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return TapBounce(
       onTap: onTap,
-      behavior: HitTestBehavior.opaque,
       child: Container(
         width: width,
         height: height,

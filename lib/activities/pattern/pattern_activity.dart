@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../content/content.dart';
 import '../../theme/theme.dart';
 import '../../widgets/widgets.dart';
+import '../../juice/juice.dart';
 import '../activity.dart';
 
 /// पैटर्न पूरा करो — complete the A-B-A-B-? sequence.
@@ -98,6 +99,7 @@ class _PatternBodyState extends State<PatternBody>
   }
 
   void _onChoice(int index) {
+    widget.session.audio.playTapNote();
     if (_solved) return;
     final chosen = _choices[index];
     if (chosen.slug == _answer.slug) {
@@ -244,9 +246,8 @@ class _PatternBodyState extends State<PatternBody>
       },
       child: tile,
     );
-    return GestureDetector(
-      onTap: () => _onChoice(i),
-      behavior: HitTestBehavior.opaque,
+    return TapBounce(
+      onDown: () => _onChoice(i),
       child: tile,
     );
   }

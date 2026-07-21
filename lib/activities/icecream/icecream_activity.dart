@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../theme/theme.dart';
 import '../../widgets/widgets.dart';
+import '../../juice/juice.dart';
 import '../activity.dart';
 
 /// आइसक्रीम बनाओ — the ice-cream parlor (founder upgrade 2026-07-21).
@@ -400,7 +401,7 @@ class _IceCreamBodyState extends State<IceCreamBody>
           final t = _idle.value * 2 * pi + delay.toDouble();
           return Transform.scale(scale: 1.0 + 0.05 * sin(t), child: c);
         },
-        child: GestureDetector(onTap: onTap, child: child),
+        child: TapBounce(onDown: onTap, child: child),
       ),
     );
   }

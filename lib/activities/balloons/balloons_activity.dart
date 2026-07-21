@@ -126,7 +126,7 @@ class _BalloonsBodyState extends State<BalloonsBody>
   void _pop(_Balloon b, Size size) {
     if (b.popped || _finishing) return;
     b.popped = true;
-    widget.session.audio.playSfx('tap_pop');
+    widget.session.audio.playTapNote();
 
     final at = Offset(
       b.x * size.width,
@@ -188,7 +188,7 @@ class _BalloonsBodyState extends State<BalloonsBody>
             left: b.x * size.width - 44,
             top: size.height * (1.05 - b.phase * 1.1) - 55,
             child: GestureDetector(
-              onTap: () => _pop(b, size),
+              onTapDown: (_) => _pop(b, size),
               behavior: HitTestBehavior.opaque,
               child: CustomPaint(
                 size: const Size(88, 120),
