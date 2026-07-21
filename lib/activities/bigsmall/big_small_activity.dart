@@ -44,6 +44,9 @@ class _BigSmallBodyState extends State<BigSmallBody>
   late final bool _bigOnLeft;
   bool _solved = false;
   bool _wobblingWrong = false;
+  late final NudgeTimer _nudge;
+  bool _hinting = false;
+  int _wrongs = 0;
 
   late final AnimationController _idle;
   late final AnimationController _wobble;
@@ -68,10 +71,20 @@ class _BigSmallBodyState extends State<BigSmallBody>
 
     widget.session.audio
         .playHost(_askBig ? 'mithu_konsa_bada' : 'mithu_konsa_chota');
+    _nudge = NudgeTimer(onNudge: _onNudge)..arm();
+  }
+
+  void _onNudge() {
+    if (_solved || !mounted) return;
+    setState(() => _hinting = true);
+    widget.session.audio
+        .playHost(_askBig ? 'mithu_konsa_bada' : 'mithu_konsa_chota');
+    _nudge.arm();
   }
 
   @override
   void dispose() {
+    _nudge.dispose();
     _idle.dispose();
     _wobble.dispose();
     _glow.dispose();
@@ -81,14 +94,21 @@ class _BigSmallBodyState extends State<BigSmallBody>
   void _onTap({required bool tappedBig}) {
     widget.session.audio.playTapNote();
     if (_solved) return;
+    _nudge.arm();
     if (tappedBig == _askBig) {
-      setState(() => _solved = true);
+      _nudge.cancel();
+      setState(() {
+        _solved = true;
+        _hinting = false;
+      });
       _glow.forward(from: 0.0);
       widget.session.audio.playHost(_askBig ? 'mithu_bada' : 'mithu_chota');
       Future.delayed(const Duration(milliseconds: 1200), () {
         if (mounted) widget.session.onComplete();
       });
     } else {
+      _wrongs++;
+      if (_wrongs >= 2) _hinting = true;
       setState(() => _wobblingWrong = true);
       _wobble.forward(from: 0.0).whenCompleteOrCancel(() {
         if (mounted) setState(() => _wobblingWrong = false);
@@ -141,6 +161,10 @@ class _BigSmallBodyState extends State<BigSmallBody>
         if (_solved && correct) {
           return Transform.scale(
               scale: 1.0 + 0.15 * sin(_glow.value * pi), child: child);
+        }
+        if (_hinting && !_solved && isBig == _askBig) {
+          final h = _idle.value * 2 * pi * 3;
+          return Transform.scale(scale: 1.0 + 0.12 * sin(h), child: child);
         }
         final t = _idle.value * 2 * pi + (isBig ? 0.0 : 1.9);
         return Transform.scale(scale: 1.0 + 0.04 * sin(t), child: child);

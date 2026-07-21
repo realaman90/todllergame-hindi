@@ -41,6 +41,9 @@ class _OddOneBodyState extends State<OddOneBody> with TickerProviderStateMixin {
   late final int _oddIndex;
   bool _solved = false;
   int? _wobbling;
+  late final NudgeTimer _nudge;
+  bool _hinting = false;
+  int _wrongs = 0;
 
   late final AnimationController _idle;
   late final AnimationController _wobble;
@@ -65,10 +68,19 @@ class _OddOneBodyState extends State<OddOneBody> with TickerProviderStateMixin {
         duration: const Duration(milliseconds: 450), vsync: this);
 
     widget.session.audio.playHost('mithu_alag_kaun');
+    _nudge = NudgeTimer(onNudge: _onNudge)..arm();
+  }
+
+  void _onNudge() {
+    if (_solved || !mounted) return;
+    setState(() => _hinting = true);
+    widget.session.audio.playHost('mithu_alag_kaun');
+    _nudge.arm();
   }
 
   @override
   void dispose() {
+    _nudge.dispose();
     _idle.dispose();
     _wobble.dispose();
     _glow.dispose();
@@ -78,8 +90,13 @@ class _OddOneBodyState extends State<OddOneBody> with TickerProviderStateMixin {
   void _onTap(int i) {
     widget.session.audio.playTapNote();
     if (_solved) return;
+    _nudge.arm();
     if (i == _oddIndex) {
-      setState(() => _solved = true);
+      _nudge.cancel();
+      setState(() {
+        _solved = true;
+        _hinting = false;
+      });
       _glow.forward(from: 0.0);
       widget.session.audio
           .playWord(widget.session.scene.id, _odd.slug, language: 'hi');
@@ -87,6 +104,8 @@ class _OddOneBodyState extends State<OddOneBody> with TickerProviderStateMixin {
         if (mounted) widget.session.onComplete();
       });
     } else {
+      _wrongs++;
+      if (_wrongs >= 2) _hinting = true;
       setState(() => _wobbling = i);
       _wobble.forward(from: 0.0).whenCompleteOrCancel(() {
         if (mounted) setState(() => _wobbling = null);
@@ -137,6 +156,10 @@ class _OddOneBodyState extends State<OddOneBody> with TickerProviderStateMixin {
         if (_solved && i == _oddIndex) {
           return Transform.scale(
               scale: 1.0 + 0.18 * sin(_glow.value * pi), child: child);
+        }
+        if (_hinting && !_solved && i == _oddIndex) {
+          final h = _idle.value * 2 * pi * 3;
+          return Transform.scale(scale: 1.0 + 0.12 * sin(h), child: child);
         }
         final t = _idle.value * 2 * pi + i * 1.3;
         return Transform.scale(scale: 1.0 + 0.05 * sin(t), child: child);

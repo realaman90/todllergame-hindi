@@ -25,6 +25,9 @@ class IceCreamActivity extends Activity {
   String get titleHi => 'आइसक्रीम बनाओ';
 
   @override
+  bool get bringsOwnMithu => true;
+
+  @override
   Widget build(BuildContext context, ActivitySession session) {
     return IceCreamBody(session: session, key: const ValueKey('icecream'));
   }

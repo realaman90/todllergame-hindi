@@ -63,6 +63,9 @@ class _LineMatchBodyState extends State<LineMatchBody>
   final List<_FadingLine> _fadingLines = [];
   int _burstTrigger = 0;
   Offset _burstAt = Offset.zero;
+  late final NudgeTimer _nudge;
+  int? _hintPair; // F17/F16: pulse this pair's tiles
+  int _wrongs = 0;
 
   late final AnimationController _idleController;
   late final AnimationController _glowController;
@@ -92,6 +95,7 @@ class _LineMatchBodyState extends State<LineMatchBody>
     );
 
     widget.session.audio.playHost('mithu_game_linematch');
+    _nudge = NudgeTimer(onNudge: _onNudge)..arm();
   }
 
   bool _identityOrder(List<int> order) {
@@ -101,8 +105,25 @@ class _LineMatchBodyState extends State<LineMatchBody>
     return true;
   }
 
+  int? get _firstUnmatched {
+    for (var row = 0; row < _pairs.length; row++) {
+      if (!_matched.contains(row)) return row;
+    }
+    return null;
+  }
+
+  void _onNudge() {
+    final pair = _firstUnmatched;
+    if (pair == null || !mounted) return;
+    setState(() => _hintPair = pair);
+    widget.session.audio
+        .playWord(widget.session.scene.id, _pairs[pair].slug, language: 'hi');
+    _nudge.arm();
+  }
+
   @override
   void dispose() {
+    _nudge.dispose();
     _idleController.dispose();
     _glowController.dispose();
     for (final line in _fadingLines) {
@@ -163,6 +184,7 @@ class _LineMatchBodyState extends State<LineMatchBody>
   // ----- gestures -----
 
   void _onPanStart(Size size, DragStartDetails d) {
+    _nudge.arm();
     final hit = _hitLeft(size, d.localPosition);
     if (hit == null) return;
     setState(() => _dragPair = hit);
@@ -192,7 +214,9 @@ class _LineMatchBodyState extends State<LineMatchBody>
         _matched.add(pair);
         _lastMatched = pair;
         _dragPair = null;
+        _hintPair = null;
       });
+      _nudge.arm();
       _glowController.forward(from: 0.0);
       widget.session.audio.playSfx('ding_sticker');
       setState(() {
@@ -214,6 +238,8 @@ class _LineMatchBodyState extends State<LineMatchBody>
       // tile, Mithu explains warmly — "यह [that word] नहीं है!" (founder
       // request 2026-07-20: informative correction, never a buzzer).
       if (target != null) {
+        _wrongs++;
+        if (_wrongs >= 2) _hintPair = _firstUnmatched;
         widget.session.audio.playSfx('boop_curious');
         widget.session.audio.playWrongMatch(
           widget.session.scene.id,
@@ -310,7 +336,8 @@ class _LineMatchBodyState extends State<LineMatchBody>
                     phase: row * 1.1,
                     themeColor: themeColor,
                     deepColor: deepColor,
-                    glowing: _lastMatched == row),
+                    glowing: _lastMatched == row,
+                    hinted: _hintPair == row),
                 _tile(
                     size,
                     _pairs[_rightOrder[row]],
@@ -319,7 +346,8 @@ class _LineMatchBodyState extends State<LineMatchBody>
                     phase: row * 1.1 + 0.5,
                     themeColor: themeColor,
                     deepColor: deepColor,
-                    glowing: _lastMatched == _rightOrder[row]),
+                    glowing: _lastMatched == _rightOrder[row],
+                    hinted: _hintPair == _rightOrder[row]),
               ],
             ],
           ),
@@ -333,7 +361,8 @@ class _LineMatchBodyState extends State<LineMatchBody>
       required double phase,
       required Color themeColor,
       required Color deepColor,
-      required bool glowing}) {
+      required bool glowing,
+      bool hinted = false}) {
     Widget tile = ArtTile(
       imagePath: 'assets/art/${object.art}',
       wordHi: object.wordHi,
@@ -347,7 +376,11 @@ class _LineMatchBodyState extends State<LineMatchBody>
       animation: Listenable.merge([_idleController, _glowController]),
       builder: (context, child) {
         var scale = 1.0;
-        if (!matched) {
+        if (!matched && hinted) {
+          // Nudge pulse (F17): unmistakably bigger and faster than idle.
+          final h = _idleController.value * 2 * pi * 3;
+          scale = 1.0 + 0.12 * sin(h);
+        } else if (!matched) {
           final t = _idleController.value * 2 * pi + phase;
           scale = 1.0 + 0.05 * sin(t);
         } else if (glowing) {

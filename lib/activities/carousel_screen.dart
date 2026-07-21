@@ -213,6 +213,23 @@ class _CarouselScreenState extends State<CarouselScreen> {
                   child: activity.build(context, session),
                 ),
               ),
+              // Mithu witnesses play from the corner (F15): he speaks
+              // the prompts and dances on praise — a face, not a particle.
+              if (!activity.bringsOwnMithu && _earnedSlug == null)
+                Positioned(
+                  left: 14,
+                  bottom: 12,
+                  child: IgnorePointer(
+                    child: ListenableBuilder(
+                      listenable: widget.audio,
+                      builder: (context, _) => MithuTalking(
+                        isPlaying: widget.audio.isPlaying,
+                        voicePath: widget.audio.currentVoicePath,
+                        size: 100,
+                      ),
+                    ),
+                  ),
+                ),
               if (_earnedSlug != null)
                 _buildEarnedOverlay(state.scene, round.activityId),
             ],

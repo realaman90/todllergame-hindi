@@ -50,6 +50,9 @@ class _PatternBodyState extends State<PatternBody>
 
   bool _solved = false;
   int? _wobbling; // choice index doing the gentle wobble
+  late final NudgeTimer _nudge;
+  bool _hinting = false; // F17 nudge / F16 level-3 highlight
+  int _wrongs = 0;
 
   late final AnimationController _idle;
   late final AnimationController _wobble;
@@ -75,6 +78,14 @@ class _PatternBodyState extends State<PatternBody>
         duration: const Duration(milliseconds: 450), vsync: this);
 
     _speakSequence();
+    _nudge = NudgeTimer(onNudge: _onNudge)..arm();
+  }
+
+  void _onNudge() {
+    if (_solved || !mounted) return;
+    setState(() => _hinting = true);
+    _speakSequence();
+    _nudge.arm();
   }
 
   Future<void> _speakSequence() async {
@@ -92,6 +103,7 @@ class _PatternBodyState extends State<PatternBody>
 
   @override
   void dispose() {
+    _nudge.dispose();
     _idle.dispose();
     _wobble.dispose();
     _fill.dispose();
@@ -102,8 +114,13 @@ class _PatternBodyState extends State<PatternBody>
     widget.session.audio.playTapNote();
     if (_solved) return;
     final chosen = _choices[index];
+    _nudge.arm();
     if (chosen.slug == _answer.slug) {
-      setState(() => _solved = true);
+      _nudge.cancel();
+      setState(() {
+        _solved = true;
+        _hinting = false;
+      });
       _fill.forward(from: 0.0);
       widget.session.audio.playWord(
           widget.session.scene.id, chosen.slug,
@@ -112,7 +129,12 @@ class _PatternBodyState extends State<PatternBody>
         if (mounted) widget.session.onComplete();
       });
     } else {
-      setState(() => _wobbling = index);
+      _wrongs++;
+      setState(() {
+        _wobbling = index;
+        // F16 level 3: after two misses, highlight the answer until tapped.
+        if (_wrongs >= 2) _hinting = true;
+      });
       _wobble.forward(from: 0.0).whenCompleteOrCancel(() {
         if (mounted) setState(() => _wobbling = null);
       });
@@ -241,6 +263,11 @@ class _PatternBodyState extends State<PatternBody>
         if (_wobbling == i) {
           final w = sin(_wobble.value * pi * 3) * 0.08;
           return Transform.rotate(angle: w, child: child);
+        }
+        if (_hinting && !_solved && _choices[i].slug == _answer.slug) {
+          // Nudge pulse: unmistakably bigger and faster than idle breath.
+          final h = _idle.value * 2 * pi * 3;
+          return Transform.scale(scale: 1.0 + 0.12 * sin(h), child: child);
         }
         final t = _idle.value * 2 * pi + i * 1.7;
         return Transform.scale(scale: 1.0 + 0.05 * sin(t), child: child);

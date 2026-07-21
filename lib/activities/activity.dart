@@ -15,6 +15,11 @@ abstract class Activity {
   /// Devanagari display title shown in the carousel's app bar.
   String get titleHi;
 
+  /// True when the activity places its own Mithu on screen (e.g. the
+  /// ice-cream parlor) — the carousel then hides the corner witness so
+  /// there is never a double Mithu.
+  bool get bringsOwnMithu => false;
+
   /// Builds the activity UI for a scene's vocabulary subset.
   Widget build(BuildContext context, ActivitySession session);
 }
