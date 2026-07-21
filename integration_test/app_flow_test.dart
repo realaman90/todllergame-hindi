@@ -170,6 +170,8 @@ void main() {
 
     // Skip until the line-match round comes up (playlist alternates).
     var skips = 0;
+    expect(await waitFor(tester, find.byType(ShadowBody)), isTrue,
+        reason: 'carousel opens on the shadow-match round');
     while (!tester.any(find.byType(LineMatchBody)) && skips < 14) {
       final skipArrow = find.byIcon(Icons.arrow_forward_rounded);
       if (!tester.any(skipArrow)) break;
@@ -248,8 +250,11 @@ void main() {
 
     // ---------- ALL NEW GAMES REACHABLE ----------
     final wanted = <String, Finder>{
+      'wipereveal': find.byType(WipeBody),
       'pattern': find.byType(PatternBody),
+      'missing': find.byType(MissingBody),
       'oddone': find.byType(OddOneBody),
+      'pathtrace': find.byType(PathBody),
       'bigsmall': find.byType(BigSmallBody),
     };
     var walkGuard = 0;

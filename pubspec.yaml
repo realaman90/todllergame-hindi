@@ -27,6 +27,7 @@ flutter:
     - assets/art/
     - assets/art/scenes/
     - assets/art/objects/
+    - assets/art/silhouettes/
     - assets/art/characters/
     - assets/audio/hi/
     - assets/audio/music/

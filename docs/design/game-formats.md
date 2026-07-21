@@ -61,7 +61,7 @@ playlist over those modules.
 | 14 | बड़ा-छोटा (Big & small) | NEW vocab: बड़ा, छोटा | tap | "कौन सा बड़ा है?" comparisons — **requires curriculum addition + recording** |
 
 | 15 | रेखा मिलाओ (Line matching) | any pairs: word-art↔art, animal↔sound, color↔object | **finger-drag line** | founder priority 2026-07-20: drag a line from an item on the left to its match on the right; the line draws under the finger, snaps + glows on a correct match, gently fades on a miss (no fail state); both items speak on connect. 3 pairs max on screen. |
-| 15b | आइसक्रीम बनाओ (Ice-cream parlor) | foods (fruit flavors) | tap + drag | **BUILT 2026-07-21, parlor upgrade same day** — choose a flavor (scoop plops on the waffle cone), tap toppings (fruit bits + sprinkles), then drag the finished cone to Mithu, who slides in, munches it and dances. Every choice is right. (Was "kulfi", then a mixing bowl — founder asked for a proper parlor flow) |
+| 15b | आइसक्रीम बनाओ (Ice-cream parlor) | foods (fruit flavors) | tap + drag | **RETIRED 2026-07-21** — founder didn't enjoy any of three iterations (kulfi → bowl → parlor); slot given to the expansion wave. Code removed (git history has it) |
 | 15c | अच्छा खाना (Healthy food) | foods | tap/drag | founder idea 2026-07-21: pick the fruits / build a healthy plate — framed positively (choose the good things), never food-shaming |
 | 16 | पैटर्न पूरा करो (Pattern completion) | any | tap | simple AB/ABC sequences of art tiles (गाय-फूल-गाय-फूल-?) with 2 big answer choices; foundational pre-math skill |
 
@@ -80,14 +80,14 @@ first (see `level-roadmap.md` — many pair with a planned level).
 | # | Format | Vocab | Core action | Notes |
 |---|---|---|---|---|
 | **Tap-primitive (engine exists)** |||||
-| 17 | क्या ग़ायब? (What's missing) | any | tap | 3 objects shown, one hides under a cloth — tap what's missing among 2 choices; first memory game |
+| 17 | क्या ग़ायब? (What's missing) | any | tap | **BUILT 2026-07-21** — 3 objects shown, one hides under a cloth — tap what's missing among 2 choices; first memory game |
 | 18 | झटपट बोलो (Whack-a-word) | any | tap | objects peek out of pots/windows; tap the one Mithu names; gentle pace, nothing "escapes" |
 | 19 | छोटा-मझला-बड़ा (3-size sort) | sizes | tap | extends big-small to three sizes; tap in size order |
 | 20 | दिन-रात छाँटो (Day/night) | routine words | tap | sun or moon in the corner — tap the things that belong (NEW-vocab: level 26) |
 | 21 | आवाज़ का क्रम (Sound simon) | animals | tap | Gauri then Laddoo call out — tap them in the order heard; 2-step max, pre-memory skill |
 | 22 | ताल मिलाओ (Music taps) | instruments/animals | tap | tap characters to build a little rhythm loop; every tap sounds good (NEW-vocab: level 25) |
 | **Drag-primitive (built for ice cream / thali)** |||||
-| 23 | परछाईं मिलाओ (Shadow match) | any | drag→snap | drag object onto its silhouette; art pipeline can bake silhouettes automatically |
+| 23 | परछाईं मिलाओ (Shadow match) | any | drag→snap | **BUILT 2026-07-21** — drag object onto its silhouette; art pipeline can bake silhouettes automatically |
 | 24 | रेल गाड़ी भरो (Load the train) | categories | drag→snap | fruits wagon vs animals wagon — first sorting-by-category; train chugs off as reward |
 | 25 | टावर बनाओ (Stack the blocks) | colors/sizes | drag→snap | stack 4 blocks big→small; wobble physics feel, tower cheers |
 | 26 | पौधा उगाओ (Grow a plant) | garden words | drag→snap | seed→water→sun in order; flower blooms + butterfly lands (pairs with level 28) |
@@ -96,11 +96,11 @@ first (see `level-roadmap.md` — many pair with a planned level).
 | 29 | स्मूदी बनाओ (Smoothie mixer) | fruits | drag→snap | ice-cream template reskin: fruits into blender, whirl animation, colored smoothie out |
 | 30 | खाना खिलाओ (Feed by sequence) | foods + family | drag→snap | "पहले दादी को…" — serve family members in the asked order (builds on #9) |
 | **Finger-line primitive (built for line-match)** |||||
-| 31 | रास्ता दिखाओ (Trace the path) | any | finger-trace | guide Laddoo home along a wiggly dotted road; finger-line follows, pre-writing motor skill |
+| 31 | रास्ता दिखाओ (Trace the path) | any | finger-trace | **BUILT 2026-07-21** — guide Laddoo home along a wiggly dotted road; finger-line follows, pre-writing motor skill |
 | 32 | आकार बनाओ (Shape tracing) | shapes | finger-trace | trace a big गोल/तिकोना with sparkle trail; shape comes alive (eyes + giggle) (NEW-vocab: level 20) |
 | 33 | नंबर बनाओ (Number tracing) | numbers 1–5 | finger-trace | trace the numeral, then that many mangoes pop up counted aloud; pairs with counting balloons |
 | **Reveal/gesture novelties** |||||
-| 34 | पोंछो और देखो (Wipe & reveal) | any | rub | steamy window — rub to reveal the object underneath, word plays when enough is clear; hugely satisfying |
+| 34 | पोंछो और देखो (Wipe & reveal) | any | rub | **BUILT 2026-07-21** — steamy window — rub to reveal the object underneath, word plays when enough is clear; hugely satisfying |
 | 35 | कौन छुपा है? (Peek-a-boo zoom) | animals | tap | extreme close-up (fur/beak) slowly zooms out — tap when she knows; guessing without reading |
 | 36 | चिपकाओ मन से (Sticker scene, free-play) | earned stickers | drag | creative mode: place earned stickers anywhere on a scene, no goal, saves her arrangement; makes the sticker book a toy (NEW-VO: invite line) |
 

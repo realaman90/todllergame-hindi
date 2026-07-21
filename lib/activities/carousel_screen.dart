@@ -51,8 +51,19 @@ class _CarouselScreenState extends State<CarouselScreen> {
     // activities, so neither a scene nor a format repeats back-to-back.
     final sceneIds = ['house', 'farm', 'family'];
     sceneIds.shuffle(Random());
-    // linematch leads: newest game greets the child (and founder) first.
-    const formats = ['icecream', 'linematch', 'pattern', 'oddone', 'bigsmall', 'pairs'];
+    // New-games wave leads (founder retired the ice-cream game
+    // 2026-07-21 after three iterations — format didn't land).
+    const formats = [
+      'shadow',
+      'linematch',
+      'wipereveal',
+      'pattern',
+      'missing',
+      'oddone',
+      'pathtrace',
+      'bigsmall',
+      'pairs',
+    ];
     final rounds = [
       for (var round = 0; round < formats.length; round++)
         for (var i = 0; i < sceneIds.length; i++)
