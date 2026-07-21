@@ -48,11 +48,27 @@ class AudioService extends ChangeNotifier {
   SoundHandle? _ambientHandle;
   double _ambientCurrent = 0.0;
   int _rampGeneration = 0;
+  double _musicVolumeFactor = 1.0;
 
   int _ladderStep = 0;
 
   bool get isPlaying => _voiceActive;
   String? get currentVoicePath => _currentVoicePath;
+
+  /// Parent-facing background-music volume (0.0–1.0), scaled on top of
+  /// the internal duck/restore levels. Settings screen persists it and
+  /// re-applies on launch; the change ramps in immediately.
+  double get musicVolume => _musicVolumeFactor;
+  set musicVolume(double v) {
+    _musicVolumeFactor = v.clamp(0.0, 1.0);
+    unawaited(_rampAmbient(
+      _voiceActive ? _scaledDuck : _scaledAmbient,
+      ms: 300,
+    ));
+  }
+
+  double get _scaledAmbient => _ambientVolume * _musicVolumeFactor;
+  double get _scaledDuck => _duckedVolume * _musicVolumeFactor;
 
   /// Boot the engine and preload the latency-critical SFX. Safe to call
   /// more than once; every public method awaits this internally.
@@ -262,7 +278,7 @@ class AudioService extends ChangeNotifier {
       _ambientHandle = _engine.play(source, volume: 0.0, looping: loop);
       // Fade in from silence instead of slamming on.
       await _rampAmbient(
-        _voiceActive ? _duckedVolume : _ambientVolume,
+        _voiceActive ? _scaledDuck : _scaledAmbient,
         ms: 1200,
       );
     } catch (e, stack) {
@@ -305,9 +321,9 @@ class AudioService extends ChangeNotifier {
     }
   }
 
-  Future<void> _duckAmbient() => _rampAmbient(_duckedVolume);
+  Future<void> _duckAmbient() => _rampAmbient(_scaledDuck);
 
-  Future<void> _restoreAmbient() => _rampAmbient(_ambientVolume, ms: 420);
+  Future<void> _restoreAmbient() => _rampAmbient(_scaledAmbient, ms: 420);
 
   /// Play a one-shot sound effect by filename (no extension).
   ///
