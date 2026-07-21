@@ -219,6 +219,42 @@ def generate_objects(filter_words: list[str] | None = None):
 
 
 # ---------------------------------------------------------------------------
+# Game props (non-curriculum art used by mini-games)
+# ---------------------------------------------------------------------------
+
+GAME_PROPS = {
+    # Existing four were generated ad-hoc 2026-07-21; listed so the set is
+    # reproducible. New parlor props below.
+    "icecream_bowl": "a cream-coloured mixing bowl, plain and modern",
+    "icecream_done": "a finished ice cream cone: waffle cone with a swirl of ice cream on top",
+    "kulfi_pot": "a small clay matka pot",
+    "kulfi_done": "a kulfi on a stick",
+    "icecream_cone_empty": (
+        "an empty golden waffle ice cream cone standing upright in a small "
+        "white cone holder, nothing on top, waiting to be filled"
+    ),
+    "icecream_scoop": (
+        "one single perfectly round scoop of plain vanilla ice cream, "
+        "creamy white ball with soft texture, nothing else"
+    ),
+}
+
+
+def generate_props():
+    """Generate mini-game prop art (same style as objects)."""
+    print("\n=== GAME PROPS ===")
+    for slug, desc in GAME_PROPS.items():
+        prompt = (
+            f"{STYLE_PREFIX}"
+            f"Single isolated object on a clean white background: {desc}. "
+            f"Paper-cutout style with visible paper layers and soft edges. "
+            f"Simple, recognizable, designed for a 3-year-old to identify. "
+            f"No text, no labels. Centered in frame."
+        )
+        generate_image(prompt, OBJ_DIR / f"{slug}.png")
+
+
+# ---------------------------------------------------------------------------
 # Mascot concept explorations (brand-level treatment of the host character)
 # ---------------------------------------------------------------------------
 
@@ -347,7 +383,7 @@ def main():
     parser = argparse.ArgumentParser(description="Generate game art with OpenAI gpt-image-2")
     parser.add_argument(
         "--only",
-        choices=["characters", "scenes", "objects", "mascot", "mithu-onmodel"],
+        choices=["characters", "scenes", "objects", "props", "mascot", "mithu-onmodel"],
         help="Generate only one category",
     )
     parser.add_argument(
@@ -366,6 +402,8 @@ def main():
         generate_characters()
     if args.only is None or args.only == "scenes":
         generate_scenes()
+    if args.only == "props":
+        generate_props()
     if args.only is None or args.only == "objects":
         generate_objects(filter_words)
     if args.only == "mascot":

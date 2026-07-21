@@ -10,7 +10,9 @@ status: living backlog
 # Polish Backlog
 
 Founder critique 2026-07-21: "inaccuracies in audio, animations very
-basic, transitions, bg music." Triage below. Rule of thumb: placeholder
+basic, transitions, bg music." Triage below. The system-level answer
+to this critique is now [`game-feel.md`](game-feel.md) (feel rules +
+build order); items here are the symptom-level backlog. Rule of thumb: placeholder
 quality is capped until the **native recording session** (voice) and the
 **Rive decision** (character animation) — everything else is code.
 

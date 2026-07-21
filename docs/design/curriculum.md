@@ -168,6 +168,31 @@ takes: that register difference IS the character. Voice casting: founder,
 | बहुत बढ़िया! | bahut badhiya! | praise (random pick) | `mithu_badhiya.mp3` |
 | नया स्टिकर मिला! | naya sticker mila! | sticker earned | `mithu_sticker.mp3` |
 
+### Game host lines (2026-07-20/21 game expansion)
+
+| Devanagari | Transliteration | Used when | Audio file |
+|---|---|---|---|
+| यह | yeh | wrong-match correction, part 1 (yeh + word + nahi hai) | `mithu_yeh.mp3` |
+| नहीं है! | nahi hai! | wrong-match correction, part 3 | `mithu_nahi_hai.mp3` |
+| फिर से! | phir se! | gentle try-again | `mithu_phir_se.mp3` |
+| अलग कौन है? | alag kaun hai? | odd-one-out prompt | `mithu_alag_kaun.mp3` |
+| कौन सा बड़ा है? | kaun sa bada hai? | big-small prompt | `mithu_konsa_bada.mp3` |
+| कौन सा छोटा है? | kaun sa chota hai? | big-small prompt | `mithu_konsa_chota.mp3` |
+| बड़ा! / छोटा! | bada! / chota! | big-small answer echo | `mithu_bada.mp3` / `mithu_chota.mp3` |
+| रेखा मिलाओ! | rekha milao! | line-match title | `mithu_game_linematch.mp3` |
+| जोड़ी मिलाओ! | jodi milao! | pairs title | `mithu_game_pairs.mp3` |
+| पैटर्न पूरा करो! | pattern poora karo! | pattern title | `mithu_game_pattern.mp3` |
+| आइसक्रीम बनाओ! | ice cream banao! | parlor title | `mithu_game_icecream.mp3` |
+| आइसक्रीम! | ice cream! | finished cone reveal | `mithu_icecream.mp3` |
+| कौन सा लोगे? | kaun sa loge? | parlor: flavor prompt | `mithu_konsa_loge.mp3` |
+| ऊपर डालो! | upar daalo! | parlor: toppings prompt | `mithu_upar_daalo.mp3` |
+| अब मिठू को दो! | ab Mithu ko do! | parlor: serve-to-Mithu prompt | `mithu_mujhe_do.mp3` |
+| मम्म! बहुत अच्छा! | mmm! bahut achha! | parlor: Mithu eats the cone | `mithu_yum.mp3` |
+
+(`mithu_game_kulfi` / `mithu_kulfi` / `mithu_daalo` exist as dev TTS but
+are retired — the kulfi framing was de-clichéd to a normal parlor,
+2026-07-21. Don't record them.)
+
 Same two-take rule does NOT apply (no slow takes needed for host lines).
 Placeholder TTS versions exist for dev builds only (ADR-003).
 

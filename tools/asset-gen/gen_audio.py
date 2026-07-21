@@ -621,6 +621,11 @@ MITHU_LINES = {
     "mithu_icecream": "आइसक्रीम!",
     "mithu_daalo": "डालो!",
     "mithu_chota": "छोटा!",
+    # Ice-cream parlor flow (founder upgrade 2026-07-21)
+    "mithu_konsa_loge": "कौन सा लोगे?",
+    "mithu_upar_daalo": "ऊपर डालो!",
+    "mithu_mujhe_do": "अब मिठू को दो!",
+    "mithu_yum": "मम्म! बहुत अच्छा!",
 }
 
 

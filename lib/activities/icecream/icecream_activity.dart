@@ -6,12 +6,14 @@ import '../../theme/theme.dart';
 import '../../widgets/widgets.dart';
 import '../activity.dart';
 
-/// आइसक्रीम बनाओ — make ice cream! The first "making" game.
+/// आइसक्रीम बनाओ — the ice-cream parlor (founder upgrade 2026-07-21).
 ///
-/// Two forgiving drag steps into a mixing bowl: first दूध (milk), then a
-/// fruit flavor of the child's choice (आम / केला / सेब — every choice is
-/// right). The bowl shakes, and out pops an ice cream cone tinted by the flavor.
-/// Vocabulary is fixed to the house-scene food words.
+/// A real parlor flow in three joyful steps:
+///   1. choose a flavor — the scoop plops onto the waffle cone,
+///   2. choose toppings — fruit bits and sprinkles land on the scoop,
+///   3. give it to Mithu — he slides in, you drag him the cone, he
+///      munches it and dances.
+/// Every choice is right; vocabulary is the house-scene food words.
 class IceCreamActivity extends Activity {
   const IceCreamActivity();
 
@@ -27,12 +29,21 @@ class IceCreamActivity extends Activity {
   }
 }
 
-class _Ingredient {
+enum _ParlorPhase { flavor, topping, serve, done }
+
+class _Flavor {
   final String slug;
   final String wordHi;
   final Color tint;
 
-  const _Ingredient(this.slug, this.wordHi, this.tint);
+  const _Flavor(this.slug, this.wordHi, this.tint);
+}
+
+class _Topping {
+  final String slug; // 'sprinkles' or a fruit slug
+  final Offset spot; // where it landed on the scoop (0..1 of scoop size)
+
+  const _Topping(this.slug, this.spot);
 }
 
 class IceCreamBody extends StatefulWidget {
@@ -44,21 +55,27 @@ class IceCreamBody extends StatefulWidget {
   State<IceCreamBody> createState() => _IceCreamBodyState();
 }
 
-class _IceCreamBodyState extends State<IceCreamBody> with TickerProviderStateMixin {
-  static const _milk = _Ingredient('doodh', 'दूध', Colors.white);
-  static const _fruits = [
-    _Ingredient('aam', 'आम', Color(0xFFF2A93B)),
-    _Ingredient('kela', 'केला', Color(0xFFF7DC6F)),
-    _Ingredient('seb', 'सेब', Color(0xFFE86A6A)),
+class _IceCreamBodyState extends State<IceCreamBody>
+    with TickerProviderStateMixin {
+  static const _flavors = [
+    _Flavor('aam', 'आम', Color(0xFFF2A93B)),
+    _Flavor('kela', 'केला', Color(0xFFF7DC6F)),
+    _Flavor('seb', 'सेब', Color(0xFFE86A6A)),
+  ];
+  static const _toppingsMax = 3;
+  // Deterministic landing spots so toppings never overlap.
+  static const _spots = [
+    Offset(0.26, 0.30),
+    Offset(0.62, 0.22),
+    Offset(0.44, 0.55),
   ];
 
-  bool _milkIn = false;
-  _Ingredient? _flavor;
-  bool _done = false;
+  var _phase = _ParlorPhase.flavor;
+  _Flavor? _flavor;
+  final List<_Topping> _toppings = [];
+  bool _coneServed = false;
 
   late final AnimationController _idle;
-  late final AnimationController _shake;
-  late final AnimationController _pour;
 
   @override
   void initState() {
@@ -66,216 +83,369 @@ class _IceCreamBodyState extends State<IceCreamBody> with TickerProviderStateMix
     _idle = AnimationController(
         duration: const Duration(milliseconds: 3000), vsync: this)
       ..repeat();
-    _shake = AnimationController(
-        duration: const Duration(milliseconds: 700), vsync: this);
-    _pour = AnimationController(
-        duration: const Duration(milliseconds: 500), vsync: this);
-
-    widget.session.audio.playHost('mithu_game_icecream');
+    widget.session.audio
+        .playHostSequence(['mithu_game_icecream', 'mithu_konsa_loge']);
   }
 
   @override
   void dispose() {
     _idle.dispose();
-    _shake.dispose();
-    _pour.dispose();
     super.dispose();
   }
 
-  void _accept(_Ingredient ing) {
-    if (_done) return;
-    if (!_milkIn) {
-      if (ing.slug != 'doodh') return; // pot only wants milk first
-      setState(() => _milkIn = true);
-      _pour.forward(from: 0.0);
-      widget.session.audio.playWord('house', 'doodh', language: 'hi');
+  void _pickFlavor(_Flavor f) {
+    if (_phase != _ParlorPhase.flavor) return;
+    setState(() {
+      _flavor = f;
+      _phase = _ParlorPhase.topping;
+    });
+    widget.session.audio.playWord('house', f.slug, language: 'hi');
+    widget.session.audio.playSfx('tap_pop');
+    Future.delayed(const Duration(milliseconds: 1300), () {
+      if (mounted && _phase == _ParlorPhase.topping) {
+        widget.session.audio.playHost('mithu_upar_daalo');
+      }
+    });
+  }
+
+  void _pickTopping(String slug) {
+    if (_phase != _ParlorPhase.topping) return;
+    if (_toppings.length >= _toppingsMax) return;
+    setState(() {
+      _toppings.add(_Topping(slug, _spots[_toppings.length]));
+    });
+    if (slug == 'sprinkles') {
       widget.session.audio.playSfx('tap_pop');
-    } else if (_flavor == null) {
-      if (ing.slug == 'doodh') return;
-      setState(() => _flavor = ing);
-      widget.session.audio.playWord('house', ing.slug, language: 'hi');
-      _shake.forward(from: 0.0).whenCompleteOrCancel(() async {
-        if (!mounted) return;
-        setState(() => _done = true);
-        await widget.session.audio.playHost('mithu_icecream');
-        await Future.delayed(const Duration(milliseconds: 700));
-        if (mounted) widget.session.onComplete();
+    } else {
+      widget.session.audio.playWord('house', slug, language: 'hi');
+    }
+    // Two toppings make an ice cream — time to serve it.
+    if (_toppings.length >= 2) {
+      Future.delayed(const Duration(milliseconds: 900), () {
+        if (!mounted || _phase != _ParlorPhase.topping) return;
+        setState(() => _phase = _ParlorPhase.serve);
+        widget.session.audio.playHost('mithu_mujhe_do');
       });
     }
   }
 
+  Future<void> _serve() async {
+    if (_phase != _ParlorPhase.serve) return;
+    setState(() {
+      _phase = _ParlorPhase.done;
+      _coneServed = true;
+    });
+    // Munch munch — then the happy verdict, then the carousel celebrates.
+    widget.session.audio.playSfx('tap_pop');
+    await Future.delayed(const Duration(milliseconds: 350));
+    widget.session.audio.playSfx('tap_pop');
+    await Future.delayed(const Duration(milliseconds: 400));
+    await widget.session.audio.playHost('mithu_yum');
+    await Future.delayed(const Duration(milliseconds: 500));
+    if (mounted) widget.session.onComplete();
+  }
+
   @override
   Widget build(BuildContext context) {
-    const themeColor = AppColors.marigold;
-    const deepColor = AppColors.marigoldDeep;
-
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SizedBox(
-          height: 210,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              // The matka pot — also the drag target.
-              AnimatedBuilder(
-                animation: Listenable.merge([_idle, _shake, _pour]),
-                builder: (context, child) {
-                  final wobble = _shake.isAnimating
-                      ? sin(_shake.value * pi * 6) * 0.09
-                      : 0.02 * sin(_idle.value * 2 * pi);
-                  final pourPop = _pour.isAnimating
-                      ? 1.0 + 0.08 * sin(_pour.value * pi)
-                      : 1.0;
-                  return Transform.rotate(
-                    angle: wobble,
-                    child: Transform.scale(scale: pourPop, child: child),
-                  );
-                },
-                child: DragTarget<_Ingredient>(
-                  // Forgiving: any hover over the pot area counts.
-                  onWillAcceptWithDetails: (d) => !_done,
-                  onAcceptWithDetails: (d) => _accept(d.data),
-                  builder: (context, candidates, rejected) {
-                    final excited = candidates.isNotEmpty;
-                    return Transform.scale(
-                      scale: excited ? 1.08 : 1.0,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          const ArtTile(
-                            imagePath: 'assets/art/objects/icecream_bowl.png',
-                            color: themeColor,
-                            deepColor: deepColor,
-                            size: 185,
-                            showLabel: false,
-                          ),
-                          // Milk fill peeks over the rim.
-                          if (_milkIn && !_done)
-                            Positioned(
-                              top: 38,
-                              child: Container(
-                                width: 86,
-                                height: 26,
-                                decoration: BoxDecoration(
-                                  color: _flavor == null
-                                      ? Colors.white
-                                      : _flavor!.tint,
-                                  borderRadius: BorderRadius.circular(13),
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
-              // The finished kulfi pops out above the pot.
-              if (_done)
-                Positioned(
-                  top: 0,
-                  child: _ScoopPlop(
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        const ArtTile(
-                          imagePath: 'assets/art/objects/icecream_done.png',
-                          color: themeColor,
-                          deepColor: deepColor,
-                          size: 150,
-                          showLabel: false,
-                        ),
-                        // Flavor tint wash over the kulfi.
-                        Container(
-                          width: 120,
-                          height: 120,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(24),
-                            color: (_flavor?.tint ?? Colors.white)
-                                .withValues(alpha: 0.22),
-                          ),
-                        ),
-                      ],
-                    ),
+    return Stack(children: [
+      // Counter: the cone under assembly, center-left.
+      Align(
+        alignment: const Alignment(-0.35, -0.25),
+        child: _coneServed
+            ? const SizedBox(width: 200, height: 270)
+            : _buildConeAssembly(interactive: _phase == _ParlorPhase.serve),
+      ),
+      // Option tray along the bottom, per phase.
+      Align(
+        alignment: const Alignment(0, 0.92),
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 350),
+          transitionBuilder: (child, anim) => FadeTransition(
+            opacity: anim,
+            child: SlideTransition(
+              position: Tween(
+                      begin: const Offset(0, 0.25), end: Offset.zero)
+                  .animate(anim),
+              child: child,
+            ),
+          ),
+          child: switch (_phase) {
+            _ParlorPhase.flavor => _flavorTray(),
+            _ParlorPhase.topping => _toppingTray(),
+            _ => const SizedBox(key: ValueKey('empty-tray')),
+          },
+        ),
+      ),
+      // Mithu slides in from the right when it's time to serve.
+      AnimatedPositioned(
+        duration: const Duration(milliseconds: 650),
+        curve: Curves.easeOutBack,
+        right: _phase == _ParlorPhase.serve || _phase == _ParlorPhase.done
+            ? 18
+            : -220,
+        bottom: 46,
+        child: DragTarget<bool>(
+          onWillAcceptWithDetails: (_) => _phase == _ParlorPhase.serve,
+          onAcceptWithDetails: (_) => _serve(),
+          builder: (context, candidates, rejected) {
+            final excited = candidates.isNotEmpty;
+            return GestureDetector(
+              onTap: _serve,
+              child: Transform.scale(
+                scale: excited ? 1.12 : 1.0,
+                child: ListenableBuilder(
+                  listenable: widget.session.audio,
+                  builder: (context, _) => MithuTalking(
+                    isPlaying: widget.session.audio.isPlaying,
+                    voicePath: widget.session.audio.currentVoicePath,
+                    size: 160,
                   ),
                 ),
-            ],
+              ),
+            );
+          },
+        ),
+      ),
+    ]);
+  }
+
+  /// The cone + scoop + toppings collage. In the serve phase the whole
+  /// thing is draggable toward Mithu and pulses as an invitation.
+  Widget _buildConeAssembly({required bool interactive}) {
+    final assembly = SizedBox(
+      width: 200,
+      height: 270,
+      child: Stack(
+        alignment: Alignment.topCenter,
+        children: [
+          Positioned(
+            bottom: 0,
+            child: const ArtTile(
+              imagePath: 'assets/art/objects/icecream_cone_empty.png',
+              color: AppColors.marigold,
+              deepColor: AppColors.marigoldDeep,
+              size: 175,
+              showLabel: false,
+            ),
           ),
-        ),
-        const SizedBox(height: 30),
-        // Ingredient tray.
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _draggable(_milk, used: _milkIn, delay: 0),
-            const SizedBox(width: 26),
-            for (var i = 0; i < _fruits.length; i++) ...[
-              _draggable(_fruits[i],
-                  used: _flavor != null, delay: 140 * (i + 1)),
-              if (i < _fruits.length - 1) const SizedBox(width: 26),
-            ],
-          ],
-        ),
+          if (_flavor != null)
+            Positioned(
+              top: 4,
+              child: _ScoopPlop(
+                child: SizedBox(
+                  width: 126,
+                  height: 126,
+                  child: Stack(children: [
+                    const ArtTile(
+                      imagePath: 'assets/art/objects/icecream_scoop.png',
+                      color: AppColors.marigold,
+                      deepColor: AppColors.marigoldDeep,
+                      size: 126,
+                      showLabel: false,
+                    ),
+                    // Flavor wash over the vanilla scoop.
+                    Container(
+                      width: 126,
+                      height: 126,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(26),
+                        color: _flavor!.tint.withValues(alpha: 0.30),
+                      ),
+                    ),
+                    for (final t in _toppings)
+                      Positioned(
+                        left: t.spot.dx * 126 - 15,
+                        top: t.spot.dy * 126 - 15,
+                        child: PopIn(child: _toppingChip(t.slug, 30)),
+                      ),
+                  ]),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+
+    if (!interactive) return assembly;
+
+    // Serve phase: pulse gently + draggable to Mithu.
+    return AnimatedBuilder(
+      animation: _idle,
+      builder: (context, child) => Transform.scale(
+        scale: 1.0 + 0.04 * sin(_idle.value * 2 * pi * 2),
+        child: child,
+      ),
+      child: Draggable<bool>(
+        data: true,
+        feedback: Transform.scale(scale: 1.05, child: assembly),
+        childWhenDragging: Opacity(opacity: 0.25, child: assembly),
+        child: assembly,
+      ),
+    );
+  }
+
+  Widget _toppingChip(String slug, double size) {
+    if (slug == 'sprinkles') {
+      return CustomPaint(
+          size: Size(size, size), painter: _SprinklesPainter());
+    }
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: 2.5),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.ink.withValues(alpha: 0.15),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ClipOval(
+        child: Image.asset('assets/art/objects/house_$slug.png',
+            fit: BoxFit.cover),
+      ),
+    );
+  }
+
+  Widget _flavorTray() {
+    return Row(
+      key: const ValueKey('flavor-tray'),
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (var i = 0; i < _flavors.length; i++) ...[
+          _trayOption(
+            delay: 120 * i,
+            onTap: () => _pickFlavor(_flavors[i]),
+            child: ArtTile(
+              imagePath: 'assets/art/objects/house_${_flavors[i].slug}.png',
+              wordHi: _flavors[i].wordHi,
+              color: AppColors.marigold,
+              deepColor: AppColors.marigoldDeep,
+              size: 96,
+              showLabel: true,
+            ),
+          ),
+          if (i < _flavors.length - 1) const SizedBox(width: 24),
+        ],
       ],
     );
   }
 
-  Widget _draggable(_Ingredient ing, {required bool used, required int delay}) {
-    const themeColor = AppColors.marigold;
-    const deepColor = AppColors.marigoldDeep;
-    final tile = ArtTile(
-      imagePath: 'assets/art/objects/house_${ing.slug}.png',
-      wordHi: ing.wordHi,
-      color: themeColor,
-      deepColor: deepColor,
-      size: 92,
-      showLabel: true,
+  Widget _toppingTray() {
+    // Sprinkles + the two fruits NOT chosen as the flavor.
+    final fruits =
+        _flavors.where((f) => f.slug != _flavor?.slug).toList();
+    final options = <(String, Widget)>[
+      (
+        'sprinkles',
+        Container(
+          width: 96,
+          height: 96,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.ink.withValues(alpha: 0.12),
+                blurRadius: 6,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: CustomPaint(painter: _SprinklesPainter()),
+        )
+      ),
+      for (final f in fruits)
+        (
+          f.slug,
+          ArtTile(
+            imagePath: 'assets/art/objects/house_${f.slug}.png',
+            wordHi: f.wordHi,
+            color: AppColors.marigold,
+            deepColor: AppColors.marigoldDeep,
+            size: 96,
+            showLabel: true,
+          )
+        ),
+    ];
+
+    return Row(
+      key: const ValueKey('topping-tray'),
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (var i = 0; i < options.length; i++) ...[
+          _trayOption(
+            delay: 120 * i,
+            onTap: () => _pickTopping(options[i].$1),
+            child: options[i].$2,
+          ),
+          if (i < options.length - 1) const SizedBox(width: 24),
+        ],
+      ],
     );
+  }
 
-    if (used && ing.slug == 'doodh' || used && ing.slug != 'doodh' && _flavor != null && _flavor!.slug != ing.slug) {
-      // Spent or unchosen ingredients rest dimmed.
-      return Opacity(opacity: 0.35, child: tile);
-    }
-    if (_flavor != null && _flavor!.slug == ing.slug) {
-      return Opacity(opacity: 0.35, child: tile);
-    }
-
+  Widget _trayOption(
+      {required int delay,
+      required VoidCallback onTap,
+      required Widget child}) {
     return PopIn(
       delayMs: 100 + delay,
       child: AnimatedBuilder(
         animation: _idle,
-        builder: (context, child) {
+        builder: (context, c) {
           final t = _idle.value * 2 * pi + delay.toDouble();
-          return Transform.scale(
-              scale: 1.0 + 0.05 * sin(t), child: child);
+          return Transform.scale(scale: 1.0 + 0.05 * sin(t), child: c);
         },
-        child: Draggable<_Ingredient>(
-          data: ing,
-          feedback: Transform.scale(
-            scale: 1.2,
-            child: ArtTile(
-              imagePath: 'assets/art/objects/house_${ing.slug}.png',
-              color: themeColor,
-              deepColor: deepColor,
-              size: 92,
-              showLabel: false,
-            ),
-          ),
-          childWhenDragging: Opacity(opacity: 0.3, child: tile),
-          child: GestureDetector(
-            onTap: () => widget.session.audio
-                .playWord('house', ing.slug, language: 'hi'),
-            child: tile,
-          ),
-        ),
+        child: GestureDetector(onTap: onTap, child: child),
       ),
     );
   }
 }
 
-/// Squash-and-stretch entrance for the finished cone: drops in, squashes
-/// on landing, springs back — the classic satisfying "plop".
+/// Colorful sprinkle capsules on a small square — used both as the tray
+/// tile art and as the on-scoop topping chip.
+class _SprinklesPainter extends CustomPainter {
+  static const _colors = [
+    AppColors.kumkum,
+    AppColors.peacock,
+    AppColors.marigold,
+    AppColors.mehndi,
+  ];
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Fixed pseudo-random layout: same sprinkles every time (no flicker).
+    for (var i = 0; i < 10; i++) {
+      final fx = (i * 37 % 83) / 83;
+      final fy = (i * 53 % 71) / 71;
+      final angle = (i * 67 % 90) / 90 * pi;
+      canvas.save();
+      canvas.translate(
+          size.width * (0.15 + 0.7 * fx), size.height * (0.15 + 0.7 * fy));
+      canvas.rotate(angle);
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+            Rect.fromCenter(
+                center: Offset.zero,
+                width: size.width * 0.22,
+                height: size.width * 0.07),
+            const Radius.circular(4)),
+        Paint()..color = _colors[i % _colors.length],
+      );
+      canvas.restore();
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _SprinklesPainter old) => false;
+}
+
+/// Squash-and-stretch entrance for the scoop: drops in, squashes on
+/// landing, springs back — the classic satisfying "plop".
 class _ScoopPlop extends StatefulWidget {
   final Widget child;
 

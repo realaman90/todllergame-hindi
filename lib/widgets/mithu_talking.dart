@@ -50,7 +50,8 @@ class _MithuTalkingState extends State<MithuTalking>
     return p.contains('shabash') ||
         p.contains('wah') ||
         p.contains('badhiya') ||
-        p.contains('sticker');
+        p.contains('sticker') ||
+        p.contains('yum');
   }
 
   @override

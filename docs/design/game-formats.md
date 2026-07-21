@@ -61,7 +61,7 @@ playlist over those modules.
 | 14 | बड़ा-छोटा (Big & small) | NEW vocab: बड़ा, छोटा | tap | "कौन सा बड़ा है?" comparisons — **requires curriculum addition + recording** |
 
 | 15 | रेखा मिलाओ (Line matching) | any pairs: word-art↔art, animal↔sound, color↔object | **finger-drag line** | founder priority 2026-07-20: drag a line from an item on the left to its match on the right; the line draws under the finger, snaps + glows on a correct match, gently fades on a miss (no fail state); both items speak on connect. 3 pairs max on screen. |
-| 15b | आइसक्रीम बनाओ (Make ice cream) | foods (दूध + fruit flavors) | drag→snap | **BUILT 2026-07-21** — milk + a flavor of her choice into a mixing bowl; every flavor choice is right. (Was "kulfi" — de-clichéd per founder 2026-07-21: normal bowl + cone) |
+| 15b | आइसक्रीम बनाओ (Ice-cream parlor) | foods (fruit flavors) | tap + drag | **BUILT 2026-07-21, parlor upgrade same day** — choose a flavor (scoop plops on the waffle cone), tap toppings (fruit bits + sprinkles), then drag the finished cone to Mithu, who slides in, munches it and dances. Every choice is right. (Was "kulfi", then a mixing bowl — founder asked for a proper parlor flow) |
 | 15c | अच्छा खाना (Healthy food) | foods | tap/drag | founder idea 2026-07-21: pick the fruits / build a healthy plate — framed positively (choose the good things), never food-shaming |
 | 16 | पैटर्न पूरा करो (Pattern completion) | any | tap | simple AB/ABC sequences of art tiles (गाय-फूल-गाय-फूल-?) with 2 big answer choices; foundational pre-math skill |
 
