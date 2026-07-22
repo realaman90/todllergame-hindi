@@ -63,7 +63,7 @@ class _WhackBodyState extends State<WhackBody> with TickerProviderStateMixin {
           duration: const Duration(milliseconds: 420), vsync: this),
     );
     _prompt(withTitle: true);
-    _spawner = Timer.periodic(const Duration(milliseconds: 1500), (_) {
+    _spawner = Timer.periodic(const Duration(milliseconds: 2100), (_) {
       if (mounted && !_finishing) _spawnPeek();
     });
     _nudge = NudgeTimer(onNudge: _onNudge)..arm();
@@ -109,8 +109,9 @@ class _WhackBodyState extends State<WhackBody> with TickerProviderStateMixin {
     }
     setState(() => _peeking[pot] = obj);
     _rise[pot].forward(from: 0.0);
-    // Bob for a moment, then sink back down.
-    Future.delayed(const Duration(milliseconds: 1500), () async {
+    // A long, unhurried bob — a 3-year-old's reaction time never loses
+    // the catch (and the asked object always comes back regardless).
+    Future.delayed(const Duration(milliseconds: 3200), () async {
       if (!mounted || _peeking[pot] == null) return;
       await _rise[pot].reverse();
       if (mounted) setState(() => _peeking[pot] = null);
