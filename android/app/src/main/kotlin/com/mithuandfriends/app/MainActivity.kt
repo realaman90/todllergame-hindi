@@ -1,4 +1,4 @@
-package com.gemoniq.chalo_ghar_ghoome
+package com.mithuandfriends.app
 
 import io.flutter.embedding.android.FlutterActivity
 

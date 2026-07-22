@@ -13,9 +13,12 @@ scoped as a shippable product (App Store / Play Store), not a one-off.
 Flutter app scaffolded and playable: milestones **M1–M3** of
 `docs/specs/tbd/app-shell-and-scene-engine.md` are implemented (all 3
 MVP scenes from curriculum.md, generated art/audio staged in `assets/`,
-sticker loop, find-it puzzles). **M4** (parent gate, settings, app icon,
-store-readiness) is not started — the spec stays in `tbd/` until it
-lands. Word voiceover in `assets/audio/hi/` is dev-placeholder TTS —
+sticker loop, find-it puzzles), plus post-M3 growth: 17 mini-game
+formats, breathers, game-feel P0–P3 (ADR-011 SoLoud), welcome screen,
+tablet scaling. **M4 is underway** (2026-07-22): parent gate + settings
+shipped; bundle id renamed to `com.mithuandfriends.app` (ADR-012);
+first Android build in progress. Remaining: store assets, privacy
+policy, native-speaker recording (the ship-blocker). Word voiceover in `assets/audio/hi/` is dev-placeholder TTS —
 must be replaced with native-speaker recordings before ship (ADR-003).
 Asset generation tooling lives in `tools/asset-gen/` (see its README).
 Before building any new piece, check `docs/specs/tbd/` for a build spec
