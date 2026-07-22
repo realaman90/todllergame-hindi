@@ -627,6 +627,11 @@ MITHU_LINES = {
     "mithu_game_missing": "क्या ग़ायब?",
     "mithu_kya_gayab": "क्या ग़ायब है?",
     "mithu_game_path": "रास्ता दिखाओ!",
+    # Wave-2 games (expansion #18/#33/#6/#24, 2026-07-22)
+    "mithu_game_whack": "झटपट बोलो!",
+    "mithu_game_numtrace": "नंबर बनाओ!",
+    "mithu_game_sounds": "कौन बोला?",
+    "mithu_game_train": "रेल गाड़ी भरो!",
     # Ice-cream parlor flow (founder upgrade 2026-07-21)
     "mithu_konsa_loge": "कौन सा लोगे?",
     "mithu_upar_daalo": "ऊपर डालो!",

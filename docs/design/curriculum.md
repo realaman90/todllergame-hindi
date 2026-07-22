@@ -188,6 +188,14 @@ takes: that register difference IS the character. Voice casting: founder,
 | ऊपर डालो! | upar daalo! | parlor: toppings prompt | `mithu_upar_daalo.mp3` |
 | अब मिठू को दो! | ab Mithu ko do! | parlor: serve-to-Mithu prompt | `mithu_mujhe_do.mp3` |
 | मम्म! बहुत अच्छा! | mmm! bahut achha! | parlor: Mithu eats the cone | `mithu_yum.mp3` |
+| परछाईं मिलाओ! | parchhaain milao! | shadow-match title | `mithu_game_shadow.mp3` |
+| पोंछो और देखो! | poncho aur dekho! | wipe-reveal title | `mithu_game_wipe.mp3` |
+| क्या ग़ायब? / क्या ग़ायब है? | kya gayab (hai)? | what's-missing title / prompt | `mithu_game_missing.mp3` / `mithu_kya_gayab.mp3` |
+| रास्ता दिखाओ! | raasta dikhao! | path-trace title | `mithu_game_path.mp3` |
+| झटपट बोलो! | jhatpat bolo! | whack-a-word title | `mithu_game_whack.mp3` |
+| नंबर बनाओ! | number banao! | number-tracing title | `mithu_game_numtrace.mp3` |
+| कौन बोला? | kaun bola? | sound-match title | `mithu_game_sounds.mp3` |
+| रेल गाड़ी भरो! | rail gaadi bharo! | load-the-train title | `mithu_game_train.mp3` |
 
 (`mithu_game_kulfi` / `mithu_kulfi` / `mithu_daalo` exist as dev TTS but
 are retired — the kulfi framing was de-clichéd to a normal parlor,

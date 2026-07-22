@@ -49,7 +49,7 @@ playlist over those modules.
 | 3 | गिनती (Counting-tap) | numbers 1–10 | sequential tap | resolves curriculum's open "numbers interaction" item |
 | 4 | जोड़ी मिलाओ (Pairs) | any | tap two | face-up find-the-twin first; memory-flip variant later |
 | 5 | लड्डू कहाँ छुपा? (Hide-and-seek) | objects + spatial words | tap | Laddoo hides behind objects; Mithu gives audio clues |
-| 6 | आवाज़ पहचानो (Sound match) | animals | tap | hear the animal sound, tap who made it |
+| 6 | आवाज़ पहचानो (Sound match) | animals | tap | **BUILT 2026-07-22** as कौन बोला? — generated animal voices (ElevenLabs), wrong taps answer with their own voice |
 | 7 | मिठू के अंग (Body parts on Mithu) | body parts | tap | "मिठू की नाक कहाँ?" — tap the mascot's features |
 | 8 | रंग के फूल (Color sorting) | colors | drag→snap | feed laal/peela/hara flowers to matching pots |
 | 9 | फल खिलाओ (Feed the animals) | foods + animals | drag→snap | feed Gauri/Laddoo; pairs two vocab groups |
@@ -81,14 +81,14 @@ first (see `level-roadmap.md` — many pair with a planned level).
 |---|---|---|---|---|
 | **Tap-primitive (engine exists)** |||||
 | 17 | क्या ग़ायब? (What's missing) | any | tap | **BUILT 2026-07-21** — 3 objects shown, one hides under a cloth — tap what's missing among 2 choices; first memory game |
-| 18 | झटपट बोलो (Whack-a-word) | any | tap | objects peek out of pots/windows; tap the one Mithu names; gentle pace, nothing "escapes" |
+| 18 | झटपट बोलो (Whack-a-word) | any | tap | **BUILT 2026-07-22** — objects peek from paper pots; asked object guaranteed every 2nd rise; wrong peekers say their own name |
 | 19 | छोटा-मझला-बड़ा (3-size sort) | sizes | tap | extends big-small to three sizes; tap in size order |
 | 20 | दिन-रात छाँटो (Day/night) | routine words | tap | sun or moon in the corner — tap the things that belong (NEW-vocab: level 26) |
 | 21 | आवाज़ का क्रम (Sound simon) | animals | tap | Gauri then Laddoo call out — tap them in the order heard; 2-step max, pre-memory skill |
 | 22 | ताल मिलाओ (Music taps) | instruments/animals | tap | tap characters to build a little rhythm loop; every tap sounds good (NEW-vocab: level 25) |
 | **Drag-primitive (built for ice cream / thali)** |||||
 | 23 | परछाईं मिलाओ (Shadow match) | any | drag→snap | **BUILT 2026-07-21** — drag object onto its silhouette; art pipeline can bake silhouettes automatically |
-| 24 | रेल गाड़ी भरो (Load the train) | categories | drag→snap | fruits wagon vs animals wagon — first sorting-by-category; train chugs off as reward |
+| 24 | रेल गाड़ी भरो (Load the train) | categories | drag→snap | **BUILT 2026-07-22** — fruits wagon vs animals wagon (fixed cross-scene content); train departs with spinning wheels |
 | 25 | टावर बनाओ (Stack the blocks) | colors/sizes | drag→snap | stack 4 blocks big→small; wobble physics feel, tower cheers |
 | 26 | पौधा उगाओ (Grow a plant) | garden words | drag→snap | seed→water→sun in order; flower blooms + butterfly lands (pairs with level 28) |
 | 27 | कपड़े पहनाओ (Dress Mithu) | clothes | drag→snap | put टोपी/मोज़े on Mithu for the weather; every outfit is right (NEW-vocab: level 7) |
@@ -98,7 +98,7 @@ first (see `level-roadmap.md` — many pair with a planned level).
 | **Finger-line primitive (built for line-match)** |||||
 | 31 | रास्ता दिखाओ (Trace the path) | any | finger-trace | **BUILT 2026-07-21** — guide Laddoo home along a wiggly dotted road; finger-line follows, pre-writing motor skill |
 | 32 | आकार बनाओ (Shape tracing) | shapes | finger-trace | trace a big गोल/तिकोना with sparkle trail; shape comes alive (eyes + giggle) (NEW-vocab: level 20) |
-| 33 | नंबर बनाओ (Number tracing) | numbers 1–5 | finger-trace | trace the numeral, then that many mangoes pop up counted aloud; pairs with counting balloons |
+| 33 | नंबर बनाओ (Number tracing) | numbers 1–5 | finger-trace | **BUILT 2026-07-22** — single-stroke stylized digits, ghost numeral + light-up dots; mangoes counted aloud as payoff |
 | **Reveal/gesture novelties** |||||
 | 34 | पोंछो और देखो (Wipe & reveal) | any | rub | **BUILT 2026-07-21** — steamy window — rub to reveal the object underneath, word plays when enough is clear; hugely satisfying |
 | 35 | कौन छुपा है? (Peek-a-boo zoom) | animals | tap | extreme close-up (fur/beak) slowly zooms out — tap when she knows; guessing without reading |

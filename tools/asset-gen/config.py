@@ -352,6 +352,24 @@ SFX = {
         "description": "A tiny victory stinger: quick kalimba flourish rising up with a soft shaker, gentle and joyful",
         "duration_seconds": 2,
     },
+    # Animal voices for कौन बोला? (sound match #6, 2026-07-22) — soft,
+    # cartoon-friendly, single call each, never startling.
+    "animal_gaay": {
+        "description": "A single gentle cartoon cow moo, warm and friendly, one moo only",
+        "duration_seconds": 2,
+    },
+    "animal_kutta": {
+        "description": "Two soft happy puppy barks, small friendly dog, light and cute",
+        "duration_seconds": 2,
+    },
+    "animal_bakri": {
+        "description": "A single gentle goat bleat, soft meh sound, friendly farm goat",
+        "duration_seconds": 2,
+    },
+    "animal_batakh": {
+        "description": "Two cheerful little duck quacks, cute and soft",
+        "duration_seconds": 2,
+    },
     "stinger_win_3": {
         "description": "A tiny victory stinger: little ukulele strum up-stroke plus one glockenspiel sparkle note, cozy and happy",
         "duration_seconds": 2,

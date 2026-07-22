@@ -251,15 +251,19 @@ void main() {
 
     // ---------- ALL NEW GAMES REACHABLE ----------
     final wanted = <String, Finder>{
-      'wipereveal': find.byType(WipeBody),
+      'whack': find.byType(WhackBody),
       'pattern': find.byType(PatternBody),
+      'numtrace': find.byType(NumTraceBody),
       'missing': find.byType(MissingBody),
+      'soundmatch': find.byType(SoundMatchBody),
       'oddone': find.byType(OddOneBody),
+      'train': find.byType(TrainBody),
+      'wipereveal': find.byType(WipeBody),
       'pathtrace': find.byType(PathBody),
       'bigsmall': find.byType(BigSmallBody),
     };
     var walkGuard = 0;
-    while (wanted.isNotEmpty && walkGuard < 22) {
+    while (wanted.isNotEmpty && walkGuard < 52) {
       wanted.removeWhere((_, f) => tester.any(f));
       if (wanted.isEmpty) break;
       final skip = find.byIcon(Icons.arrow_forward_rounded);

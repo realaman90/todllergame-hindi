@@ -38,6 +38,8 @@ class AudioService extends ChangeNotifier {
   bool _engineReady = false;
 
   final Map<String, AudioSource> _cache = {};
+  final Map<String, Future<AudioSource?>> _loading = {};
+  Future<void> _loadChain = Future.value();
 
   int _voiceGeneration = 0;
   SoundHandle? _voiceHandle;
@@ -88,21 +90,36 @@ class AudioService extends ChangeNotifier {
     }
   }
 
+  /// Loads are de-duplicated per path AND serialized globally: the
+  /// plugin stages assets through temp files, and two overlapping
+  /// loadAsset calls can collide there ("file found, but could not be
+  /// loaded" thrown uncatchably from its native callback). One load at
+  /// a time costs nothing — sources are cached forever after.
   Future<AudioSource?> _load(
     String path, {
     LoadMode mode = LoadMode.memory,
-  }) async {
-    if (!_engineReady) return null;
+  }) {
+    if (!_engineReady) return Future.value(null);
     final cached = _cache[path];
-    if (cached != null) return cached;
-    try {
-      final source = await _engine.loadAsset(path, mode: mode);
-      _cache[path] = source;
-      return source;
-    } catch (e) {
-      if (kDebugMode) debugPrint('AudioService failed to load $path: $e');
-      return null;
-    }
+    if (cached != null) return Future.value(cached);
+    final inflight = _loading[path];
+    if (inflight != null) return inflight;
+    final future = _loadChain.then((_) async {
+      final again = _cache[path];
+      if (again != null) return again;
+      try {
+        final source = await _engine.loadAsset(path, mode: mode);
+        _cache[path] = source;
+        return source;
+      } catch (e) {
+        if (kDebugMode) debugPrint('AudioService failed to load $path: $e');
+        return null;
+      }
+    });
+    _loading[path] = future;
+    _loadChain = future.then((_) {});
+    future.whenComplete(() => _loading.remove(path));
+    return future;
   }
 
   void _setVoiceActive(bool active) {
