@@ -229,6 +229,10 @@ GAME_PROPS = {
     "icecream_done": "a finished ice cream cone: waffle cone with a swirl of ice cream on top",
     "kulfi_pot": "a small clay matka pot",
     "kulfi_done": "a kulfi on a stick",
+    "plant_sprout": (
+        "a tiny green seedling sprout with two small leaves growing from "
+        "a little brown soil mound, cute and hopeful"
+    ),
     "icecream_cone_empty": (
         "an empty golden waffle ice cream cone standing upright in a small "
         "white cone holder, nothing on top, waiting to be filled"

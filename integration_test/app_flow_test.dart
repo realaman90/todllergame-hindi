@@ -252,6 +252,10 @@ void main() {
     // ---------- ALL NEW GAMES REACHABLE ----------
     final wanted = <String, Finder>{
       'whack': find.byType(WhackBody),
+      'plant': find.byType(PlantBody),
+      'peek': find.byType(PeekBody),
+      'sizes': find.byType(SizesBody),
+      'stickerplay': find.byType(StickerPlayBody),
       'pattern': find.byType(PatternBody),
       'numtrace': find.byType(NumTraceBody),
       'missing': find.byType(MissingBody),
@@ -263,7 +267,7 @@ void main() {
       'bigsmall': find.byType(BigSmallBody),
     };
     var walkGuard = 0;
-    while (wanted.isNotEmpty && walkGuard < 52) {
+    while (wanted.isNotEmpty && walkGuard < 78) {
       wanted.removeWhere((_, f) => tester.any(f));
       if (wanted.isEmpty) break;
       final skip = find.byIcon(Icons.arrow_forward_rounded);

@@ -64,15 +64,19 @@ class _CarouselScreenState extends State<CarouselScreen> {
       'shadow',
       'linematch',
       'whack',
+      'plant',
       'pattern',
       'numtrace',
+      'peek',
       'missing',
       'soundmatch',
       'oddone',
       'train',
+      'sizes',
       'wipereveal',
       'pathtrace',
       'bigsmall',
+      'stickerplay',
       'pairs',
     ];
     final rounds = [
@@ -222,6 +226,7 @@ class _CarouselScreenState extends State<CarouselScreen> {
             scene: state.scene,
             vocab: state.vocab,
             audio: widget.audio,
+            stickers: widget.stickerService,
             onComplete: () {
               if (generation == _roundGeneration) _onComplete();
             },

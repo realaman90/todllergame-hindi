@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../audio/audio.dart';
 import '../content/content.dart';
+import '../stickers/sticker_service.dart';
 
 /// A single playable mini-game format.
 ///
@@ -32,6 +33,10 @@ class ActivitySession {
   final List<SceneObject> vocab;
   final AudioService audio;
 
+  /// The child's sticker collection — free-play activities read it;
+  /// null in contexts without one.
+  final StickerService? stickers;
+
   /// Call when the child has completed the activity.
   ///
   /// The carousel handles celebration, sticker, and auto-advance.
@@ -46,5 +51,6 @@ class ActivitySession {
     required this.audio,
     required this.onComplete,
     required this.onSkip,
+    this.stickers,
   });
 }

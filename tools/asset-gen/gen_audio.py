@@ -627,6 +627,11 @@ MITHU_LINES = {
     "mithu_game_missing": "क्या ग़ायब?",
     "mithu_kya_gayab": "क्या ग़ायब है?",
     "mithu_game_path": "रास्ता दिखाओ!",
+    # Wave-3 games (expansion #26/#35/#36/#19, 2026-07-22)
+    "mithu_game_plant": "पौधा उगाओ!",
+    "mithu_game_peek": "कौन छुपा है?",
+    "mithu_game_stickerplay": "चिपकाओ!",
+    "mithu_game_sizes": "छोटा, मझला, बड़ा!",
     # Wave-2 games (expansion #18/#33/#6/#24, 2026-07-22)
     "mithu_game_whack": "झटपट बोलो!",
     "mithu_game_numtrace": "नंबर बनाओ!",

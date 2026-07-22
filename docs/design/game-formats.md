@@ -82,7 +82,7 @@ first (see `level-roadmap.md` — many pair with a planned level).
 | **Tap-primitive (engine exists)** |||||
 | 17 | क्या ग़ायब? (What's missing) | any | tap | **BUILT 2026-07-21** — 3 objects shown, one hides under a cloth — tap what's missing among 2 choices; first memory game |
 | 18 | झटपट बोलो (Whack-a-word) | any | tap | **BUILT 2026-07-22** — objects peek from paper pots; asked object guaranteed every 2nd rise; wrong peekers say their own name |
-| 19 | छोटा-मझला-बड़ा (3-size sort) | sizes | tap | extends big-small to three sizes; tap in size order |
+| 19 | छोटा-मझला-बड़ा (3-size sort) | sizes | tap | **BUILT 2026-07-22** — tap the biggest of what remains, locks onto a shelf; existing VO only |
 | 20 | दिन-रात छाँटो (Day/night) | routine words | tap | sun or moon in the corner — tap the things that belong (NEW-vocab: level 26) |
 | 21 | आवाज़ का क्रम (Sound simon) | animals | tap | Gauri then Laddoo call out — tap them in the order heard; 2-step max, pre-memory skill |
 | 22 | ताल मिलाओ (Music taps) | instruments/animals | tap | tap characters to build a little rhythm loop; every tap sounds good (NEW-vocab: level 25) |
@@ -90,7 +90,7 @@ first (see `level-roadmap.md` — many pair with a planned level).
 | 23 | परछाईं मिलाओ (Shadow match) | any | drag→snap | **BUILT 2026-07-21** — drag object onto its silhouette; art pipeline can bake silhouettes automatically |
 | 24 | रेल गाड़ी भरो (Load the train) | categories | drag→snap | **BUILT 2026-07-22** — fruits wagon vs animals wagon (fixed cross-scene content); train departs with spinning wheels |
 | 25 | टावर बनाओ (Stack the blocks) | colors/sizes | drag→snap | stack 4 blocks big→small; wobble physics feel, tower cheers |
-| 26 | पौधा उगाओ (Grow a plant) | garden words | drag→snap | seed→water→sun in order; flower blooms + butterfly lands (pairs with level 28) |
+| 26 | पौधा उगाओ (Grow a plant) | garden words | drag→snap | **BUILT 2026-07-22** — paani + sooraj in any order, sprout blooms into phool, code-drawn butterfly lands |
 | 27 | कपड़े पहनाओ (Dress Mithu) | clothes | drag→snap | put टोपी/मोज़े on Mithu for the weather; every outfit is right (NEW-vocab: level 7) |
 | 28 | मछली पकड़ो (Fishing) | sea words | drag | drag the hook-line to the fish Mithu names; reuses line-match finger math (NEW-vocab: level 14) |
 | 29 | स्मूदी बनाओ (Smoothie mixer) | fruits | drag→snap | ice-cream template reskin: fruits into blender, whirl animation, colored smoothie out |
@@ -101,8 +101,8 @@ first (see `level-roadmap.md` — many pair with a planned level).
 | 33 | नंबर बनाओ (Number tracing) | numbers 1–5 | finger-trace | **BUILT 2026-07-22** — single-stroke stylized digits, ghost numeral + light-up dots; mangoes counted aloud as payoff |
 | **Reveal/gesture novelties** |||||
 | 34 | पोंछो और देखो (Wipe & reveal) | any | rub | **BUILT 2026-07-21** — steamy window — rub to reveal the object underneath, word plays when enough is clear; hugely satisfying |
-| 35 | कौन छुपा है? (Peek-a-boo zoom) | animals | tap | extreme close-up (fur/beak) slowly zooms out — tap when she knows; guessing without reading |
-| 36 | चिपकाओ मन से (Sticker scene, free-play) | earned stickers | drag | creative mode: place earned stickers anywhere on a scene, no goal, saves her arrangement; makes the sticker book a toy (NEW-VO: invite line) |
+| 35 | कौन छुपा है? (Peek-a-boo zoom) | animals | tap | **BUILT 2026-07-22** — 9s zoom-out from a random quadrant, answer any time, zoom always completes (no fail) |
+| 36 | चिपकाओ मन से (Sticker scene, free-play) | earned stickers | drag | **BUILT 2026-07-22** — earned stickers lead the tray, place anywhere, each speaks; 4 placements earn the round (arrangement persistence: later) |
 
 Build order recommendation: **23, 34, 17, 31** first — zero new
 vocabulary, maximum novelty per effort (shadow match and wipe-reveal are
