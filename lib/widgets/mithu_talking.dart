@@ -47,13 +47,21 @@ class _MithuTalkingState extends State<MithuTalking>
   // 0 = lean dance, 1 = spin-hop, 2 = happy flap.
   final int _danceStyle = Random().nextInt(3);
 
+  bool _danceLatch = false;
+
   bool get _dancing {
     final p = widget.voicePath ?? '';
-    return p.contains('shabash') ||
+    final praiseNow = p.contains('shabash') ||
         p.contains('wah') ||
         p.contains('badhiya') ||
         p.contains('sticker') ||
         p.contains('yum');
+    // Latch: once a celebration starts, dance through the WHOLE audio
+    // (the praise sequence changes clips mid-way and un-matched the
+    // substring — Mithu froze at the celebration peak).
+    if (praiseNow) _danceLatch = true;
+    if (!widget.isPlaying) _danceLatch = false;
+    return praiseNow || (_danceLatch && widget.isPlaying);
   }
 
   @override

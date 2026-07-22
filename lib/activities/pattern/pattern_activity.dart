@@ -62,7 +62,7 @@ class _PatternBodyState extends State<PatternBody>
   void initState() {
     super.initState();
     final vocab = List.of(widget.session.vocab);
-    final rng = Random(widget.session.scene.id.hashCode ^ 0x9a77);
+    final rng = Random(); // fresh every replay (seeded RNG let her memorize positions)
     vocab.shuffle(rng);
     _a = vocab[0];
     _b = vocab.length > 1 ? vocab[1] : vocab[0];

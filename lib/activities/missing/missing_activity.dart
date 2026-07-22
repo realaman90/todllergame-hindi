@@ -61,7 +61,7 @@ class _MissingBodyState extends State<MissingBody>
   @override
   void initState() {
     super.initState();
-    final rng = Random(widget.session.scene.id.hashCode ^ 0x6a1b);
+    final rng = Random(); // fresh every replay (seeded RNG let her memorize positions)
     final vocab = List.of(widget.session.vocab)..shuffle(rng);
     _shown = vocab.take(3).toList();
     _hiddenIndex = rng.nextInt(3);

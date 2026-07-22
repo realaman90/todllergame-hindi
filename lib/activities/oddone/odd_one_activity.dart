@@ -53,7 +53,7 @@ class _OddOneBodyState extends State<OddOneBody> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     final vocab = List.of(widget.session.vocab);
-    final rng = Random(widget.session.scene.id.hashCode ^ 0x0dd1);
+    final rng = Random(); // fresh every replay (seeded RNG let her memorize positions)
     vocab.shuffle(rng);
     _common = vocab[0];
     _odd = vocab.length > 1 ? vocab[1] : vocab[0];

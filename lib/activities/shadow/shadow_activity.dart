@@ -53,7 +53,7 @@ class _ShadowBodyState extends State<ShadowBody>
   @override
   void initState() {
     super.initState();
-    final rng = Random(widget.session.scene.id.hashCode ^ 0x5ad0);
+    final rng = Random(); // fresh every replay (seeded RNG let her memorize positions)
     _objects = widget.session.vocab.take(3).toList();
     _slots = List.of(_objects)..shuffle(rng);
     for (final o in _objects) {

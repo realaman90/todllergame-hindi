@@ -106,7 +106,11 @@ class _WordOverlayState extends State<WordOverlay>
                 ),
               );
             },
-            child: Container(
+            child: GestureDetector(
+              // Absorb card pokes: poking the word must NOT dismiss —
+              // only tapping outside (the scrim) closes the card.
+              onTap: () {},
+              child: Container(
               width: 320,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
@@ -154,6 +158,7 @@ class _WordOverlayState extends State<WordOverlay>
                 ],
               ),
             ),
+            )
           ),
         ),
       ),

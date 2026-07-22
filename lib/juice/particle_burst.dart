@@ -59,7 +59,7 @@ class _ParticleBurstState extends State<ParticleBurst>
   void didUpdateWidget(covariant ParticleBurst old) {
     super.didUpdateWidget(old);
     if (widget.trigger != old.trigger && widget.trigger > 0) {
-      final rng = Random(widget.trigger);
+      final rng = Random(); // varied bursts, not replayed patterns
       _pieces = List.generate(widget.pieces, (i) {
         // Mostly upward fan; gravity brings them down slowly.
         final angle = -pi / 2 + (rng.nextDouble() - 0.5) * pi * 1.2;

@@ -50,6 +50,7 @@ class _BubblesBodyState extends State<BubblesBody>
   static const _popsToFinish = 8;
 
   late final AnimationController _clock;
+  double _lastClock = 0.0;
   final _rng = Random();
   final List<_Bubble> _bubbles = [];
   final List<(Offset, double, AnimationController)> _bursts = [];
@@ -83,8 +84,11 @@ class _BubblesBodyState extends State<BubblesBody>
   void _tick() {
     if (!mounted) return;
     setState(() {
+      final now = _clock.value;
+      final dt = (now - _lastClock + 1.0) % 1.0; // loop-safe frame delta
+      _lastClock = now;
       for (final b in _bubbles) {
-        b.phase += b.speed / (60 * 12);
+        b.phase += b.speed * dt; // time-based, not frame-count-based
         b.x += sin(b.phase * 18 + b.id) * 0.0007;
       }
       _bubbles.removeWhere((b) => b.phase > 1.15 || b.popped);

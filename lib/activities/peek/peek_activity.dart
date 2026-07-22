@@ -54,7 +54,7 @@ class _PeekBodyState extends State<PeekBody>
   @override
   void initState() {
     super.initState();
-    final rng = Random(widget.session.scene.id.hashCode ^ 0x9eeb);
+    final rng = Random(); // fresh every replay (seeded RNG let her memorize positions)
     final vocab = List.of(widget.session.vocab)..shuffle(rng);
     _answer = vocab[0];
     _choices = [vocab[0], vocab[1]]..shuffle(rng);

@@ -74,7 +74,7 @@ class _StickerEarnedOverlayState extends State<StickerEarnedOverlay>
     );
     _controller.addStatusListener(_onStatusChanged);
 
-    final random = Random(widget.sticker.key?.hashCode ?? 42);
+    final random = Random(); // varied every time — fixed seed made all celebrations identical
     const colors = [
       AppColors.marigold,
       AppColors.kumkum,
@@ -106,6 +106,8 @@ class _StickerEarnedOverlayState extends State<StickerEarnedOverlay>
 
   void _onStatusChanged(AnimationStatus status) {
     if (status == AnimationStatus.completed) {
+      // Arrival beat: the sticker lands somewhere real, audibly.
+      widget.audio.playSfx('ding_sticker');
       widget.onDismiss();
     }
   }
@@ -142,7 +144,7 @@ class _StickerEarnedOverlayState extends State<StickerEarnedOverlay>
     final target = widget.targetRect ?? _fallbackTarget(size);
 
     final rectAnimation = RectTween(begin: source, end: target).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOutCubic),
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
 
     final sparkleProgress = CurvedAnimation(

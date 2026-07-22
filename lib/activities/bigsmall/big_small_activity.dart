@@ -55,7 +55,7 @@ class _BigSmallBodyState extends State<BigSmallBody>
   @override
   void initState() {
     super.initState();
-    final rng = Random(widget.session.scene.id.hashCode ^ 0xb165);
+    final rng = Random(); // fresh every replay (seeded RNG let her memorize positions)
     final vocab = List.of(widget.session.vocab)..shuffle(rng);
     _object = vocab.first;
     _askBig = rng.nextBool();

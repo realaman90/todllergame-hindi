@@ -60,6 +60,7 @@ class _BalloonsBodyState extends State<BalloonsBody>
   ];
 
   late final AnimationController _clock;
+  double _lastClock = 0.0;
   final _rng = Random();
   final List<_Balloon> _balloons = [];
   final List<(Offset, Color, AnimationController)> _bursts = [];
@@ -106,8 +107,11 @@ class _BalloonsBodyState extends State<BalloonsBody>
   void _tick() {
     if (!mounted) return;
     setState(() {
+      final now = _clock.value;
+      final dt = (now - _lastClock + 1.0) % 1.0; // loop-safe frame delta
+      _lastClock = now;
       for (final b in _balloons) {
-        b.phase += b.speed / (60 * 12); // rise per frame at 12s clock
+        b.phase += b.speed * dt; // time-based: same speed at 60 or 120Hz
       }
       final escaped = _balloons
           .where((b) => b.phase > 1.15 && !b.popped)

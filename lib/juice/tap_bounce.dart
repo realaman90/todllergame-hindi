@@ -63,12 +63,12 @@ class _TapBounceState extends State<TapBounce> with TickerProviderStateMixin {
         .animate(CurvedAnimation(parent: _press, curve: Curves.easeOut));
     _releaseScale = TweenSequence<double>([
       TweenSequenceItem(
-        tween: Tween(begin: 0.92, end: 1.07)
+        tween: Tween(begin: 0.92, end: 1.22)
             .chain(CurveTween(curve: Curves.easeOut)),
         weight: 35,
       ),
       TweenSequenceItem(
-        tween: Tween(begin: 1.07, end: 1.0)
+        tween: Tween(begin: 1.22, end: 1.0)
             .chain(CurveTween(curve: Curves.easeOut)),
         weight: 65,
       ),
@@ -96,9 +96,13 @@ class _TapBounceState extends State<TapBounce> with TickerProviderStateMixin {
 
   void _down(TapDownDetails _) {
     _fingerDown = true;
+    // Mash continuity: start the squash from the CURRENT rendered scale
+    // so a re-tap mid-release never snaps a frame (toddlers mash).
+    final current = _inPress ? _pressScale.value : _releaseScale.value;
     _inPress = true;
     _release.stop();
-    _press.forward(from: 0.0);
+    final from = ((1.0 - current) / 0.08).clamp(0.0, 1.0);
+    _press.forward(from: from);
     if (widget.haptic) HapticFeedback.lightImpact();
     widget.tapSound?.playTapNote();
     widget.onDown?.call();

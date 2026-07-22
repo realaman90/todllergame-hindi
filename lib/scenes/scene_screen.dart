@@ -139,6 +139,12 @@ class _SceneScreenState extends State<SceneScreen> {
   }
 
   void _showObject(SceneObject object, Rect sourceRect) {
+    // Two quick taps on different objects: the first one's pending
+    // discovery must not be silently overwritten (lost-sticker race) —
+    // bank it before switching.
+    if (_pendingSlug != null && _pendingSlug != object.slug) {
+      widget.stickerService.discover(_pendingSlug!);
+    }
     if (!widget.stickerService.has(object.slug)) {
       _pendingSlug = object.slug;
       _pendingSourceRect = sourceRect;

@@ -32,8 +32,13 @@ class _ChaloGharGhoomeAppState extends State<ChaloGharGhoomeApp> {
   @override
   void initState() {
     super.initState();
-    // Boot the audio engine + preload SFX before the child's first tap.
-    _audio.init();
+    // Boot the audio engine + preload SFX before the child's first tap,
+    // then warm the whole word set in the background (A5: the lesson
+    // must land as fast as the pop).
+    _audio.init().then((_) async {
+      final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
+      if (mounted) _audio.warmUp(manifest.listAssets());
+    });
     _stickers.load();
     _settings.load().then((_) {
       if (mounted) {

@@ -76,6 +76,18 @@ class AudioService extends ChangeNotifier {
   /// more than once; every public method awaits this internally.
   Future<void> init() => _initFuture ??= _doInit();
 
+  /// Warm every voice/SFX clip into the cache in the background so the
+  /// WORD (the actual lesson) lands as fast as the pop — cold loads cost
+  /// 300-800ms on first use. Music stays disk-streamed.
+  Future<void> warmUp(Iterable<String> assetPaths) async {
+    await init();
+    for (final path in assetPaths) {
+      if (path.endsWith('.mp3') && !path.contains('/music/')) {
+        await _load(path);
+      }
+    }
+  }
+
   Future<void> _doInit() async {
     try {
       await _engine.init();

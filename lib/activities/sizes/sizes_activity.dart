@@ -62,7 +62,7 @@ class _SizesBodyState extends State<SizesBody>
   @override
   void initState() {
     super.initState();
-    final rng = Random(widget.session.scene.id.hashCode ^ 0x517e);
+    final rng = Random(); // fresh every replay (seeded RNG let her memorize positions)
     final vocab = List.of(widget.session.vocab)..shuffle(rng);
     _object = vocab.first;
     _order = [0, 1, 2]..shuffle(rng);
