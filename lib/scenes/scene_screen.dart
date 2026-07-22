@@ -74,7 +74,10 @@ class _SceneScreenState extends State<SceneScreen> {
   @override
   void dispose() {
     widget.audio.stop();
-    widget.audio.stopAmbient();
+    // Hand the Home theme back instead of leaving silence — Home only
+    // starts it in initState, so stopping here muted Home for the rest
+    // of the session (Kimi review: loudest sub-premium signal).
+    widget.audio.playAmbient('assets/audio/music/theme.mp3');
     widget.stickerService.removeListener(_onStickersChanged);
     super.dispose();
   }
@@ -328,9 +331,16 @@ class _SceneScreenState extends State<SceneScreen> {
                     children: [
                       _Background(scene: scene),
                       ..._visibleObjects.map((object) {
-                        final slotIndex = _slotAssignment[object.slug]!;
+                        final slotIndex = _slotAssignment[object.slug];
+                        if (slotIndex == null) {
+                          return const SizedBox.shrink();
+                        }
                         final slot = _slots[slotIndex];
-                        final size = 100.0 * object.scale;
+                        // Center on the VISUAL size (ArtTile scales by
+                        // uiScale internally) — unscaled math mis-centered
+                        // and edge-clipped every object on iPad.
+                        final size =
+                            100.0 * object.scale * uiScale(context);
                         final x = slot.dx * constraints.maxWidth;
                         final y = slot.dy * constraints.maxHeight;
                         final instanceId = _instanceGeneration[object.slug] ?? 0;

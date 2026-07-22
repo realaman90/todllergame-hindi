@@ -182,7 +182,10 @@ class _CarouselScreenState extends State<CarouselScreen> {
 
   @override
   void dispose() {
-    widget.audio.stopAmbient();
+    // Hand the Home theme back instead of leaving silence — Home only
+    // starts it in initState, so stopping here muted Home for the rest
+    // of the session (Kimi review: loudest sub-premium signal).
+    widget.audio.playAmbient('assets/audio/music/theme.mp3');
     super.dispose();
   }
 

@@ -56,11 +56,10 @@ class _ParentGateDialogState extends State<_ParentGateDialog>
   void _cancelHold() {
     if (!mounted) return;
     setState(() => _holding = false);
-    _progressController.animateBack(
-      0.0,
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeOut,
-    );
+    // SNAP to zero: the 200ms decay let toddler-speed mashing ratchet
+    // the ring to completion (each press resumed from the residue).
+    _progressController.stop();
+    _progressController.value = 0.0;
   }
 
   @override
@@ -98,10 +97,13 @@ class _ParentGateDialogState extends State<_ParentGateDialog>
               ),
             ),
             const SizedBox(height: 28),
-            GestureDetector(
-              onTapDown: (_) => _startHold(),
-              onTapUp: (_) => _cancelHold(),
-              onTapCancel: () => _cancelHold(),
+            Listener(
+              // Pointer events, not tap gestures: a parent's thumb may
+              // drift while holding 3s — gesture slop cancelled the hold
+              // at 18px, making the gate hard for adults.
+              onPointerDown: (_) => _startHold(),
+              onPointerUp: (_) => _cancelHold(),
+              onPointerCancel: (_) => _cancelHold(),
               behavior: HitTestBehavior.opaque,
               child: SizedBox(
                 width: 88,
