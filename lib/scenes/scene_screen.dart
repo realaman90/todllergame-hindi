@@ -206,18 +206,25 @@ class _SceneScreenState extends State<SceneScreen> {
     });
 
     final replacement = candidates.first;
+    // Two readable beats instead of a same-frame morph (founder: "the
+    // refresh feels like a bug"): the discovered object leaves, the slot
+    // rests empty for a breath, then the newcomer pops in.
     setState(() {
       _visibleObjects.removeWhere((o) => o.slug == slug);
       _visibleSlugs.remove(slug);
       _slotAssignment.remove(slug);
       _outgoingSlugs.add(slug);
-
-      _visibleObjects.add(replacement);
-      _visibleSlugs.add(replacement.slug);
-      _shownSlugs.add(replacement.slug);
-      _slotAssignment[replacement.slug] = slot;
-      _instanceGeneration[replacement.slug] =
-          (_instanceGeneration[replacement.slug] ?? 0) + 1;
+    });
+    Future.delayed(const Duration(milliseconds: 850), () {
+      if (!mounted || _visibleSlugs.contains(replacement.slug)) return;
+      setState(() {
+        _visibleObjects.add(replacement);
+        _visibleSlugs.add(replacement.slug);
+        _shownSlugs.add(replacement.slug);
+        _slotAssignment[replacement.slug] = slot;
+        _instanceGeneration[replacement.slug] =
+            (_instanceGeneration[replacement.slug] ?? 0) + 1;
+      });
     });
   }
 

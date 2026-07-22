@@ -236,6 +236,15 @@ class AudioService extends ChangeNotifier {
     await init();
     if (!_engineReady) return;
 
+    // The same single clip is already mid-utterance (rapid re-tap, or a
+    // pick-speak immediately followed by a success re-speak of the same
+    // word): let it finish. Restarting from zero reads as a stutter bug.
+    if (paths.length == 1 &&
+        _voiceActive &&
+        paths.first == _currentVoicePath) {
+      return;
+    }
+
     final generation = ++_voiceGeneration;
     _pendingSfx = thenSfx;
 

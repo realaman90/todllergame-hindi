@@ -38,6 +38,7 @@ class _CarouselScreenState extends State<CarouselScreen> {
   int _index = 0;
   bool _completing = false;
   String? _earnedSlug;
+  int _earnedGeneration = 0;
   // Round-skip guards (founder report 2026-07-22: "some games get
   // skipped"): a generation stamp kills stale complete/skip callbacks
   // from a round that already ended, and a debounce absorbs toddler
@@ -134,26 +135,29 @@ class _CarouselScreenState extends State<CarouselScreen> {
     final round = _playlist[_index];
     final slug = 'activity:${round.activityId}:${round.sceneId}';
     widget.stickerService.discover(slug);
-    // Restate the round's focal word inside the celebration (F14).
-    final state = await _roundFuture;
-    final word = state.vocab.firstOrNull;
-    await widget.audio.playPraise(
-      sceneId: word == null ? null : round.sceneId,
-      slug: word?.slug,
-      language: word == null ? null : 'hi',
-    );
+    // No word restate here: the carousel cannot know which word the game
+    // was actually about (vocab.first was usually wrong — founder heard a
+    // random word after "bahut badhiya" and rightly called it a bug). The
+    // find-it puzzle keeps its restate, where the slug IS the target.
+    await widget.audio.playPraise();
     // The child may have skipped ahead while the praise played — the
     // overlay (whose dismissal advances again) must not appear then.
     if (mounted && generation == _roundGeneration) {
-      setState(() => _earnedSlug = slug);
+      setState(() {
+        _earnedSlug = slug;
+        _earnedGeneration = _roundGeneration;
+      });
     }
   }
 
   void _onSkip() => _advance();
 
   void _onEarnedDismiss() {
+    final advanced = _earnedGeneration != _roundGeneration;
     setState(() => _earnedSlug = null);
-    _advance();
+    // If a skip already advanced the round while the celebration was up,
+    // dismissing it must not advance AGAIN (this silently ate a game).
+    if (!advanced) _advance();
   }
 
   void _advance() {
@@ -327,7 +331,10 @@ class _SkipArrow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.findAncestorStateOfType<_CarouselScreenState>();
-    return TapBounce(
+    final celebrating = state?._earnedSlug != null;
+    return IgnorePointer(
+      ignoring: celebrating,
+      child: TapBounce(
       tapSound: state?.widget.audio,
       onTap: () => state?._onSkip(),
       child: Container(
@@ -351,6 +358,7 @@ class _SkipArrow extends StatelessWidget {
           color: AppColors.ink,
           size: 32,
         ),
+      ),
       ),
     );
   }
