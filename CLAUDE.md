@@ -70,8 +70,11 @@ Which model/mode to use for what kind of work in this repo:
 - **Structural/mechanical implementation (new screens, persistence,
   content plumbing, scaffolding):** shell out to **Kimi K3 in
   yolo (auto-approve) mode** via its CLI, driven from the specs written
-  above. Invocation (kimi-code v0.27.0, installed at `~/.kimi-code/bin`):
-  `kimi -p "<implementation brief>"` from the repo root. Prompt mode is
+  above. Invocation (kimi-code v0.29.0, installed at `~/.kimi-code/bin`):
+  `kimi -m kimi-code/k3 -p "<implementation brief>"` from the repo root —
+  ALWAYS pin `-m kimi-code/k3` (founder caught an early dispatch running
+  K2.7 under an older default; config.toml now defaults to K3, but the
+  pin makes dispatches robust against config drift). Prompt mode is
   implicitly auto-approve — do NOT add `-y`/`--auto` (they error when
   combined with `-p`; they're for interactive mode). Use
   `kimi -r <session-id> -p "..."` to continue a prior Kimi session for
