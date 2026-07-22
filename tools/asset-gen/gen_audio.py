@@ -575,7 +575,13 @@ def generate_sfx():
 # Hindi voice for placeholder VO. Default: "Noorie - Warm Conversational
 # Support" (female, Hindi) from the shared library, added to the account.
 # Override with ELEVENLABS_HINDI_VOICE_ID in .env if you prefer another.
-DEFAULT_HINDI_VOICE_ID = "U05hO0X5Y4TnTclUk0k7"  # Noorie
+# Krusha (founder-auditioned 2026-07-22, clear native pronunciation).
+# Two registers, founder-approved from the expression ladder:
+#   words  -> calm baseline (clarity + take-to-take consistency)
+#   host   -> parrot-host (maximum expressiveness for Mithu's energy)
+DEFAULT_HINDI_VOICE_ID = "TnYB2ffExJibiE7F67qW"  # Krusha
+WORD_SETTINGS = {"stability": 0.50, "similarity_boost": 0.80, "style": 0.60}
+HOST_SETTINGS = {"stability": 0.20, "similarity_boost": 0.75, "style": 1.00}
 
 
 def get_hindi_voice_id() -> str:
@@ -660,11 +666,7 @@ def generate_mithu_lines():
                 voice_id=voice_id,
                 text=text,
                 model_id="eleven_multilingual_v2",
-                voice_settings={
-                    "stability": 0.5,
-                    "similarity_boost": 0.8,
-                    "style": 0.6,
-                },
+                voice_settings=HOST_SETTINGS,
             )
             save_audio(audio, path)
             print(f"  OK: {path.name}")
@@ -700,11 +702,7 @@ def generate_voiceover():
                     voice_id=voice_id,
                     text=hindi_text,
                     model_id="eleven_multilingual_v2",
-                    voice_settings={
-                        "stability": 0.7,
-                        "similarity_boost": 0.8,
-                        "style": 0.3,
-                    },
+                    voice_settings=WORD_SETTINGS,
                 )
                 save_audio(audio, std_path)
                 print(f"  OK: {std_path.name}")
@@ -724,9 +722,8 @@ def generate_voiceover():
                     text=slow_text,
                     model_id="eleven_multilingual_v2",
                     voice_settings={
+                        **WORD_SETTINGS,
                         "stability": 0.85,
-                        "similarity_boost": 0.8,
-                        "style": 0.1,
                         "speed": 0.7,
                     },
                 )

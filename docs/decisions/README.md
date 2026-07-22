@@ -28,6 +28,7 @@ as decisions are made; don't rewrite history (supersede instead). Format:
 | [010](ADR-010-name-mithu-and-friends.md) | Product named "Mithu & Friends" (Hindi tagline: चलो घर घूमें!); per-language store-listing pattern | 2026-07-20 | Accepted |
 | [011](ADR-011-flutter-soloud-audio-engine.md) | flutter_soloud replaces just_audio as the only audio engine (feel rules F2/F12) | 2026-07-21 | Accepted |
 | [012](ADR-012-publisher-identity-mithu-and-friends.md) | Published under the app's own brand (bundle id com.mithuandfriends.app), not Gemoniq | 2026-07-22 | Accepted |
+| [013](ADR-013-krusha-tts-ships-hindi-v1.md) | Curated ElevenLabs voice (Krusha, two registers) ships Hindi v1 VO; recording becomes optional upgrade | 2026-07-22 | Proposed — pending founder in-app confirmation |
 
 ### Adding a decision
 
