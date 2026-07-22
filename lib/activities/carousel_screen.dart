@@ -38,6 +38,13 @@ class _CarouselScreenState extends State<CarouselScreen> {
   int _index = 0;
   bool _completing = false;
   String? _earnedSlug;
+  // Round-skip guards (founder report 2026-07-22: "some games get
+  // skipped"): a generation stamp kills stale complete/skip callbacks
+  // from a round that already ended, and a debounce absorbs toddler
+  // double-taps on the skip arrow — each would double-advance and eat
+  // the next game unseen.
+  int _roundGeneration = 0;
+  DateTime _lastAdvance = DateTime.fromMillisecondsSinceEpoch(0);
 
   @override
   void initState() {
@@ -115,6 +122,7 @@ class _CarouselScreenState extends State<CarouselScreen> {
   Future<void> _onComplete() async {
     if (_completing) return;
     _completing = true;
+    final generation = _roundGeneration;
     final round = _playlist[_index];
     final slug = 'activity:${round.activityId}:${round.sceneId}';
     widget.stickerService.discover(slug);
@@ -126,7 +134,11 @@ class _CarouselScreenState extends State<CarouselScreen> {
       slug: word?.slug,
       language: word == null ? null : 'hi',
     );
-    if (mounted) setState(() => _earnedSlug = slug);
+    // The child may have skipped ahead while the praise played — the
+    // overlay (whose dismissal advances again) must not appear then.
+    if (mounted && generation == _roundGeneration) {
+      setState(() => _earnedSlug = slug);
+    }
   }
 
   void _onSkip() => _advance();
@@ -137,6 +149,12 @@ class _CarouselScreenState extends State<CarouselScreen> {
   }
 
   void _advance() {
+    final now = DateTime.now();
+    if (now.difference(_lastAdvance) < const Duration(milliseconds: 700)) {
+      return; // double-tap on the skip arrow, or a racing callback
+    }
+    _lastAdvance = now;
+    _roundGeneration++;
     _completing = false;
     // Each round's taps restart the pentatonic ladder from the root.
     widget.audio.resetTapLadder();
@@ -195,12 +213,17 @@ class _CarouselScreenState extends State<CarouselScreen> {
           }
 
           final state = snapshot.data!;
+          final generation = _roundGeneration;
           final session = ActivitySession(
             scene: state.scene,
             vocab: state.vocab,
             audio: widget.audio,
-            onComplete: _onComplete,
-            onSkip: _onSkip,
+            onComplete: () {
+              if (generation == _roundGeneration) _onComplete();
+            },
+            onSkip: () {
+              if (generation == _roundGeneration) _onSkip();
+            },
           );
 
           final themeColor = AppColors.forTheme(state.scene.theme);
