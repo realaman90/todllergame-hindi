@@ -48,6 +48,7 @@ class _WhackBodyState extends State<WhackBody> with TickerProviderStateMixin {
   late final List<AnimationController> _rise;
   late final List<AnimationController> _bonk;
   final List<int> _bonkBurst = List.filled(_pots, 0);
+  final List<bool> _bonking = List.filled(_pots, false);
   final _rng = Random();
   Timer? _spawner;
   int _caught = 0;
@@ -119,10 +120,13 @@ class _WhackBodyState extends State<WhackBody> with TickerProviderStateMixin {
     _rise[pot].forward(from: 0.0);
     // A long, unhurried bob — a 3-year-old's reaction time never loses
     // the catch (and the asked object always comes back regardless).
-    Future.delayed(const Duration(milliseconds: 3200), () async {
-      if (!mounted || _peeking[pot] == null) return;
-      await _rise[pot].reverse();
-      if (mounted) setState(() => _peeking[pot] = null);
+    Future.delayed(const Duration(milliseconds: 3200), () {
+      if (!mounted || _peeking[pot] == null || _bonking[pot]) return;
+      _rise[pot].reverse().whenCompleteOrCancel(() {
+        if (mounted && !_bonking[pot] && _rise[pot].value == 0.0) {
+          setState(() => _peeking[pot] = null);
+        }
+      });
     });
   }
 
@@ -134,14 +138,23 @@ class _WhackBodyState extends State<WhackBody> with TickerProviderStateMixin {
       return;
     }
     // The BONK: physical thock + medium thump + squash-into-pot + dust.
+    // NEVER bare-await the controller: a re-tap restarting it cancels
+    // the ticker and the await hangs forever, killing the pot (founder
+    // hit this — all pots dead after rapid bonks). Timed cleanup + a
+    // per-pot guard instead.
+    if (_bonking[pot]) return;
+    _bonking[pot] = true;
     HapticFeedback.mediumImpact();
     widget.session.audio.playSfx('tap_wood',
         rate: 0.68 + _rng.nextDouble() * 0.22, volume: 1.8);
     setState(() => _bonkBurst[pot]++);
-    await _bonk[pot].forward(from: 0.0);
+    _bonk[pot].forward(from: 0.0);
+    await Future.delayed(const Duration(milliseconds: 320));
+    _bonking[pot] = false;
     if (!mounted) return;
     setState(() => _peeking[pot] = null);
     _rise[pot].value = 0.0;
+    _bonk[pot].value = 0.0;
     if (obj.slug == _ask.slug) {
       _caught++;
       widget.session.audio.playSfx('ding_sticker');
@@ -226,7 +239,7 @@ class _WhackBodyState extends State<WhackBody> with TickerProviderStateMixin {
                           return Transform.translate(
                             offset: Offset(
                                 0,
-                                -(potH * 0.55 + (tile * 0.85) * (t - 1)) +
+                                -(potH * 0.55 + (tile * 1.15) * (t - 1)) +
                                     b * tile * 0.95),
                             child: Transform.scale(
                               scaleX: 1.0 + 0.6 * b,
