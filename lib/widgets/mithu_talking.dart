@@ -3,6 +3,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../theme/theme.dart';
+
 /// Mithu as a paper puppet with three states, driven by real frame art
 /// (all generated on-model from the ADR-008 canon):
 ///
@@ -163,8 +165,8 @@ class _MithuTalkingState extends State<MithuTalking>
         );
       },
       child: SizedBox(
-        width: widget.size,
-        height: widget.size,
+        width: widget.size * uiScale(context),
+        height: widget.size * uiScale(context),
         // Same-composition on-model frames: a plain swap reads as motion.
         child: ClipOval(
           child: Image.asset(_frame, fit: BoxFit.cover, gaplessPlayback: true),

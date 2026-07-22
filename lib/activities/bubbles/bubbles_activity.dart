@@ -140,7 +140,9 @@ class _BubblesBodyState extends State<BubblesBody>
           Positioned(
             left: b.x * size.width - b.size / 2,
             top: size.height * (1.08 - b.phase * 1.15) - b.size / 2,
-            child: GestureDetector(
+            child: Transform.scale(
+              scale: uiScale(context),
+              child: GestureDetector(
               onTapDown: (_) => _pop(b, size),
               behavior: HitTestBehavior.opaque,
               child: CustomPaint(
@@ -148,6 +150,7 @@ class _BubblesBodyState extends State<BubblesBody>
                 painter: _BubblePainter(
                     wobble: sin(b.phase * 22 + b.id)),
               ),
+            ),
             ),
           ),
         for (final (at, bsize, c) in _bursts)

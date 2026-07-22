@@ -28,8 +28,11 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen>
     with TickerProviderStateMixin {
-  static bool _greetingPlayed = false;
-  bool _introPlaying = false;
+  // Welcome moment on every app open (founder 2026-07-22: "the welcome
+  // screen is not there") — full-screen Mithu + wordmark that parts into
+  // Home once the greeting lands. First launch keeps the longer intro.
+  bool _welcomeShowing = true;
+  bool _welcomeGone = false;
   late final AnimationController _pulseController;
   late final AnimationController _breathingController;
 
@@ -56,25 +59,38 @@ class _HomeScreenState extends State<HomeScreen>
     if (!widget.stickerService.hasSeenIntro) {
       await widget.stickerService.markIntroSeen();
       if (!mounted) return;
-      setState(() => _introPlaying = true);
       await widget.audio.playHostSequence([
         'mithu_intro_name',
         'mithu_intro_play',
-        'mithu_intro_choose',
       ]);
-      if (mounted && _introPlaying) {
-        setState(() => _introPlaying = false);
-      }
-    } else if (!_greetingPlayed) {
-      _greetingPlayed = true;
-      widget.audio.playHost('mithu_greeting');
+      if (!mounted) return;
+      _dismissWelcome();
+      // Doors are visible now — "एक दरवाज़ा चुनो!" pulses them over the
+      // revealed Home (via _onAudioChanged).
+      widget.audio.playHost('mithu_intro_choose');
+    } else {
+      // Give the greeting a floor so the welcome reads as a moment, not
+      // a flicker, even if audio finishes fast (or fails silently).
+      await Future.wait([
+        widget.audio.playHost('mithu_greeting'),
+        Future.delayed(const Duration(milliseconds: 1800)),
+      ]);
+      if (mounted) _dismissWelcome();
     }
   }
 
-  void _skipIntro() {
-    if (!_introPlaying) return;
+  void _dismissWelcome() {
+    if (!_welcomeShowing) return;
+    setState(() => _welcomeShowing = false);
+    Future.delayed(const Duration(milliseconds: 520), () {
+      if (mounted) setState(() => _welcomeGone = true);
+    });
+  }
+
+  void _skipWelcome() {
+    if (!_welcomeShowing) return;
     widget.audio.stop();
-    setState(() => _introPlaying = false);
+    _dismissWelcome();
   }
 
   void _onAudioChanged() {
@@ -136,7 +152,12 @@ class _HomeScreenState extends State<HomeScreen>
         Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _MithuBlock(audio: widget.audio),
+            // One MithuTalking at a time: the welcome overlay owns him
+            // until it parts, then he pops into his home spot.
+            if (_welcomeGone)
+              PopIn(child: _MithuBlock(audio: widget.audio))
+            else
+              const SizedBox(width: 220, height: 230),
           ],
         ),
         const SizedBox(width: 32),
@@ -190,21 +211,70 @@ class _HomeScreenState extends State<HomeScreen>
       body: SafeArea(
         child: Stack(
           children: [
-            Center(
-              child: _introPlaying
-                  ? GestureDetector(
-                      onTap: _skipIntro,
-                      behavior: HitTestBehavior.opaque,
-                      child: AbsorbPointer(child: content),
-                    )
-                  : content,
-            ),
+            Center(child: content),
             Positioned(
               top: 4,
               right: 4,
               child: _SettingsButton(),
             ),
+            if (!_welcomeGone) _buildWelcome(),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+extension on _HomeScreenState {
+  Widget _buildWelcome() {
+    return Positioned.fill(
+      child: IgnorePointer(
+        ignoring: !_welcomeShowing,
+        child: AnimatedOpacity(
+          opacity: _welcomeShowing ? 1.0 : 0.0,
+          duration: const Duration(milliseconds: 480),
+          child: GestureDetector(
+            onTap: _skipWelcome,
+            behavior: HitTestBehavior.opaque,
+            child: Container(
+              color: AppColors.paper,
+              child: Stack(children: [
+                const Positioned.fill(
+                    child: GameBackdrop(color: AppColors.marigold)),
+                Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ListenableBuilder(
+                        listenable: widget.audio,
+                        builder: (context, _) => MithuTalking(
+                          isPlaying: widget.audio.isPlaying,
+                          voicePath: widget.audio.currentVoicePath,
+                          size: 190,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Mithu & Friends',
+                        style: AppTextStyles.homeTitle.copyWith(
+                          color: AppColors.peacock,
+                          fontSize: 44,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'चलो घर घूमें!',
+                        style: AppTextStyles.sceneTitle.copyWith(
+                          color: AppColors.marigoldDeep,
+                          fontSize: 24,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ]),
+            ),
+          ),
         ),
       ),
     );

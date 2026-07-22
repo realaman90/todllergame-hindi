@@ -69,10 +69,11 @@ class _WipeBodyState extends State<WipeBody>
 
   void _wipeAt(Offset local) {
     if (_revealed) return;
+    final win = _windowSize * uiScale(context);
     if (local.dx < 0 ||
         local.dy < 0 ||
-        local.dx > _windowSize ||
-        local.dy > _windowSize) {
+        local.dx > win ||
+        local.dy > win) {
       return;
     }
     if (_wipes.isNotEmpty && (local - _wipes.last).distance < 14) return;
@@ -83,8 +84,8 @@ class _WipeBodyState extends State<WipeBody>
           .playSfx('tap_soft', rate: 0.9 + (_sfxCounter % 4) * 0.08);
     }
     // Coverage bookkeeping: a wipe clears its cell + close neighbours.
-    final cx = (local.dx / _windowSize * _gridN).floor().clamp(0, _gridN - 1);
-    final cy = (local.dy / _windowSize * _gridN).floor().clamp(0, _gridN - 1);
+    final cx = (local.dx / win * _gridN).floor().clamp(0, _gridN - 1);
+    final cy = (local.dy / win * _gridN).floor().clamp(0, _gridN - 1);
     for (var dx = -1; dx <= 1; dx++) {
       for (var dy = -1; dy <= 1; dy++) {
         final x = cx + dx, y = cy + dy;
@@ -120,8 +121,8 @@ class _WipeBodyState extends State<WipeBody>
         onPanDown: (d) => _wipeAt(d.localPosition),
         onPanUpdate: (d) => _wipeAt(d.localPosition),
         child: SizedBox(
-          width: _windowSize,
-          height: _windowSize,
+          width: _windowSize * uiScale(context),
+          height: _windowSize * uiScale(context),
           child: Stack(children: [
             // The hidden object, framed like a window.
             Center(
@@ -151,7 +152,8 @@ class _WipeBodyState extends State<WipeBody>
                 builder: (context, _) => Opacity(
                   opacity: 1.0 - _melt.value,
                   child: CustomPaint(
-                    size: const Size(_windowSize, _windowSize),
+                    size: Size(_windowSize * uiScale(context),
+                        _windowSize * uiScale(context)),
                     painter: _FrostPainter(
                         wipes: List.of(_wipes), themeColor: themeColor),
                   ),

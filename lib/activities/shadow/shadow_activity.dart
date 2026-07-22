@@ -205,7 +205,8 @@ class _ShadowBodyState extends State<ShadowBody>
   Widget _draggableObject(
       SceneObject o, int i, Color themeColor, Color deepColor) {
     if (_filled.contains(o.slug)) {
-      return const SizedBox(width: _tile, height: _tile);
+      final s = uiScale(context);
+      return SizedBox(width: _tile * s, height: _tile * s);
     }
     final tile = ArtTile(
       imagePath: 'assets/art/${o.art}',

@@ -28,6 +28,7 @@ class ArtTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = this.size * uiScale(context);
     final artSize = showLabel ? size * 0.82 : size;
     final rim = artSize * 0.055; // white die-cut edge
     // Hand-placed feel: stable per-art tilt of up to ~3 degrees.

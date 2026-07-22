@@ -166,7 +166,7 @@ class _MissingBodyState extends State<MissingBody>
           ),
           const SizedBox(height: 36),
           SizedBox(
-            height: _tile * 0.9 + 34,
+            height: _tile * 0.9 * uiScale(context) + 34,
             child: _phase == _MissingPhase.showing
                 ? const SizedBox.shrink()
                 : Row(
@@ -191,12 +191,13 @@ class _MissingBodyState extends State<MissingBody>
     final covered = _phase == _MissingPhase.covered && i == _hiddenIndex;
     final revealed = _phase == _MissingPhase.solved && i == _hiddenIndex;
 
+    final ts = _tile * uiScale(context);
     return PopIn(
       delayMs: 120 * i,
       child: SizedBox(
         key: i == _hiddenIndex ? _hiddenKey : null,
-        width: _tile,
-        height: _tile,
+        width: ts,
+        height: ts,
         child: Stack(children: [
           if (revealed)
             PopIn(
@@ -220,19 +221,19 @@ class _MissingBodyState extends State<MissingBody>
           AnimatedPositioned(
             duration: const Duration(milliseconds: 550),
             curve: Curves.easeOutCubic,
-            top: covered ? 0 : -_tile - 30,
+            top: covered ? 0 : -ts - 30,
             left: 0,
-            child: _cloth(deepColor),
+            child: _cloth(deepColor, ts),
           ),
         ]),
       ),
     );
   }
 
-  Widget _cloth(Color deepColor) {
+  Widget _cloth(Color deepColor, double clothSize) {
     return Container(
-      width: _tile,
-      height: _tile,
+      width: clothSize,
+      height: clothSize,
       decoration: BoxDecoration(
         color: AppColors.kumkum,
         borderRadius: BorderRadius.circular(22),

@@ -74,7 +74,7 @@ class _PathBodyState extends State<PathBody>
     if (_done) return;
     // Nearest sample at-or-ahead of current progress within grab range.
     var best = -1;
-    var bestD = _grabRadius;
+    var bestD = _grabRadius * uiScale(context);
     final from = (_progress * _samplesN).floor();
     final to = min(_samplesN, from + 14); // can't skip ahead over the wave
     for (var i = from; i <= to; i++) {
@@ -135,8 +135,8 @@ class _PathBodyState extends State<PathBody>
           ),
           // Home, waiting at the end of the road.
           Positioned(
-            left: _pointAt(size, 1.0).dx - 8,
-            top: _pointAt(size, 1.0).dy - 56,
+            left: _pointAt(size, 1.0).dx - 52 * uiScale(context) + 44,
+            top: _pointAt(size, 1.0).dy - 52 * uiScale(context) - 4,
             child: AnimatedBuilder(
               animation: _idle,
               builder: (context, child) => Transform.scale(
@@ -146,8 +146,8 @@ class _PathBodyState extends State<PathBody>
                 child: child,
               ),
               child: Container(
-                width: 104,
-                height: 104,
+                width: 104 * uiScale(context),
+                height: 104 * uiScale(context),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(22),
                   border: Border.all(color: Colors.white, width: 4),
@@ -168,8 +168,8 @@ class _PathBodyState extends State<PathBody>
           ),
           // The puppy walks the road under the finger.
           Positioned(
-            left: dogAt.dx - 40,
-            top: dogAt.dy - 40,
+            left: dogAt.dx - 40 * uiScale(context),
+            top: dogAt.dy - 40 * uiScale(context),
             child: IgnorePointer(
               child: AnimatedBuilder(
                 animation: _idle,
@@ -178,8 +178,8 @@ class _PathBodyState extends State<PathBody>
                   child: child,
                 ),
                 child: Container(
-                  width: 80,
-                  height: 80,
+                  width: 80 * uiScale(context),
+                  height: 80 * uiScale(context),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(color: Colors.white, width: 4),

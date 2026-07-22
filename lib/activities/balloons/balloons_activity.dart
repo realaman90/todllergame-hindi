@@ -187,7 +187,9 @@ class _BalloonsBodyState extends State<BalloonsBody>
           Positioned(
             left: b.x * size.width - 44,
             top: size.height * (1.05 - b.phase * 1.1) - 55,
-            child: GestureDetector(
+            child: Transform.scale(
+              scale: uiScale(context),
+              child: GestureDetector(
               onTapDown: (_) => _pop(b, size),
               behavior: HitTestBehavior.opaque,
               child: CustomPaint(
@@ -198,6 +200,7 @@ class _BalloonsBodyState extends State<BalloonsBody>
                   number: b.number,
                 ),
               ),
+            ),
             ),
           ),
         for (final (at, color, c) in _bursts)

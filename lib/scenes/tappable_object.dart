@@ -129,7 +129,7 @@ class _TappableObjectState extends State<TappableObject>
   Widget build(BuildContext context) {
     final themeColor = AppColors.forTheme(widget.scene.theme);
     final deepColor = AppColors.deepFor(widget.scene.theme);
-    final size = 100.0 * widget.object.scale;
+    final size = 100.0 * widget.object.scale * uiScale(context);
     final phase = (widget.object.slug.hashCode.abs() % 1000) / 1000 * 2 * pi;
 
     Widget tile = ArtTile(

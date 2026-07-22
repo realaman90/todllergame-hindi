@@ -406,8 +406,8 @@ class _LineMatchBodyState extends State<LineMatchBody>
     );
 
     return Positioned(
-      left: center.dx - _tileSize / 2,
-      top: center.dy - _tileSize / 2,
+      left: center.dx - _tileSize * uiScale(context) / 2,
+      top: center.dy - _tileSize * uiScale(context) / 2,
       child: IgnorePointer(
         child: PopIn(delayMs: 100 + (phase * 120).round(), child: tile),
       ),

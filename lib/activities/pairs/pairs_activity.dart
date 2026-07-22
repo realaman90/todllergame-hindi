@@ -118,8 +118,8 @@ class _PairsGameState extends State<_PairsGame>
           ),
           const SizedBox(height: 24),
           SizedBox(
-            width: 360,
-            height: 240,
+            width: 360 * uiScale(context),
+            height: 240 * uiScale(context),
             child: GridView.count(
               crossAxisCount: 3,
               mainAxisSpacing: 16,

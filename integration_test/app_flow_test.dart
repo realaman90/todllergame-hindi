@@ -42,11 +42,12 @@ void main() {
   testWidgets('full core loop: intro -> scene -> word -> sticker -> puzzle',
       (tester) async {
     app.main();
-    await wait(tester, 2000);
-
-    // ---------- HOME ----------
-    expect(find.byType(MithuTalking), findsOneWidget,
-        reason: 'Mithu (talking widget) must be on Home');
+    // Poll rather than fixed-wait: cold starts (fresh install, first
+    // SoLoud init) can push first frame past a hard 2s.
+    expect(await waitFor(tester, find.byType(MithuTalking), timeoutMs: 15000),
+        isTrue,
+        reason: 'Mithu (talking widget) must appear (welcome or Home)');
+    await wait(tester, 800);
     expect(find.text('सीखो'), findsOneWidget,
         reason: 'Seekho (learn) card must be on Home');
     expect(find.text('खेलो'), findsOneWidget,

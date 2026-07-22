@@ -31,8 +31,8 @@ class DoorwayCard extends StatelessWidget {
     return TapBounce(
       onTap: onTap,
       child: Container(
-        width: width,
-        height: height,
+        width: width * uiScale(context),
+        height: height * uiScale(context),
         decoration: BoxDecoration(
           color: AppColors.paper2,
           borderRadius: BorderRadius.circular(20),
