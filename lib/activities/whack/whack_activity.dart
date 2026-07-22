@@ -135,8 +135,8 @@ class _WhackBodyState extends State<WhackBody> with TickerProviderStateMixin {
     }
     // The BONK: physical thock + medium thump + squash-into-pot + dust.
     HapticFeedback.mediumImpact();
-    widget.session.audio
-        .playSfx('tap_wood', rate: 0.8 + _rng.nextDouble() * 0.25);
+    widget.session.audio.playSfx('tap_wood',
+        rate: 0.68 + _rng.nextDouble() * 0.22, volume: 1.8);
     setState(() => _bonkBurst[pot]++);
     await _bonk[pot].forward(from: 0.0);
     if (!mounted) return;
@@ -227,10 +227,10 @@ class _WhackBodyState extends State<WhackBody> with TickerProviderStateMixin {
                             offset: Offset(
                                 0,
                                 -(potH * 0.55 + (tile * 0.85) * (t - 1)) +
-                                    b * tile * 0.7),
+                                    b * tile * 0.95),
                             child: Transform.scale(
-                              scaleX: 1.0 + 0.35 * b,
-                              scaleY: 1.0 - 0.62 * b,
+                              scaleX: 1.0 + 0.6 * b,
+                              scaleY: 1.0 - 0.82 * b,
                               alignment: Alignment.bottomCenter,
                               child: child,
                             ),
@@ -252,8 +252,8 @@ class _WhackBodyState extends State<WhackBody> with TickerProviderStateMixin {
                         animation: _bonk[i],
                         builder: (context, child) {
                           final b = _bonk[i].value;
-                          final jiggle = sin(b * pi * 3) * 0.05 * (1 - b);
-                          final bulge = 1.0 + 0.08 * sin(b * pi);
+                          final jiggle = sin(b * pi * 3) * 0.09 * (1 - b);
+                          final bulge = 1.0 + 0.14 * sin(b * pi);
                           return Transform.rotate(
                             angle: jiggle,
                             child: Transform.scale(
@@ -270,7 +270,7 @@ class _WhackBodyState extends State<WhackBody> with TickerProviderStateMixin {
                       ParticleBurst(
                         trigger: _bonkBurst[i],
                         at: Offset(potW / 2, tile * 0.55),
-                        pieces: 8,
+                        pieces: 12,
                       ),
                     ],
                   ),

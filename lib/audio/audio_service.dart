@@ -346,13 +346,14 @@ class AudioService extends ChangeNotifier {
   ///
   /// [rate] is a relative playback speed (1.0 = as recorded); use it for
   /// pitch variation so repeats never sound identical (F12).
-  Future<void> playSfx(String name, {double? rate}) async {
+  Future<void> playSfx(String name, {double? rate, double volume = 1.0}) async {
     await init();
     if (!_engineReady) return;
     try {
       final source = await _load('assets/audio/sfx/$name.mp3');
       if (source == null) return;
-      final handle = _engine.play(source, paused: rate != null);
+      final handle =
+          _engine.play(source, volume: volume, paused: rate != null);
       if (rate != null) {
         _engine.setRelativePlaySpeed(handle, rate);
         _engine.setPause(handle, false);
