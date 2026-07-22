@@ -282,8 +282,8 @@ idle life + entrances. **P2 core:** ElevenLabs feel palette generated
 stingers, tap_wood/tap_soft spare timbres); pentatonic ladder live on
 all taps; boop on every wrong path; ding + burst on line-match connects
 and pairs matches; praise restates the word (carousel + find-it);
-sticker pill bounces on landing. **Open:** wobble/squash dedup into
-lib/juice (pattern/oddone/bigsmall still inline), sticker flight from
+sticker pill bounces on landing. **Open:** wobble/squash/hint-pulse dedup into
+lib/juice (now inline in 7 games — worth one consolidation pass), sticker flight from
 real source rects in carousel games, per-family tap timbres wiring,
 and all of P3.
 

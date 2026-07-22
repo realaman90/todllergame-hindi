@@ -69,3 +69,26 @@ Mithu's real voice sets the personality bar.
 3. Sticker flight: add a small arc + squash-and-stretch on landing.
 4. Word overlay: art tile should fly from the tapped object's rect
    (rect is already captured at tap time) rather than scaling in place.
+
+## Vision-verdict pass, 8 newest games (Gemini, 2026-07-22)
+
+Recording: iPad tour driven by `integration_test/new_games_tour_test.dart`.
+Verdict triaged — rig artifacts excluded (video rotation = portrait-sim
+recording artifact; "stuck" periods = the test idling; drag ghosts =
+intentional childWhenDragging).
+
+Real polish items, by priority:
+- **Whack**: rising tile's square bottom edge reads against the pot's
+  slanted sides — soften with a slightly narrower tile or a rim overlap.
+- **Load-the-train**: wagon drop zones need clearer affordance contrast
+  (bigger hover glow or a dashed opening on the wagon top).
+- **Sound match**: unselected tiles vanish abruptly on completion — give
+  them a 200ms shrink-fade before the round advances.
+- **Peek-a-boo**: choice-tile labels render small/cramped at size 100 —
+  bump label scale or tile size.
+- **Round transition cross-fade** occasionally reads as "ghosting" of the
+  previous round in compressed video (numtrace) — consider a slightly
+  shorter fade-out (helps perceived cleanliness, low priority).
+
+Verdict highlights: grow-a-plant and peek-a-boo judged the most polished;
+no broken layouts, no off-screen elements, no stuck animations in-app.
