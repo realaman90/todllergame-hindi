@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../content/content.dart';
 import '../../juice/juice.dart';
@@ -45,6 +46,8 @@ class _WhackBodyState extends State<WhackBody> with TickerProviderStateMixin {
   late SceneObject _ask;
   final List<SceneObject?> _peeking = List.filled(_pots, null);
   late final List<AnimationController> _rise;
+  late final List<AnimationController> _bonk;
+  final List<int> _bonkBurst = List.filled(_pots, 0);
   final _rng = Random();
   Timer? _spawner;
   int _caught = 0;
@@ -61,6 +64,11 @@ class _WhackBodyState extends State<WhackBody> with TickerProviderStateMixin {
       _pots,
       (_) => AnimationController(
           duration: const Duration(milliseconds: 420), vsync: this),
+    );
+    _bonk = List.generate(
+      _pots,
+      (_) => AnimationController(
+          duration: const Duration(milliseconds: 300), vsync: this),
     );
     _prompt(withTitle: true);
     _spawner = Timer.periodic(const Duration(milliseconds: 2100), (_) {
@@ -120,17 +128,25 @@ class _WhackBodyState extends State<WhackBody> with TickerProviderStateMixin {
 
   Future<void> _onPotTap(int pot) async {
     final obj = _peeking[pot];
-    widget.session.audio.playTapNote();
     _nudge.arm();
-    if (obj == null || _finishing) return;
+    if (obj == null || _finishing) {
+      widget.session.audio.playTapNote();
+      return;
+    }
+    // The BONK: physical thock + medium thump + squash-into-pot + dust.
+    HapticFeedback.mediumImpact();
+    widget.session.audio
+        .playSfx('tap_wood', rate: 0.8 + _rng.nextDouble() * 0.25);
+    setState(() => _bonkBurst[pot]++);
+    await _bonk[pot].forward(from: 0.0);
+    if (!mounted) return;
+    setState(() => _peeking[pot] = null);
+    _rise[pot].value = 0.0;
     if (obj.slug == _ask.slug) {
       _caught++;
       widget.session.audio.playSfx('ding_sticker');
       widget.session.audio
           .playWord(widget.session.scene.id, obj.slug, language: 'hi');
-      await _rise[pot].reverse();
-      if (!mounted) return;
-      setState(() => _peeking[pot] = null);
       if (_caught >= _needed) {
         _finishing = true;
         _nudge.cancel();
@@ -149,7 +165,8 @@ class _WhackBodyState extends State<WhackBody> with TickerProviderStateMixin {
         });
       }
     } else {
-      // A friendly wrong: the peeker introduces itself and ducks away.
+      // A friendly wrong: bonking it is still fun — it just introduces
+      // itself on the way down.
       widget.session.audio
           .playWord(widget.session.scene.id, obj.slug, language: 'hi');
     }
@@ -160,6 +177,9 @@ class _WhackBodyState extends State<WhackBody> with TickerProviderStateMixin {
     _spawner?.cancel();
     _nudge.dispose();
     for (final c in _rise) {
+      c.dispose();
+    }
+    for (final c in _bonk) {
       c.dispose();
     }
     super.dispose();
@@ -192,16 +212,28 @@ class _WhackBodyState extends State<WhackBody> with TickerProviderStateMixin {
                     children: [
                       // The peeker rises from behind the pot rim.
                       AnimatedBuilder(
-                        animation: _rise[i],
+                        animation:
+                            Listenable.merge([_rise[i], _bonk[i]]),
                         builder: (context, child) {
                           final t =
                               Curves.easeOutBack.transform(_rise[i].value);
+                          final b =
+                              Curves.easeIn.transform(_bonk[i].value);
                           // NOT Positioned (must be a direct Stack child):
                           // translate up from the bottomCenter alignment.
+                          // A bonk squashes it flat and shoves it down
+                          // into the pot.
                           return Transform.translate(
                             offset: Offset(
-                                0, -(potH * 0.55 + (tile * 0.85) * (t - 1))),
-                            child: child,
+                                0,
+                                -(potH * 0.55 + (tile * 0.85) * (t - 1)) +
+                                    b * tile * 0.7),
+                            child: Transform.scale(
+                              scaleX: 1.0 + 0.35 * b,
+                              scaleY: 1.0 - 0.62 * b,
+                              alignment: Alignment.bottomCenter,
+                              child: child,
+                            ),
                           );
                         },
                         child: _peeking[i] == null
@@ -215,11 +247,30 @@ class _WhackBodyState extends State<WhackBody> with TickerProviderStateMixin {
                                 showLabel: false,
                               ),
                       ),
-                      // Paper pot in front.
-                      CustomPaint(
-                        size: Size(potW, potH),
-                        painter: _PotPainter(
-                            color: themeColor, deep: deepColor),
+                      // Paper pot in front — jiggles and bulges on a bonk.
+                      AnimatedBuilder(
+                        animation: _bonk[i],
+                        builder: (context, child) {
+                          final b = _bonk[i].value;
+                          final jiggle = sin(b * pi * 3) * 0.05 * (1 - b);
+                          final bulge = 1.0 + 0.08 * sin(b * pi);
+                          return Transform.rotate(
+                            angle: jiggle,
+                            child: Transform.scale(
+                                scaleX: bulge, child: child),
+                          );
+                        },
+                        child: CustomPaint(
+                          size: Size(potW, potH),
+                          painter: _PotPainter(
+                              color: themeColor, deep: deepColor),
+                        ),
+                      ),
+                      // Dust puff above the rim on every bonk.
+                      ParticleBurst(
+                        trigger: _bonkBurst[i],
+                        at: Offset(potW / 2, tile * 0.55),
+                        pieces: 8,
                       ),
                     ],
                   ),
