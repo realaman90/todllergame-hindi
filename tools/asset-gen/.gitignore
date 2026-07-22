@@ -1,0 +1,5 @@
+# Generated assets — review locally, commit only curated picks elsewhere
+out/
+
+# Virtual environment
+.venv/

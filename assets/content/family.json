@@ -1,0 +1,362 @@
+{
+  "id": "family",
+  "title_hi": "परिवार",
+  "title_translit": "Parivaar",
+  "title_en": "Family",
+  "theme": "kumkum",
+  "background": "scenes/family_bg.png",
+  "ambient_audio": "music/family_ambient.mp3",
+  "objects": [
+    {
+      "slug": "maa",
+      "word_hi": "माँ",
+      "translit": "maa",
+      "gloss_en": "mother",
+      "art": "objects/family_maa.png",
+      "pos": [
+        0.14,
+        0.2
+      ],
+      "scale": 1.0,
+      "anim": "bounce"
+    },
+    {
+      "slug": "papa",
+      "word_hi": "पापा",
+      "translit": "papa",
+      "gloss_en": "father",
+      "art": "objects/family_papa.png",
+      "pos": [
+        0.34,
+        0.18
+      ],
+      "scale": 1.0,
+      "anim": "wiggle"
+    },
+    {
+      "slug": "dadi",
+      "word_hi": "दादी",
+      "translit": "dadi",
+      "gloss_en": "grandmother (paternal)",
+      "art": "objects/family_dadi.png",
+      "pos": [
+        0.54,
+        0.2
+      ],
+      "scale": 1.0,
+      "anim": "pop"
+    },
+    {
+      "slug": "dada",
+      "word_hi": "दादा",
+      "translit": "dada",
+      "gloss_en": "grandfather (paternal)",
+      "art": "objects/family_dada.png",
+      "pos": [
+        0.74,
+        0.18
+      ],
+      "scale": 1.0,
+      "anim": "float"
+    },
+    {
+      "slug": "bhai",
+      "word_hi": "भाई",
+      "translit": "bhai",
+      "gloss_en": "brother",
+      "art": "objects/family_bhai.png",
+      "pos": [
+        0.88,
+        0.34
+      ],
+      "scale": 0.95,
+      "anim": "bounce"
+    },
+    {
+      "slug": "bahan",
+      "word_hi": "बहन",
+      "translit": "bahan",
+      "gloss_en": "sister",
+      "art": "objects/family_bahan.png",
+      "pos": [
+        0.1,
+        0.4
+      ],
+      "scale": 1.0,
+      "anim": "wiggle"
+    },
+    {
+      "slug": "baccha",
+      "word_hi": "बच्चा",
+      "translit": "baccha",
+      "gloss_en": "baby / child",
+      "art": "objects/family_baccha.png",
+      "pos": [
+        0.3,
+        0.38
+      ],
+      "scale": 0.95,
+      "anim": "pop"
+    },
+    {
+      "slug": "aankh",
+      "word_hi": "आँख",
+      "translit": "aankh",
+      "gloss_en": "eye",
+      "art": "objects/family_aankh.png",
+      "pos": [
+        0.5,
+        0.4
+      ],
+      "scale": 1.0,
+      "anim": "float"
+    },
+    {
+      "slug": "naak",
+      "word_hi": "नाक",
+      "translit": "naak",
+      "gloss_en": "nose",
+      "art": "objects/family_naak.png",
+      "pos": [
+        0.7,
+        0.38
+      ],
+      "scale": 0.95,
+      "anim": "bounce"
+    },
+    {
+      "slug": "munh",
+      "word_hi": "मुँह",
+      "translit": "munh",
+      "gloss_en": "mouth",
+      "art": "objects/family_munh.png",
+      "pos": [
+        0.88,
+        0.56
+      ],
+      "scale": 1.0,
+      "anim": "wiggle"
+    },
+    {
+      "slug": "kaan",
+      "word_hi": "कान",
+      "translit": "kaan",
+      "gloss_en": "ear",
+      "art": "objects/family_kaan.png",
+      "pos": [
+        0.12,
+        0.58
+      ],
+      "scale": 1.0,
+      "anim": "pop"
+    },
+    {
+      "slug": "haath",
+      "word_hi": "हाथ",
+      "translit": "haath",
+      "gloss_en": "hand",
+      "art": "objects/family_haath.png",
+      "pos": [
+        0.32,
+        0.56
+      ],
+      "scale": 0.95,
+      "anim": "float"
+    },
+    {
+      "slug": "pair",
+      "word_hi": "पैर",
+      "translit": "pair",
+      "gloss_en": "foot",
+      "art": "objects/family_pair.png",
+      "pos": [
+        0.52,
+        0.58
+      ],
+      "scale": 1.0,
+      "anim": "bounce"
+    },
+    {
+      "slug": "sir",
+      "word_hi": "सिर",
+      "translit": "sir",
+      "gloss_en": "head",
+      "art": "objects/family_sir.png",
+      "pos": [
+        0.72,
+        0.56
+      ],
+      "scale": 0.95,
+      "anim": "wiggle"
+    },
+    {
+      "slug": "baal",
+      "word_hi": "बाल",
+      "translit": "baal",
+      "gloss_en": "hair",
+      "art": "objects/family_baal.png",
+      "pos": [
+        0.88,
+        0.76
+      ],
+      "scale": 1.0,
+      "anim": "pop"
+    },
+    {
+      "slug": "ek",
+      "word_hi": "एक",
+      "translit": "ek",
+      "gloss_en": "one",
+      "art": "objects/family_ek.png",
+      "pos": [
+        0.12,
+        0.82
+      ],
+      "scale": 0.85,
+      "anim": "float"
+    },
+    {
+      "slug": "do",
+      "word_hi": "दो",
+      "translit": "do",
+      "gloss_en": "two",
+      "art": "objects/family_do.png",
+      "pos": [
+        0.26,
+        0.82
+      ],
+      "scale": 0.85,
+      "anim": "bounce"
+    },
+    {
+      "slug": "teen",
+      "word_hi": "तीन",
+      "translit": "teen",
+      "gloss_en": "three",
+      "art": "objects/family_teen.png",
+      "pos": [
+        0.12,
+        0.72
+      ],
+      "scale": 0.85,
+      "anim": "wiggle"
+    },
+    {
+      "slug": "chaar",
+      "word_hi": "चार",
+      "translit": "chaar",
+      "gloss_en": "four",
+      "art": "objects/family_chaar.png",
+      "pos": [
+        0.26,
+        0.72
+      ],
+      "scale": 0.85,
+      "anim": "pop"
+    },
+    {
+      "slug": "paanch",
+      "word_hi": "पांच",
+      "translit": "paanch",
+      "gloss_en": "five",
+      "art": "objects/family_paanch.png",
+      "pos": [
+        0.12,
+        0.62
+      ],
+      "scale": 0.85,
+      "anim": "float"
+    },
+    {
+      "slug": "chhah",
+      "word_hi": "छह",
+      "translit": "chhah",
+      "gloss_en": "six",
+      "art": "objects/family_chhah.png",
+      "pos": [
+        0.26,
+        0.62
+      ],
+      "scale": 0.85,
+      "anim": "bounce"
+    },
+    {
+      "slug": "saat",
+      "word_hi": "सात",
+      "translit": "saat",
+      "gloss_en": "seven",
+      "art": "objects/family_saat.png",
+      "pos": [
+        0.12,
+        0.52
+      ],
+      "scale": 0.85,
+      "anim": "wiggle"
+    },
+    {
+      "slug": "aath",
+      "word_hi": "आठ",
+      "translit": "aath",
+      "gloss_en": "eight",
+      "art": "objects/family_aath.png",
+      "pos": [
+        0.26,
+        0.52
+      ],
+      "scale": 0.85,
+      "anim": "pop"
+    },
+    {
+      "slug": "nau",
+      "word_hi": "नौ",
+      "translit": "nau",
+      "gloss_en": "nine",
+      "art": "objects/family_nau.png",
+      "pos": [
+        0.12,
+        0.42
+      ],
+      "scale": 0.85,
+      "anim": "float"
+    },
+    {
+      "slug": "das",
+      "word_hi": "दस",
+      "translit": "das",
+      "gloss_en": "ten",
+      "art": "objects/family_das.png",
+      "pos": [
+        0.26,
+        0.42
+      ],
+      "scale": 0.85,
+      "anim": "bounce"
+    }
+  ],
+  "puzzles": [
+    {
+      "ask": "maa",
+      "decoys": [
+        "papa",
+        "dadi",
+        "dada"
+      ]
+    },
+    {
+      "ask": "aankh",
+      "decoys": [
+        "naak",
+        "munh",
+        "kaan"
+      ]
+    },
+    {
+      "ask": "ek",
+      "decoys": [
+        "do",
+        "teen",
+        "chaar"
+      ]
+    }
+  ]
+}

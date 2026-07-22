@@ -1,4 +1,10 @@
-# ADR-001 — Flutter + Rive as the app framework, over Unity/Godot (2026-07-18) — Accepted
+# ADR-001 — Flutter + Rive as the app framework, over Unity/Godot (2026-07-18) — Accepted; animation leg amended by ADR-005
+
+> **2026-07-19:** the Flutter framework choice stands; the Rive animation
+> leg is amended by
+> [ADR-005](ADR-005-code-driven-flutter-animation-rive-deferred.md) —
+> MVP animation is code-driven Flutter, Rive deferred to an optional
+> upgrade path (its editor is proprietary/skill-gated).
 
 ## What
 

@@ -22,14 +22,15 @@ Additions or changes to anything below require a new ADR in
 
 | Technology | Purpose | Why | ADR |
 |---|---|---|---|
-| Rive | Tappable-object animations for scene interactions | Designers iterate animation without touching app code | [ADR-001](../decisions/ADR-001-flutter-plus-rive-over-unity-godot.md) |
-| Lottie | Fallback for simpler animations where Rive is overkill | — | — |
+| Flutter animation APIs (`AnimationController`, implicit animations, optionally `flutter_animate`) | All MVP animation — transforms on static generated art layers (bounce, float, pulse, pop, confetti) | Fully code-authorable, no proprietary editor skills needed; MVP motion needs are simple transforms | [ADR-005](../decisions/ADR-005-code-driven-flutter-animation-rive-deferred.md) |
+| Lottie | Fallback for pre-baked flourishes beyond simple transforms | Open JSON format, programmatically authorable | [ADR-005](../decisions/ADR-005-code-driven-flutter-animation-rive-deferred.md) |
+| Rive | **Deferred** — optional later upgrade for organic character motion (squash-and-stretch, walk cycles) | Runtimes are open source but the editor is proprietary and skill-gated | [ADR-005](../decisions/ADR-005-code-driven-flutter-animation-rive-deferred.md) amends [ADR-001](../decisions/ADR-001-flutter-plus-rive-over-unity-godot.md) |
 
 ## Audio
 
 | Technology | Purpose | Why |
 |---|---|---|
-| `just_audio` or `audioplayers` (Flutter plugin, to be finalized when scaffolding starts) | Playback of short word/voice clips | Mature, well-supported Flutter audio plugins for many short bundled clips |
+| `flutter_soloud` (only audio engine — SFX, voice, ambient) | Preloaded in-memory SFX (<100ms tap feedback), per-play pitch, polyphony, FFI play path | ADR-011 (2026-07-21); replaced `just_audio`, which couldn't meet feel rules F2/F12 |
 
 ## Storage
 
